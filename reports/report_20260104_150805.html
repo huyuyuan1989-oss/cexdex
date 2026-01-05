@@ -1,0 +1,434 @@
+
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔗 全鏈資金流向分析報告</title>
+    <style>
+        :root {
+            --bg-dark: #0a0a0f;
+            --bg-card: #12121a;
+            --accent: #6366f1;
+            --green: #22c55e;
+            --red: #ef4444;
+            --orange: #f97316;
+            --text: #e2e8f0;
+            --text-muted: #94a3b8;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 2rem;
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+        h1 {
+            font-size: 2rem;
+            background: linear-gradient(135deg, var(--accent), #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+        .timestamp { color: var(--text-muted); margin-bottom: 2rem; }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .stat-card {
+            background: var(--bg-card);
+            padding: 1.25rem;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .stat-value { font-size: 1.75rem; font-weight: 700; }
+        .stat-label { color: var(--text-muted); font-size: 0.875rem; }
+        .section { margin-bottom: 2rem; }
+        .section-title {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid rgba(255,255,255,0.05);
+            margin-bottom: 1rem;
+        }
+        .chain-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        .chain-name { font-size: 1.125rem; font-weight: 600; }
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        .status-surge { background: rgba(249, 115, 22, 0.2); color: var(--orange); }
+        .status-accel { background: rgba(34, 197, 94, 0.2); color: var(--green); }
+        .status-stable { background: rgba(99, 102, 241, 0.2); color: var(--accent); }
+        .metrics {
+            display: flex;
+            gap: 1.5rem;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        th { color: var(--text-muted); font-weight: 500; font-size: 0.75rem; text-transform: uppercase; }
+        .positive { color: var(--green); }
+        .negative { color: var(--red); }
+        a { color: var(--accent); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .flow-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .flow-arrow { color: var(--accent); font-size: 1.25rem; }
+        .new-token-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+        .new-token-card {
+            background: rgba(233, 30, 99, 0.1);
+            border: 1px solid rgba(233, 30, 99, 0.2);
+            border-radius: 8px;
+            padding: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔗 全鏈資金流向深度分析報告</h1>
+        <p class="timestamp">生成時間: 2026-01-04 15:08:05</p>
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value">8</div>
+                <div class="stat-label">掃描公鏈數</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">12</div>
+                <div class="stat-label">推薦代幣數</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">0</div>
+                <div class="stat-label">新幣偵測</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">75.0%</div>
+                <div class="stat-label">系統準確率</div>
+            </div>
+        </div>
+
+        
+
+        <div class="section">
+            <h2 class="section-title">📡 公鏈資金動能</h2>
+            
+            <div class="card">
+                <div class="chain-header">
+                    <span class="chain-name">🌐 Tron</span>
+                    
+                    <span class="status-badge status-surge">🔥 資金暴衝</span>
+                    
+                </div>
+                <div class="metrics">
+                    <span>💰 TVL: $4,688,004,840</span>
+                    <span class="positive">24H: 3.38%</span>
+                    <span class="positive">7D: 7.52%</span>
+                </div>
+                
+            </div>
+            
+            <div class="card">
+                <div class="chain-header">
+                    <span class="chain-name">🌐 Sui</span>
+                    
+                    <span class="status-badge status-accel">🚀 加速流入</span>
+                    
+                </div>
+                <div class="metrics">
+                    <span>💰 TVL: $989,080,746</span>
+                    <span class="positive">24H: 2.65%</span>
+                    <span class="positive">7D: 6.84%</span>
+                </div>
+                
+            </div>
+            
+            <div class="card">
+                <div class="chain-header">
+                    <span class="chain-name">🌐 Base</span>
+                    
+                    <span class="status-badge status-accel">🚀 加速流入</span>
+                    
+                </div>
+                <div class="metrics">
+                    <span>💰 TVL: $4,726,871,630</span>
+                    <span class="positive">24H: 1.75%</span>
+                    <span class="positive">7D: 6.78%</span>
+                </div>
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>代幣</th>
+                            <th>價格</th>
+                            <th>24H</th>
+                            <th>交易量</th>
+                            <th>買壓</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        
+                        <tr>
+                            <td><a href="https://dexscreener.com/base/0x5554419ccd0293d9383901f461c7c3e0c66e925f" target="_blank">BASE</a></td>
+                            <td>$0.000002</td>
+                            <td class="negative">-7.50%</td>
+                            <td>$11,188</td>
+                            <td>0.15</td>
+                        </tr>
+                        
+                    </tbody>
+                </table>
+                
+            </div>
+            
+            <div class="card">
+                <div class="chain-header">
+                    <span class="chain-name">🌐 Solana</span>
+                    
+                    <span class="status-badge status-accel">🚀 加速流入</span>
+                    
+                </div>
+                <div class="metrics">
+                    <span>💰 TVL: $8,733,454,466</span>
+                    <span class="positive">24H: 1.47%</span>
+                    <span class="positive">7D: 4.41%</span>
+                </div>
+                
+            </div>
+            
+            <div class="card">
+                <div class="chain-header">
+                    <span class="chain-name">🌐 Avalanche</span>
+                    
+                    <span class="status-badge status-accel">🚀 加速流入</span>
+                    
+                </div>
+                <div class="metrics">
+                    <span>💰 TVL: $1,329,838,400</span>
+                    <span class="positive">24H: 1.41%</span>
+                    <span class="positive">7D: 4.85%</span>
+                </div>
+                
+            </div>
+            
+            <div class="card">
+                <div class="chain-header">
+                    <span class="chain-name">🌐 Aptos</span>
+                    
+                    <span class="status-badge status-accel">🚀 加速流入</span>
+                    
+                </div>
+                <div class="metrics">
+                    <span>💰 TVL: $448,808,379</span>
+                    <span class="positive">24H: 1.09%</span>
+                    <span class="positive">7D: 2.13%</span>
+                </div>
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>代幣</th>
+                            <th>價格</th>
+                            <th>24H</th>
+                            <th>交易量</th>
+                            <th>買壓</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        
+                        <tr>
+                            <td><a href="https://dexscreener.com/aptos/0x4a34ac7b916cc941530a99dfc0de27843bf20eba5e580f5c93d0a21e3bcb3464" target="_blank">AMI</a></td>
+                            <td>$0.010330</td>
+                            <td class="negative">-0.01%</td>
+                            <td>$7,823</td>
+                            <td>0.05</td>
+                        </tr>
+                        
+                        <tr>
+                            <td><a href="https://dexscreener.com/aptos/liquidswapv0p5-2297" target="_blank">DOODOO</a></td>
+                            <td>$0.085410</td>
+                            <td class="positive">1.94%</td>
+                            <td>$22</td>
+                            <td>0.00</td>
+                        </tr>
+                        
+                        <tr>
+                            <td><a href="https://dexscreener.com/aptos/pcs-1137" target="_blank">GUI</a></td>
+                            <td>$0.000001</td>
+                            <td class="positive">0.31%</td>
+                            <td>$3,504</td>
+                            <td>0.05</td>
+                        </tr>
+                        
+                        <tr>
+                            <td><a href="https://dexscreener.com/aptos/0xd8a280a4e308f72547a02a48b2ec0cb661dc72ed10565f116a6c7059ada9aa6e-0xa-0x81214a80d82035a190fcb76b6ff3c0145161c3a9f33d137f2bbaee4cfec8a387" target="_blank">XBTC</a></td>
+                            <td>$91386.240000</td>
+                            <td class="positive">1.65%</td>
+                            <td>$13,578</td>
+                            <td>0.07</td>
+                        </tr>
+                        
+                        <tr>
+                            <td><a href="https://dexscreener.com/aptos/thala-1010" target="_blank">THAPT</a></td>
+                            <td>$1.880000</td>
+                            <td class="positive">0.67%</td>
+                            <td>$12,112</td>
+                            <td>0.00</td>
+                        </tr>
+                        
+                    </tbody>
+                </table>
+                
+            </div>
+            
+            <div class="card">
+                <div class="chain-header">
+                    <span class="chain-name">🌐 Ethereum</span>
+                    
+                    <span class="status-badge status-stable">🟢 穩健增長</span>
+                    
+                </div>
+                <div class="metrics">
+                    <span>💰 TVL: $72,681,344,644</span>
+                    <span class="positive">24H: 0.62%</span>
+                    <span class="positive">7D: 5.99%</span>
+                </div>
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>代幣</th>
+                            <th>價格</th>
+                            <th>24H</th>
+                            <th>交易量</th>
+                            <th>買壓</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        
+                        <tr>
+                            <td><a href="https://dexscreener.com/ethereum/0x5f538e4a8d8c833aa9e7a926a99a3b415bb029ef" target="_blank">ETHEREUM</a></td>
+                            <td>$0.000151</td>
+                            <td class="positive">1.80%</td>
+                            <td>$148</td>
+                            <td>0.00</td>
+                        </tr>
+                        
+                    </tbody>
+                </table>
+                
+            </div>
+            
+            <div class="card">
+                <div class="chain-header">
+                    <span class="chain-name">🌐 Polygon</span>
+                    
+                    <span class="status-badge status-accel">🚀 加速流入</span>
+                    
+                </div>
+                <div class="metrics">
+                    <span>💰 TVL: $1,093,406,066</span>
+                    <span class="negative">24H: -0.44%</span>
+                    <span class="negative">7D: -6.35%</span>
+                </div>
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>代幣</th>
+                            <th>價格</th>
+                            <th>24H</th>
+                            <th>交易量</th>
+                            <th>買壓</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        
+                        <tr>
+                            <td><a href="https://dexscreener.com/polygon/0xda67d7c01c4c8f757c105c0890d94ac489952cd5" target="_blank">BET</a></td>
+                            <td>$0.000293</td>
+                            <td class="positive">3.71%</td>
+                            <td>$11,806</td>
+                            <td>0.04</td>
+                        </tr>
+                        
+                        <tr>
+                            <td><a href="https://dexscreener.com/polygon/0xa6a2d598365cd758ba0a72cd95b7f8805248a5d5" target="_blank">TTAJ</a></td>
+                            <td>$0.002704</td>
+                            <td class="positive">0.85%</td>
+                            <td>$7,559</td>
+                            <td>0.06</td>
+                        </tr>
+                        
+                        <tr>
+                            <td><a href="https://dexscreener.com/polygon/0x369582d2010b6ed950b571f4101e3bb9b554876f" target="_blank">SAND</a></td>
+                            <td>$0.120400</td>
+                            <td class="positive">1.91%</td>
+                            <td>$2,856</td>
+                            <td>0.01</td>
+                        </tr>
+                        
+                        <tr>
+                            <td><a href="https://dexscreener.com/polygon/0xf73e9a134970c5f10cc7e84f13d60700e587322e" target="_blank">BLOB</a></td>
+                            <td>$0.000000</td>
+                            <td class="positive">5.72%</td>
+                            <td>$2</td>
+                            <td>0.00</td>
+                        </tr>
+                        
+                        <tr>
+                            <td><a href="https://dexscreener.com/polygon/0xb2c60f199f2f0ae7ef7b7923fffa24b181e7e187" target="_blank">ONLIVE</a></td>
+                            <td>$0.000229</td>
+                            <td class="positive">1.05%</td>
+                            <td>$1,473</td>
+                            <td>0.03</td>
+                        </tr>
+                        
+                    </tbody>
+                </table>
+                
+            </div>
+            
+        </div>
+
+        
+    </div>
+</body>
+</html>
+    

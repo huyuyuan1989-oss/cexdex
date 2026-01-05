@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔗 全鏈資金流向監控系統</title>
+    <style>
+        :root {
+            --bg-dark: #0a0a0f;
+            --bg-card: #12121a;
+            --accent: #6366f1;
+            --green: #22c55e;
+            --text: #e2e8f0;
+            --text-muted: #94a3b8;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 2rem;
+            min-height: 100vh;
+        }
+        .container { max-width: 1000px; margin: 0 auto; }
+        h1 {
+            font-size: 2.5rem;
+            text-align: center;
+            background: linear-gradient(135deg, var(--accent), #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+        .subtitle {
+            text-align: center;
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+        }
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+        .stat-item {
+            background: var(--bg-card);
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            text-align: center;
+        }
+        .stat-value { font-size: 2rem; font-weight: 700; color: var(--accent); }
+        .stat-label { color: var(--text-muted); font-size: 0.875rem; }
+        .reports-section {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 1.5rem;
+        }
+        .section-title {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .report-list {
+            list-style: none;
+        }
+        .report-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            transition: background 0.2s;
+        }
+        .report-item:hover {
+            background: rgba(99, 102, 241, 0.1);
+        }
+        .report-item:last-child { border-bottom: none; }
+        .report-link {
+            color: var(--text);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .report-link:hover { color: var(--accent); }
+        .report-date { color: var(--text-muted); font-size: 0.875rem; }
+        .view-btn {
+            background: var(--accent);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 0.875rem;
+            transition: opacity 0.2s;
+        }
+        .view-btn:hover { opacity: 0.8; }
+        .loading { text-align: center; padding: 2rem; color: var(--text-muted); }
+        .footer {
+            text-align: center;
+            margin-top: 2rem;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔗 全鏈資金流向監控系統</h1>
+        <p class="subtitle">CEX/DEX 資金分析 | 每 30 分鐘自動更新</p>
+        
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-value" id="report-count">-</div>
+                <div class="stat-label">報告總數</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="last-update">-</div>
+                <div class="stat-label">最後更新</div>
+            </div>
+        </div>
+        
+        <div class="reports-section">
+            <h2 class="section-title">📄 歷史報告</h2>
+            <ul class="report-list" id="report-list">
+                <li class="loading">載入中...</li>
+            </ul>
+        </div>
+        
+        <div class="footer">
+            <p>💡 點擊報告可查看完整分析</p>
+            <p>Powered by DefiLlama + DEX Screener | v3.0</p>
+        </div>
+    </div>
+    
+    <script>
+        // 從 reports 資料夾讀取報告列表
+        // 注意：這需要 GitHub Pages 啟用目錄列表，或手動更新
+        
+        // 由於 GitHub Pages 無法列出資料夾，我們使用最近報告的連結模式
+        function generateReportLinks() {
+            const reportList = document.getElementById('report-list');
+            const now = new Date();
+            
+            // 生成最近 24 小時內每 30 分鐘的報告連結
+            const reports = [];
+            for (let i = 0; i < 48; i++) {
+                const reportTime = new Date(now - i * 30 * 60 * 1000);
+                const year = reportTime.getFullYear();
+                const month = String(reportTime.getMonth() + 1).padStart(2, '0');
+                const day = String(reportTime.getDate()).padStart(2, '0');
+                const hour = String(reportTime.getHours()).padStart(2, '0');
+                const minute = String(Math.floor(reportTime.getMinutes() / 30) * 30).padStart(2, '0');
+                
+                const filename = `report_${year}${month}${day}_${hour}${minute}00.html`;
+                const displayTime = `${year}-${month}-${day} ${hour}:${minute}`;
+                
+                reports.push({ filename, displayTime, time: reportTime });
+            }
+            
+            // 只顯示最近 10 個
+            reportList.innerHTML = reports.slice(0, 10).map(r => `
+                <li class="report-item">
+                    <div>
+                        <a href="reports/${r.filename}" class="report-link">📊 ${r.displayTime} 分析報告</a>
+                    </div>
+                    <a href="reports/${r.filename}" class="view-btn">查看報告</a>
+                </li>
+            `).join('');
+            
+            document.getElementById('report-count').textContent = '持續更新';
+            document.getElementById('last-update').textContent = now.toLocaleTimeString('zh-TW');
+        }
+        
+        generateReportLinks();
+        
+        // 每分鐘更新一次
+        setInterval(generateReportLinks, 60000);
+    </script>
+</body>
+</html>

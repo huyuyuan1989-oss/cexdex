@@ -1,0 +1,2569 @@
+
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔗 全鏈資金流向分析報告</title>
+    <style>
+        :root {
+            --bg-dark: #0a0a0f;
+            --bg-card: #12121a;
+            --accent: #6366f1;
+            --green: #22c55e;
+            --red: #ef4444;
+            --orange: #f97316;
+            --text: #e2e8f0;
+            --text-muted: #94a3b8;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 2rem;
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+        h1 {
+            font-size: 2rem;
+            background: linear-gradient(135deg, var(--accent), #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+        .timestamp { color: var(--text-muted); margin-bottom: 2rem; }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .stat-card {
+            background: var(--bg-card);
+            padding: 1.25rem;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .stat-value { font-size: 1.75rem; font-weight: 700; }
+        .stat-label { color: var(--text-muted); font-size: 0.875rem; }
+        .section { margin-bottom: 2rem; }
+        .section-title {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid rgba(255,255,255,0.05);
+            margin-bottom: 1rem;
+        }
+        .chain-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        .chain-name { font-size: 1.125rem; font-weight: 600; }
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        .status-surge { background: rgba(249, 115, 22, 0.2); color: var(--orange); }
+        .status-accel { background: rgba(34, 197, 94, 0.2); color: var(--green); }
+        .status-stable { background: rgba(99, 102, 241, 0.2); color: var(--accent); }
+        .metrics {
+            display: flex;
+            gap: 1.5rem;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        th { color: var(--text-muted); font-weight: 500; font-size: 0.75rem; text-transform: uppercase; }
+        .positive { color: var(--green); }
+        .negative { color: var(--red); }
+        a { color: var(--accent); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .flow-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .flow-arrow { color: var(--accent); font-size: 1.25rem; }
+        .new-token-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+        .new-token-card {
+            background: rgba(233, 30, 99, 0.1);
+            border: 1px solid rgba(233, 30, 99, 0.2);
+            border-radius: 8px;
+            padding: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔗 全鏈資金流向深度分析報告</h1>
+        <p class="timestamp">生成時間: 2026-01-04 22:39:27</p>
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value">16</div>
+                <div class="stat-label">掃描公鏈數</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">57</div>
+                <div class="stat-label">推薦代幣數</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">0</div>
+                <div class="stat-label">新幣偵測</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">81.3%</div>
+                <div class="stat-label">系統準確率</div>
+            </div>
+        </div>
+
+        
+        <div class="section">
+            <h2 class="section-title">🏦 交易所 (CEX) 資產監控</h2>
+            <div class="card" style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>交易所</th>
+                            <th>總資產 (TVL)</th>
+                            <th>24H 變動</th>
+                            <th>7D 變動</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        
+                        <tr>
+                            <td style="display:flex; align-items:center;">
+                                <img src="https://icons.llama.fi/binance-cex.jpg" style="width:20px; height:20px; margin-right:8px; border-radius:50%;">
+                                Binance CEX
+                            </td>
+                            <td>$171.24B</td>
+                            <td class="positive">
+                                +1.45%
+                            </td>
+                            <td class="positive">
+                                +3.94%
+                            </td>
+                        </tr>
+                        
+                        <tr>
+                            <td style="display:flex; align-items:center;">
+                                <img src="https://icons.llama.fi/okx.jpg" style="width:20px; height:20px; margin-right:8px; border-radius:50%;">
+                                OKX
+                            </td>
+                            <td>$23.37B</td>
+                            <td class="positive">
+                                +0.90%
+                            </td>
+                            <td class="positive">
+                                +4.32%
+                            </td>
+                        </tr>
+                        
+                        <tr>
+                            <td style="display:flex; align-items:center;">
+                                <img src="https://icons.llama.fi/bitfinex.png" style="width:20px; height:20px; margin-right:8px; border-radius:50%;">
+                                Bitfinex
+                            </td>
+                            <td>$20.33B</td>
+                            <td class="positive">
+                                +0.35%
+                            </td>
+                            <td class="positive">
+                                +1.00%
+                            </td>
+                        </tr>
+                        
+                        <tr>
+                            <td style="display:flex; align-items:center;">
+                                <img src="https://icons.llama.fi/bybit.png" style="width:20px; height:20px; margin-right:8px; border-radius:50%;">
+                                Bybit
+                            </td>
+                            <td>$19.03B</td>
+                            <td class="positive">
+                                +1.53%
+                            </td>
+                            <td class="positive">
+                                +2.70%
+                            </td>
+                        </tr>
+                        
+                        <tr>
+                            <td style="display:flex; align-items:center;">
+                                <img src="https://icons.llama.fi/robinhood.jpg" style="width:20px; height:20px; margin-right:8px; border-radius:50%;">
+                                Robinhood
+                            </td>
+                            <td>$17.07B</td>
+                            <td class="positive">
+                                +1.53%
+                            </td>
+                            <td class="positive">
+                                +4.88%
+                            </td>
+                        </tr>
+                        
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+
+        
+
+        <div class="section">
+            <h2 class="section-title">📡 公鏈資金動能 (多時間框架分析)</h2>
+            
+            <div class="card">
+                <div class="chain-header">
+                    <span class="chain-name">🌐 Tron</span>
+                    
+                    <span class="status-badge status-accel">🚀 加速流入</span>
+                    
+                </div>
+                <div class="metrics">
+                    <span>💰 TVL: $4,667,684,622</span>
+                </div>
+                
+                <!-- 多時間框架分析 -->
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; margin: 1rem 0; padding: 0.75rem; background: rgba(255,255,255,0.03); border-radius: 8px;">
+                    <div style="text-align: center;">
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">24H</div>
+                        <div class="positive" style="font-weight: 600;">+2.93%</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">1週</div>
+                        <div class="positive" style="font-weight: 600;">+7.06%</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">1月</div>
+                        <div class="positive" style="font-weight: 600;">+2.57%</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">3月</div>
+                        <div class="negative" style="font-weight: 600;">-27.17%</div>
+                    </div>
+                </div>
+                
+                <!-- 趨勢判定 -->
+                
+                
+                
+                
+                <div style="padding: 0.5rem; background: rgba(34, 197, 94, 0.1); border-radius: 6px; margin-bottom: 1rem; font-size: 0.875rem;">
+                    📈 <strong>短中長期多頭</strong> - 趨勢向上
+                </div>
+                
+                
+                <!-- 資金流向分析 -->
+                
+                
+                <div style="margin-bottom: 1rem;">
+                    <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem;">📊 資金流向分佈 (24H交易量)</div>
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                        
+                        
+                        <span style="padding: 0.25rem 0.5rem; background: rgba(255,255,255,0.05); border-radius: 4px; font-size: 0.75rem;">
+                            🔷 原生幣
+                            39.4%
+                        </span>
+                        
+                        
+                        
+                        
+                        
+                        <span style="padding: 0.25rem 0.5rem; background: rgba(255,255,255,0.05); border-radius: 4px; font-size: 0.75rem;">
+                            🟡 BTC
+                            4.0%
+                        </span>
+                        
+                        
+                        
+                        <span style="padding: 0.25rem 0.5rem; background: rgba(34, 197, 94, 0.2); border-radius: 4px; font-size: 0.75rem;">
+                            🚀 Altcoin
+                            56.6%
+                        </span>
+                        
+                        
+                    </div>
+                    
+                    <div style="margin-top: 0.5rem; font-size: 0.8rem; color: var(--green);">🎯 Alpha 機會！資金主要流向個別代幣</div>
+                    
+                </div>
+                
+                
+                <!-- 🐋 鯨魚吸籌代幣 (穩健長線) -->
+                
+                <div style="background: rgba(99, 102, 241, 0.05); border: 1px solid rgba(99, 102, 241, 0.1); border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
+                    <div style="font-size: 0.9rem; font-weight: 600; color: var(--accent); margin-bottom: 0.75rem;">🐋 鯨魚潛伏 (穩健累積)</div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>代幣</th>
+                                <th>24H漲幅</th>
+                                <th>流動性</th>
+                                <th>交易量</th>
+                                <th>累積方式</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            
+                            <tr>
+                                <td><a href="https://dexscreener.com/tron/ttdecobmyxhffbyuzbiqqbz56zrfkse5dg" target="_blank">SUN</a></td>
+                                <td class="positive">+1.45%</td>
+                                <td>$5,446,716</td>
+                                <td>$27,179</td>
+                                <td style="font-size: 0.75rem; color: var(--text-muted);">存活1482天 | 買49賣44 (53%買入)</td>
+                            </tr>
+                            
+                            <tr>
+                                <td><a href="https://dexscreener.com/tron/tlkyq7ej4ykbs3tgevobjwkaxwyqkwo2nn" target="_blank">BTT</a></td>
+                                <td class="positive">+3.28%</td>
+                                <td>$4,189,550</td>
+                                <td>$63,052</td>
+                                <td style="font-size: 0.75rem; color: var(--text-muted);">存活1482天 | 買72賣45 (62%買入)</td>
+                            </tr>
+                            
+                            <tr>
+                                <td><a href="https://dexscreener.com/tron/tc1ghhc5igfluuuthriuuu183p8ywpmqsk" target="_blank">WIN</a></td>
+                                <td class="positive">+7.41%</td>
+                                <td>$1,654,509</td>
+                                <td>$53,482</td>
+                                <td style="font-size: 0.75rem; color: var(--text-muted);">存活1440天 | 買85賣48 (64%買入)</td>
+                            </tr>
+                            
+                        </tbody>
+                    </table>
+                </div>
+                
+                
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>代幣</th>
+                            <th>價格</th>
+                            <th>24H</th>
+                            <th>交易量</th>
+                            <th>買壓</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        
+                        <tr>
+                            <td><a href="https://dexscreener.com/tron/tkhjbwsh7hvegxruhw4oht5t1budds2ug4" target="_blank">PEPE</a></td>
+                            <td>$0.010860</td>
+                            <td class="negative">-11.19%</td>
+                            <td>$378,283</td>
+                            <td>0.59</td>
+                        </tr>
+                        
+                        <tr>
+                            <td><a href="https://dexscreener.com/tron/tenhghfwidt8roey6gtyymgrk8v7njspap" target="_blank">AIT</a></td>
+                            <td>$0.783000</td>
+                            <td class="negative">-1.45%</td>
+                            <td>$44,381</td>
+                            <td>0.23</td>
+                        </tr>
+                        
+                        <tr>
+                            <td><a href="https://dexscreener.com/tron/ttrhkxr6cmrb5euwhphjjs5kgnbntrhqyz" target="_blank">OSK</a></td>
+                            <td>$86.810000</td>
+                            <td class="positive">0.51%</td>
+                            <td>$21,714</td>
+                            <td>0.10</td>
+                        </tr>
+                        
+                        <tr>
+                            <td><a href="https://dexscreener.com/tron/tdr7rpu33htog8qo9i676v56bzcjkpjqox" target="_blank">SUNDOG</a></td>
+                            <td>$0.011060</td>
+                            <td class="positive">18.93%</td>
+                            <td>$78,342</td>
+                            <td>0.08</td>
+                        </tr>
+                        
+                        <tr>
+                            <td><a href="https://dexscreener.com/tron/tyyp4ybbzx2vaifaihwgdztvwyjaao2mu2" target="_blank">EAT</a></td>
+                            <td>$0.000441</td>
+                            <td class="negative">-0.68%</td>
+                            <td>$8,841</td>
+                            <td>0.06</td>
+                        </tr>
+                        
+                    </tbody>
+                </table>
+                
+            </div>
+            
+            <div class="card">
+                <div class="chain-header">
+                    <span class="chain-name">🌐 Sui</span>
+                    
+                    <span class="status-badge status-accel">🚀 加速流入</span>
+                    
+                </div>
+                <div class="metrics">
+                    <span>💰 TVL: $989,952,331</span>
+                </div>
+                
+                <!-- 多時間框架分析 -->
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; margin: 1rem 0; padding: 0.75rem; background: rgba(255,255,255,0.03); border-radius: 8px;">
+                    <div style="text-align: center;">
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">24H</div>
+                        <div class="positive" style="font-weight: 600;">+2.74%</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">1週</div>
+                        <div class="positive" style="font-weight: 600;">+6.94%</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">1月</div>
+                        <div class="positive" style="font-weight: 600;">+2.96%</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">3月</div>
+                        <div class="negative" style="font-weight: 600;">-60.71%</div>
+                    </div>
+                </div>
+                
+                <!-- 趨勢判定 -->
+                
+                
+                
+                
+                <div style="padding: 0.5rem; background: rgba(34, 197, 94, 0.1); border-radius: 6px; margin-bottom: 1rem; font-size: 0.875rem;">
+                    📈 <strong>短中長期多頭</strong> - 趨勢向上
+                </div>
+                
+                
+                <!-- 資金流向分析 -->
+                
+                
+                <div style="margin-bottom: 1rem;">
+                    <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem;">📊 資金流向分佈 (24H交易量)</div>
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <span style="padding: 0.25rem 0.5rem; background: rgba(34, 197, 94, 0.2); border-radius: 4px; font-size: 0.75rem;">
+                            🚀 Altcoin
+                            100.0%
+                        </span>
+                        
+                        
+                    </div>
+                    
+                    <div style="margin-top: 0.5rem; font-size: 0.8rem; color: var(--green);">🎯 Alpha 機會！資金主要流向個別代幣</div>
+                    
+                </div>
+                
+                
+                <!-- 🐋 鯨魚吸籌代幣 (穩健長線) -->
+                
+                <div style="background: rgba(99, 102, 241, 0.05); border: 1px solid rgba(99, 102, 241, 0.1); border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
+                    <div style="font-size: 0.9rem; font-weight: 600; color: var(--accent); margin-bottom: 0.75rem;">🐋 鯨魚潛伏 (穩健累積)</div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>代幣</th>
+                                <th>24H漲幅</th>
+                                <th>流動性</th>
+                                <th>交易量</th>
+                                <th>累積方式</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            
+                            <tr>
+                                <td><a href="https://dexscreener.com/sui/0xc23e7e8a74f0b18af4dfb7c3280e2a56916ec4d41e14416f85184a8aab6b7789" target="_blank">IKA</a></td>
+                                <td class="positive">+0.17%</td>
+                                <td>$124,214</td>
+                                <td>$67,881</td>
+                                <td style="font-size: 0.75rem; color: var(--text-muted);">存活159天 | 買292賣290 (50%買入)</td>
+                            </tr>
+                            
+                        </tbody>
+                    </table>
+                </div>
+                
+                
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>代幣</th>
+                            <th>價格</th>
+                            <th>24H</th>
+                            <th>交易量</th>
+                            <th>買壓</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        
+                        <tr>
+                            <td><a href="https://dexscreener.com/sui/0x9aedfbd1a64798b83a0d70d4432327c6372207aa2ff60ed828b799a634054411" target="_blank">MAGMA</a></td>
+                            <td>$0.138400</td>
+                            <td class="negative">-3.13%</td>
+                            <td>$1,413,617</td>
+                            <td>7.30</td>
+                        </tr>
+                        
+                        <tr>
+                            <td><a href="https://dexscreener.com/sui/0xd978d331772a5b90d5a4781e1232d18afd12019d0c35db79e3674beeda8f9126" target="_blank">DEEP</a></td>
+                            <td>$0.040050</td>
+                            <td class="positive">0.65%</td>
+                            <td>$277,010</td>
+                            <td>2.45</td>
+                        </tr>
+                        
+                        <tr>
+                            <td><a href="https://dexscreener.com/sui/0xf4238fa592c9ed7f148fd091cb2c4147cb15ad81b797115ce42971923ebf6e4c" target="_blank">WAL</a></td>
+                            <td>$0.134700</td>
+                            <td class="negative">-0.36%</td>
+                            <td>$189,833</td>
+                            <td>1.47</td>
+                        </tr>
+                        
+                        <tr>
+                            <td><a href="https://dexscreener.com/sui/0xc23e7e8a74f0b18af4dfb7c3280e2a56916ec4d41e14416f85184a8aab6b7789" target="_blank">IKA</a></td>
+                            <td>$0.008071</td>
+                            <td class="positive">0.17%</td>
+                            <td>$67,881</td>
+                            <td>0.55</td>
+                        </tr>
+                        
+                        <tr>
+                            <td><a href="https://dexscreener.com/sui/0x968f1f73b8e766e2ce0198c807d0c956aa384bfe64c98a18e56bfb970a13e7bb" target="_blank">US</a></td>
+                            <td>$0.006395</td>
+                            <td class="positive">3.15%</td>
+                            <td>$300,812</td>
+                            <td>0.48</td>
+                        </tr>
+                        
+                    </tbody>
+                </table>
+                
+            </div>
+            
+            <div class="card">
+                <div class="chain-header">
+                    <span class="chain-name">🌐 Cronos</span>
+                    
+                    <span class="status-badge status-accel">🚀 加速流入</span>
+                    
+                </div>
+                <div class="metrics">
+                    <span>💰 TVL: $390,295,927</span>
+                </div>
+                
+                <!-- 多時間框架分析 -->
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; margin: 1rem 0; padding: 0.75rem; background: rgba(255,255,255,0.03); border-radius: 8px;">
+                    <div style="text-align: center;">
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">24H</div>
+                        <div class="positive" style="font-weight: 600;">+2.54%</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">1週</div>
+                        <div class="positive" style="font-weight: 600;">+5.66%</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">1月</div>
+                        <div class="negative" style="font-weight: 600;">-0.84%</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">3月</div>
+                        <div class="negative" style="font-weight: 600;">-38.41%</div>
+                    </div>
+                </div>
+                
+                <!-- 趨勢判定 -->
+                
+                
+                
+                
+                <div style="padding: 0.5rem; background: rgba(234, 179, 8, 0.1); border-radius: 6px; margin-bottom: 1rem; font-size: 0.875rem;">
+                    🔄 <strong>短期反彈中</strong> - 觀察是否持續
+                </div>
+                
+                
+                <!-- 資金流向分析 -->
+                
+                
+                <div style="margin-bottom: 1rem;">
+                    <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem;">📊 資金流向分佈 (24H交易量)</div>
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <span style="padding: 0.25rem 0.5rem; background: rgba(34, 197, 94, 0.2); border-radius: 4px; font-size: 0.75rem;">
+                            🚀 Altcoin
+                            100.0%
+                        </span>
+                        
+                        
+                    </div>
+                    
+                    <div style="margin-top: 0.5rem; font-size: 0.8rem; color: var(--green);">🎯 Alpha 機會！資金主要流向個別代幣</div>
+                    
+                </div>
+                
+                
+                <!-- 🐋 鯨魚吸籌代幣 (穩健長線) -->
+                
+                
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>代幣</th>
+                            <th>價格</th>
+                            <th>24H</th>
+                            <th>交易量</th>
+                            <th>買壓</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        
+                        <tr>
+                            <td><a href="https://dexscreener.com/cronos/0xb90d6e09075168281d47da6f0665ff4fd8f0ff6f" target="_blank">PEPE</a></td>
+                            <td>$0.000007</td>
+                            <td class="positive">13.61%</td>
+                            <td>$28,236</td>
+                            <td>0.29</td>
+                        </tr>
+                        
+                        <tr>
+                            <td><a href="https://dexscreener.com/cronos/0x72efd454bbfeca458e909b99faacbc116880b54d" target="_blank">FER</a></td>
+                            <td>$0.000387</td>
+                            <td class="positive">1.28%</td>
+                            <td>$10,763</td>
+                            <td>0.11</td>
+                        </tr>
+                        
+                        <tr>
+                            <td><a href="https://dexscreener.com/cronos/0xc43e32f44423ae7562c33ed8ca8394969bfffb29" target="_blank">CROID</a></td>
+                            <td>$0.010450</td>
+                            <td class="positive">7.73%</td>
+                            <td>$4,220</td>
+                            <td>0.03</td>
+                        </tr>
+                        
+                        <tr>
+                            <td><a href="https://dexscreener.com/cronos/0x2c30327a7ce35b9294ecf8624d1eda001b9e337f" target="_blank">DOGE</a></td>
+                            <td>$0.152100</td>
+                            <td class="positive">6.65%</td>
+                            <td>$1,724</td>
+                            <td>0.03</td>
+                        </tr>
+                        
+                        <tr>
+                            <td><a href="https://dexscreener.com/cronos/0x34d1856ed8bbc20fa7b29776ad273fd8b22967be" target="_blank">VNO</a></td>
+                            <td>$0.008358</td>
+                            <td class="positive">4.96%</td>
+                            <td>$5,072</td>
+                            <td>0.02</td>
+                        </tr>
+                        
+                    </tbody>
+                </table>
+                
+            </div>
+            
+            <div class="card">
+                <div class="chain-header">
+                    <span class="chain-name">🌐 OP Mainnet</span>
+                    
+                    <span class="status-badge status-accel">🚀 加速流入</span>
+                    
+                </div>
+                <div class="metrics">
+                    <span>💰 TVL: $306,519,263</span>
+                </div>
+                
+                <!-- 多時間框架分析 -->
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; margin: 1rem 0; padding: 0.75rem; background: rgba(255,255,255,0.03); border-radius: 8px;">
+                    <div style="text-align: center;">
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">24H</div>
+                        <div class="positive" style="font-weight: 600;">+2.08%</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">1週</div>
+                        <div class="positive" style="font-weight: 600;">+4.42%</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">1月</div>
+                        <div class="positive" style="font-weight: 600;">+2.61%</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">3月</div>
+                        <div class="negative" style="font-weight: 600;">-26.14%</div>
+                    </div>
+                </div>
+                
+                <!-- 趨勢判定 -->
+                
+                
+                
+                
+                <div style="padding: 0.5rem; background: rgba(34, 197, 94, 0.1); border-radius: 6px; margin-bottom: 1rem; font-size: 0.875rem;">
+                    📈 <strong>短中長期多頭</strong> - 趨勢向上
+                </div>
+                
+                
+                <!-- 資金流向分析 -->
+                
+                
+                <div style="margin-bottom: 1rem;">
+                    <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem;">📊 資金流向分佈 (24H交易量)</div>
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                        
+                        
+                        <span style="padding: 0.25rem 0.5rem; background: rgba(34, 197, 94, 0.2); border-radius: 4px; font-size: 0.75rem;">
+                            🔷 原生幣
+                            78.5%
+                        </span>
+                        
+                        
+                        
+                        <span style="padding: 0.25rem 0.5rem; background: rgba(255,255,255,0.05); border-radius: 4px; font-size: 0.75rem;">
+                            💵 穩定幣
+                            0.4%
+                        </span>
+                        
+                        
+                        
+                        
+                        
+                        <span style="padding: 0.25rem 0.5rem; background: rgba(255,255,255,0.05); border-radius: 4px; font-size: 0.75rem;">
+                            🚀 Altcoin
+                            21.1%
+                        </span>
+                        
+                        
+                    </div>
+                    
+                </div>
+                
+                
+                <!-- 🐋 鯨魚吸籌代幣 (穩健長線) -->
+                
+                
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>代幣</th>
+                            <th>價格</th>
+                            <th>24H</th>
+                            <th>交易量</th>
+                            <th>買壓</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        
+                        <tr>
+                            <td><a href="https://dexscreener.com/optimism/0x8134a2fdc127549480865fb8e5a9e8a8a95a54c5" target="_blank">VELO</a></td>
+                            <td>$0.022480</td>
+                            <td class="negative">-3.74%</td>
+                            <td>$7,157</td>
+                            <td>0.06</td>
+                        </tr>
+                        
+                        <tr>
+                            <td><a href="https://dexscreener.com/optimism/0x6ed6df1c23c51cb7cc67a348cc8d9e6108ea3bfe" target="_blank">MOOBIFI</a></td>
+                            <td>$188.420000</td>
+                            <td class="positive">0.04%</td>
+                            <td>$3,808</td>
+                            <td>0.01</td>
+                        </tr>
+                        
+                        <tr>
+                            <td><a href="https://dexscreener.com/optimism/0x69a9b0f791507c50b413d24abb761acb5ac52728" target="_blank">RING</a></td>
+                            <td>$0.005425</td>
+                            <td class="positive">4.45%</td>
+                            <td>$2,574</td>
+                            <td>0.01</td>
+                        </tr>
+                        
+                        <tr>
+                            <td><a href="https://dexscreener.com/optimism/0xa1055762336f92b4b8d2edc032a0ce45ead6280a" target="_blank">ALETH</a></td>
+                            <td>$3046.340000</td>
+                            <td class="positive">1.22%</td>
+                            <td>$30,441</td>
+                            <td>0.01</td>
+                        </tr>
+                        
+                        <tr>
+                            <td><a href="https://dexscreener.com/optimism/0x707ba27189e8bf89e43b2198e6b88aac4720124f" target="_blank">TAROT</a></td>
+                            <td>$0.051110</td>
+                            <td class="positive">1.89%</td>
+                            <td>$2,179</td>
+                            <td>0.00</td>
+                        </tr>
+                        
+                    </tbody>
+                </table>
+                
+            </div>
+            
+            <div class="card">
+                <div class="chain-header">
+                    <span class="chain-name">🌐 Avalanche</span>
+                    
+                    <span class="status-badge status-accel">🚀 加速流入</span>
+                    
+                </div>
+                <div class="metrics">
+                    <span>💰 TVL: $1,330,256,510</span>
+                </div>
+                
+                <!-- 多時間框架分析 -->
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; margin: 1rem 0; padding: 0.75rem; background: rgba(255,255,255,0.03); border-radius: 8px;">
+                    <div style="text-align: center;">
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">24H</div>
+                        <div class="positive" style="font-weight: 600;">+1.44%</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">1週</div>
+                        <div class="positive" style="font-weight: 600;">+4.88%</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">1月</div>
+                        <div class="positive" style="font-weight: 600;">+0.44%</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">3月</div>
+                        <div class="negative" style="font-weight: 600;">-41.29%</div>
+                    </div>
+                </div>
+                
+                <!-- 趨勢判定 -->
+                
+                
+                
+                
+                <div style="padding: 0.5rem; background: rgba(34, 197, 94, 0.1); border-radius: 6px; margin-bottom: 1rem; font-size: 0.875rem;">
+                    📈 <strong>短中長期多頭</strong> - 趨勢向上
+                </div>
+                
+                
+                <!-- 資金流向分析 -->
+                
+                
+                <div style="margin-bottom: 1rem;">
+                    <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem;">📊 資金流向分佈 (24H交易量)</div>
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <span style="padding: 0.25rem 0.5rem; background: rgba(34, 197, 94, 0.2); border-radius: 4px; font-size: 0.75rem;">
+                            🚀 Altcoin
+                            100.0%
+                        </span>
+                        
+                        
+                    </div>
+                    
+                    <div style="margin-top: 0.5rem; font-size: 0.8rem; color: var(--green);">🎯 Alpha 機會！資金主要流向個別代幣</div>
+                    
+                </div>
+                
+                
+                <!-- 🐋 鯨魚吸籌代幣 (穩健長線) -->
+                
+                <div style="background: rgba(99, 102, 241, 0.05); border: 1px solid rgba(99, 102, 241, 0.1); border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
+                    <div style="font-size: 0.9rem; font-weight: 600; color: var(--accent); margin-bottom: 0.75rem;">🐋 鯨魚潛伏 (穩健累積)</div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>代幣</th>
+                                <th>24H漲幅</th>
+                                <th>流動性</th>
+                                <th>交易量</th>
+                                <th>累積方式</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            
+                            <tr>
+                                <td><a href="https://dexscreener.com/avalanche/0x41ab86eecbd110a82ca602d032a461f453066f1e" target="_blank">COQ</a></td>
+                                <td class="positive">+3.26%</td>
+                                <td>$915,751</td>
+                                <td>$197,564</td>
+                                <td style="font-size: 0.75rem; color: var(--text-muted);">存活759天 | 買1161賣791 (59%買入)</td>
+                            </tr>
+                            
+                            <tr>
+                                <td><a href="https://dexscreener.com/avalanche/0xbd26e663281fb35d4757219eb180f02e8a065c09" target="_blank">GUN</a></td>
+                                <td class="positive">+0.88%</td>
+                                <td>$319,854</td>
+                                <td>$152,860</td>
+                                <td style="font-size: 0.75rem; color: var(--text-muted);">存活274天 | 買708賣689 (51%買入)</td>
+                            </tr>
+                            
+                            <tr>
+                                <td><a href="https://dexscreener.com/avalanche/0xa78c3e56afb8d34a536825e2497255e78b388619" target="_blank">ARENA</a></td>
+                                <td class="positive">+5.50%</td>
+                                <td>$319,631</td>
+                                <td>$167,113</td>
+                                <td style="font-size: 0.75rem; color: var(--text-muted);">存活431天 | 買1373賣1041 (57%買入)</td>
+                            </tr>
+                            
+                        </tbody>
+                    </table>
+                </div>
+                
+                
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>代幣</th>
+                            <th>價格</th>
+                            <th>24H</th>
+                            <th>交易量</th>
+                            <th>買壓</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        
+                        <tr>
+                            <td><a href="https://dexscreener.com/avalanche/0x8573f98175d816d520248b5facf40d309b1c9cee" target="_blank">AUSD</a></td>
+                            <td>$1.000100</td>
+                            <td class="negative">0.00%</td>
+                            <td>$11,672,680</td>
+                            <td>4.52</td>
+                        </tr>
+                        
+                        <tr>
+                            <td><a href="https://dexscreener.com/avalanche/0x883ea72c2a46f7acb3820855344c43666c6cc5c0" target="_blank">SAVAX</a></td>
+                            <td>$17.470000</td>
+                            <td class="positive">0.33%</td>
+                            <td>$683,577</td>
+                            <td>0.88</td>
+                        </tr>
+                        
+                        <tr>
+                            <td><a href="https://dexscreener.com/avalanche/0xa78c3e56afb8d34a536825e2497255e78b388619" target="_blank">ARENA</a></td>
+                            <td>$0.002153</td>
+                            <td class="positive">5.50%</td>
+                            <td>$167,113</td>
+                            <td>0.52</td>
+                        </tr>
+                        
+                        <tr>
+                            <td><a href="https://dexscreener.com/avalanche/0xbd26e663281fb35d4757219eb180f02e8a065c09" target="_blank">GUN</a></td>
+                            <td>$0.014250</td>
+                            <td class="positive">0.88%</td>
+                            <td>$152,860</td>
+                            <td>0.48</td>
+                        </tr>
+                        
+                        <tr>
+                            <td><a href="https://dexscreener.com/avalanche/0xb3dc87bd570d8deaa960763234ef3d93cc789e6c" target="_blank">FOLKS</a></td>
+                            <td>$4.100000</td>
+                            <td class="positive">1.19%</td>
+                            <td>$23,919</td>
+                            <td>0.38</td>
+                        </tr>
+                        
+                    </tbody>
+                </table>
+                
+            </div>
+            
+            <div class="card">
+                <div class="chain-header">
+                    <span class="chain-name">🌐 Solana</span>
+                    
+                    <span class="status-badge status-accel">🚀 加速流入</span>
+                    
+                </div>
+                <div class="metrics">
+                    <span>💰 TVL: $8,729,741,526</span>
+                </div>
+                
+                <!-- 多時間框架分析 -->
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; margin: 1rem 0; padding: 0.75rem; background: rgba(255,255,255,0.03); border-radius: 8px;">
+                    <div style="text-align: center;">
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">24H</div>
+                        <div class="positive" style="font-weight: 600;">+1.43%</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">1週</div>
+                        <div class="positive" style="font-weight: 600;">+4.37%</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">1月</div>
+                        <div class="negative" style="font-weight: 600;">-3.66%</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">3月</div>
+                        <div class="negative" style="font-weight: 600;">-31.32%</div>
+                    </div>
+                </div>
+                
+                <!-- 趨勢判定 -->
+                
+                
+                
+                
+                <div style="padding: 0.5rem; background: rgba(234, 179, 8, 0.1); border-radius: 6px; margin-bottom: 1rem; font-size: 0.875rem;">
+                    🔄 <strong>短期反彈中</strong> - 觀察是否持續
+                </div>
+                
+                
+                <!-- 資金流向分析 -->
+                
+                
+                <div style="margin-bottom: 1rem;">
+                    <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem;">📊 資金流向分佈 (24H交易量)</div>
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                        
+                        
+                        <span style="padding: 0.25rem 0.5rem; background: rgba(255,255,255,0.05); border-radius: 4px; font-size: 0.75rem;">
+                            🔷 原生幣
+                            4.9%
+                        </span>
+                        
+                        
+                        
+                        <span style="padding: 0.25rem 0.5rem; background: rgba(255,255,255,0.05); border-radius: 4px; font-size: 0.75rem;">
+                            💵 穩定幣
+                            2.3%
+                        </span>
+                        
+                        
+                        
+                        
+                        
+                        <span style="padding: 0.25rem 0.5rem; background: rgba(34, 197, 94, 0.2); border-radius: 4px; font-size: 0.75rem;">
+                            🚀 Altcoin
+                            92.8%
+                        </span>
+                        
+                        
+                    </div>
+                    
+                    <div style="margin-top: 0.5rem; font-size: 0.8rem; color: var(--green);">🎯 Alpha 機會！資金主要流向個別代幣</div>
+                    
+                </div>
+                
+                
+                <!-- 🐋 鯨魚吸籌代幣 (穩健長線) -->
+                
+                <div style="background: rgba(99, 102, 241, 0.05); border: 1px solid rgba(99, 102, 241, 0.1); border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
+                    <div style="font-size: 0.9rem; font-weight: 600; color: var(--accent); margin-bottom: 0.75rem;">🐋 鯨魚潛伏 (穩健累積)</div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>代幣</th>
+                                <th>24H漲幅</th>
+                                <th>流動性</th>
+                                <th>交易量</th>
+                                <th>累積方式</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            
+                            <tr>
+                                <td><a href="https://dexscreener.com/solana/9d9mb8kooffad3sctgztkxqypkshx6ezhbkio89ixyy2" target="_blank">TRUMP</a></td>
+                                <td class="positive">+7.02%</td>
+                                <td>$154,846,914</td>
+                                <td>$131,798,410</td>
+                                <td style="font-size: 0.75rem; color: var(--text-muted);">存活351天 | 買8987賣7264 (55%買入)</td>
+                            </tr>
+                            
+                            <tr>
+                                <td><a href="https://dexscreener.com/solana/bzc9nzfmqkxr6fz1dbph7bdf9broyef6pnzesp7v5iiw" target="_blank">FARTCOIN </a></td>
+                                <td class="positive">+10.55%</td>
+                                <td>$12,429,511</td>
+                                <td>$2,754,195</td>
+                                <td style="font-size: 0.75rem; color: var(--text-muted);">存活443天 | 買4104賣2974 (58%買入)</td>
+                            </tr>
+                            
+                            <tr>
+                                <td><a href="https://dexscreener.com/solana/7dvri3qjyd3uobszl3zth8vscgu6r6r2nvfsh7uvfdte" target="_blank">UMBRA</a></td>
+                                <td class="positive">+0.13%</td>
+                                <td>$3,138,473</td>
+                                <td>$827,512</td>
+                                <td style="font-size: 0.75rem; color: var(--text-muted);">存活85天 | 買262賣195 (57%買入)</td>
+                            </tr>
+                            
+                            <tr>
+                                <td><a href="https://dexscreener.com/solana/6nuivmsnjsi4afsmseiaezsav9n4n1zrd4jenuwnrvyb" target="_blank">JLP</a></td>
+                                <td class="positive">+1.03%</td>
+                                <td>$2,795,323</td>
+                                <td>$4,441,487</td>
+                                <td style="font-size: 0.75rem; color: var(--text-muted);">存活650天 | 買8510賣7151 (54%買入)</td>
+                            </tr>
+                            
+                            <tr>
+                                <td><a href="https://dexscreener.com/solana/bofa2viusudpbtums2krug6ahnemawjnfwqtjdgx5bkw" target="_blank">PUMP</a></td>
+                                <td class="positive">+3.92%</td>
+                                <td>$1,133,371</td>
+                                <td>$1,672,413</td>
+                                <td style="font-size: 0.75rem; color: var(--text-muted);">存活110天 | 買2552賣2303 (53%買入)</td>
+                            </tr>
+                            
+                        </tbody>
+                    </table>
+                </div>
+                
+                
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>代幣</th>
+                            <th>價格</th>
+                            <th>24H</th>
+                            <th>交易量</th>
+                            <th>買壓</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        
+                        <tr>
+                            <td><a href="https://dexscreener.com/solana/7z93mgwkcbplnshxpt6hmjbrrvblsj7vqfaphdngochb" target="_blank">LIBERTADOR</a></td>
+                            <td>$0.000081</td>
+                            <td class="negative">-86.22%</td>
+                            <td>$3,277,351</td>
+                            <td>112.20</td>
+                        </tr>
+                        
+                        <tr>
+                            <td><a href="https://dexscreener.com/solana/hkehmgtbympmnxjktlxswcmha4qziwnh6n7plmyuuux6" target="_blank">AMERICA</a></td>
+                            <td>$0.000145</td>
+                            <td class="positive">145.00%</td>
+                            <td>$4,063,649</td>
+                            <td>94.41</td>
+                        </tr>
+                        
+                        <tr>
+                            <td><a href="https://dexscreener.com/solana/9xusvxuvkkrdcmhxbhek4uzp4hxz5sukt3eyajidy6fl" target="_blank">FAFO</a></td>
+                            <td>$0.001157</td>
+                            <td class="positive">259.00%</td>
+                            <td>$11,043,353</td>
+                            <td>77.79</td>
+                        </tr>
+                        
+                        <tr>
+                            <td><a href="https://dexscreener.com/solana/gbdbj2qx7xltrcetzmxhwn5upo2etzfgihlehko6frim" target="_blank">MARLEE</a></td>
+                            <td>$0.000102</td>
+                            <td class="negative">-83.87%</td>
+                            <td>$1,913,095</td>
+                            <td>51.19</td>
+                        </tr>
+                        
+                        <tr>
+                            <td><a href="https://dexscreener.com/solana/fdf73ofcx2mzizfdztsrk9dsqurybguyyrehz4va6tnx" target="_blank">NIKETECH</a></td>
+                            <td>$0.000101</td>
+                            <td class="positive">72.41%</td>
+                            <td>$1,794,078</td>
+                            <td>50.89</td>
+                        </tr>
+                        
+                    </tbody>
+                </table>
+                
+            </div>
+            
+            <div class="card">
+                <div class="chain-header">
+                    <span class="chain-name">🌐 Bitcoin</span>
+                    
+                    <span class="status-badge status-accel">🚀 加速流入</span>
+                    
+                </div>
+                <div class="metrics">
+                    <span>💰 TVL: $7,080,343,773</span>
+                </div>
+                
+                <!-- 多時間框架分析 -->
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; margin: 1rem 0; padding: 0.75rem; background: rgba(255,255,255,0.03); border-radius: 8px;">
+                    <div style="text-align: center;">
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">24H</div>
+                        <div class="positive" style="font-weight: 600;">+1.26%</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">1週</div>
+                        <div class="positive" style="font-weight: 600;">+3.74%</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">1月</div>
+                        <div class="positive" style="font-weight: 600;">+6.55%</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">3月</div>
+                        <div class="negative" style="font-weight: 600;">-22.20%</div>
+                    </div>
+                </div>
+                
+                <!-- 趨勢判定 -->
+                
+                
+                
+                
+                <div style="padding: 0.5rem; background: rgba(34, 197, 94, 0.1); border-radius: 6px; margin-bottom: 1rem; font-size: 0.875rem;">
+                    📈 <strong>短中長期多頭</strong> - 趨勢向上
+                </div>
+                
+                
+                <!-- 資金流向分析 -->
+                
+                
+                <div style="margin-bottom: 1rem;">
+                    <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem;">📊 資金流向分佈 (24H交易量)</div>
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                    </div>
+                    
+                </div>
+                
+                
+                <!-- 🐋 鯨魚吸籌代幣 (穩健長線) -->
+                
+                
+                
+            </div>
+            
+            <div class="card">
+                <div class="chain-header">
+                    <span class="chain-name">🌐 Base</span>
+                    
+                    <span class="status-badge status-accel">🚀 加速流入</span>
+                    
+                </div>
+                <div class="metrics">
+                    <span>💰 TVL: $4,698,348,796</span>
+                </div>
+                
+                <!-- 多時間框架分析 -->
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; margin: 1rem 0; padding: 0.75rem; background: rgba(255,255,255,0.03); border-radius: 8px;">
+                    <div style="text-align: center;">
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">24H</div>
+                        <div class="positive" style="font-weight: 600;">+1.14%</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">1週</div>
+                        <div class="positive" style="font-weight: 600;">+6.13%</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">1月</div>
+                        <div class="positive" style="font-weight: 600;">+3.68%</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">3月</div>
+                        <div class="negative" style="font-weight: 600;">-12.83%</div>
+                    </div>
+                </div>
+                
+                <!-- 趨勢判定 -->
+                
+                
+                
+                
+                <div style="padding: 0.5rem; background: rgba(34, 197, 94, 0.1); border-radius: 6px; margin-bottom: 1rem; font-size: 0.875rem;">
+                    📈 <strong>短中長期多頭</strong> - 趨勢向上
+                </div>
+                
+                
+                <!-- 資金流向分析 -->
+                
+                
+                <div style="margin-bottom: 1rem;">
+                    <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem;">📊 資金流向分佈 (24H交易量)</div>
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <span style="padding: 0.25rem 0.5rem; background: rgba(34, 197, 94, 0.2); border-radius: 4px; font-size: 0.75rem;">
+                            🚀 Altcoin
+                            100.0%
+                        </span>
+                        
+                        
+                    </div>
+                    
+                    <div style="margin-top: 0.5rem; font-size: 0.8rem; color: var(--green);">🎯 Alpha 機會！資金主要流向個別代幣</div>
+                    
+                </div>
+                
+                
+                <!-- 🐋 鯨魚吸籌代幣 (穩健長線) -->
+                
+                <div style="background: rgba(99, 102, 241, 0.05); border: 1px solid rgba(99, 102, 241, 0.1); border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
+                    <div style="font-size: 0.9rem; font-weight: 600; color: var(--accent); margin-bottom: 0.75rem;">🐋 鯨魚潛伏 (穩健累積)</div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>代幣</th>
+                                <th>24H漲幅</th>
+                                <th>流動性</th>
+                                <th>交易量</th>
+                                <th>累積方式</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            
+                            <tr>
+                                <td><a href="https://dexscreener.com/base/0xd9edc75a3a797ec92ca370f19051babebfb2edee" target="_blank">KTA</a></td>
+                                <td class="positive">+1.12%</td>
+                                <td>$8,261,161</td>
+                                <td>$401,519</td>
+                                <td style="font-size: 0.75rem; color: var(--text-muted);">存活304天 | 買457賣435 (51%買入)</td>
+                            </tr>
+                            
+                            <tr>
+                                <td><a href="https://dexscreener.com/base/0x01784ef301d79e4b2df3a21ad9a536d4cf09a5ce" target="_blank">VVV</a></td>
+                                <td class="positive">+7.99%</td>
+                                <td>$6,623,589</td>
+                                <td>$623,361</td>
+                                <td style="font-size: 0.75rem; color: var(--text-muted);">存活341天 | 買781賣689 (53%買入)</td>
+                            </tr>
+                            
+                            <tr>
+                                <td><a href="https://dexscreener.com/base/0xea8b7ed6170e0ea3703dde6b496b065a8ececd7b" target="_blank">RUSSELL</a></td>
+                                <td class="positive">+0.61%</td>
+                                <td>$575,356</td>
+                                <td>$74,397</td>
+                                <td style="font-size: 0.75rem; color: var(--text-muted);">存活450天 | 買269賣227 (54%買入)</td>
+                            </tr>
+                            
+                        </tbody>
+                    </table>
+                </div>
+                
+                
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>代幣</th>
+                            <th>價格</th>
+                            <th>24H</th>
+                            <th>交易量</th>
+                            <th>買壓</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        
+                        <tr>
+                            <td><a href="https://dexscreener.com/base/0x3f0296bf652e19bca772ec3df08b32732f93014a" target="_blank">VIRTUAL</a></td>
+                            <td>$0.904500</td>
+                            <td class="positive">8.46%</td>
+                            <td>$8,209,582</td>
+                            <td>11.71</td>
+                        </tr>
+                        
+                        <tr>
+                            <td><a href="https://dexscreener.com/base/0x76c2650b7bd16bbfd7763955b6dc90eb46316de07c667ae4dba6066517692122" target="_blank">CRYPTOVC</a></td>
+                            <td>$0.000531</td>
+                            <td class="positive">916.00%</td>
+                            <td>$1,057,511</td>
+                            <td>8.96</td>
+                        </tr>
+                        
+                        <tr>
+                            <td><a href="https://dexscreener.com/base/0x87d7af8b040afc1aca217f876e23251d5705f3618dc2aaec9d522dd0688ebda3" target="_blank">DEPLOYER</a></td>
+                            <td>$0.000709</td>
+                            <td class="negative">-30.22%</td>
+                            <td>$783,045</td>
+                            <td>5.25</td>
+                        </tr>
+                        
+                        <tr>
+                            <td><a href="https://dexscreener.com/base/0xcdd442e2de893c07146b2f1072f8e077559f9aa4" target="_blank">BNKR</a></td>
+                            <td>$0.000212</td>
+                            <td class="positive">17.60%</td>
+                            <td>$379,742</td>
+                            <td>3.13</td>
+                        </tr>
+                        
+                        <tr>
+                            <td><a href="https://dexscreener.com/base/0x3f53f1fd5b7723ddf38d93a584d280b9b94c3111" target="_blank">ZORA</a></td>
+                            <td>$0.043160</td>
+                            <td class="negative">-0.99%</td>
+                            <td>$1,571,199</td>
+                            <td>2.97</td>
+                        </tr>
+                        
+                    </tbody>
+                </table>
+                
+            </div>
+            
+            <div class="card">
+                <div class="chain-header">
+                    <span class="chain-name">🌐 Aptos</span>
+                    
+                    <span class="status-badge status-accel">🚀 加速流入</span>
+                    
+                </div>
+                <div class="metrics">
+                    <span>💰 TVL: $448,286,042</span>
+                </div>
+                
+                <!-- 多時間框架分析 -->
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; margin: 1rem 0; padding: 0.75rem; background: rgba(255,255,255,0.03); border-radius: 8px;">
+                    <div style="text-align: center;">
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">24H</div>
+                        <div class="positive" style="font-weight: 600;">+0.97%</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">1週</div>
+                        <div class="positive" style="font-weight: 600;">+2.01%</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">1月</div>
+                        <div class="negative" style="font-weight: 600;">-7.08%</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">3月</div>
+                        <div class="negative" style="font-weight: 600;">-47.11%</div>
+                    </div>
+                </div>
+                
+                <!-- 趨勢判定 -->
+                
+                
+                
+                
+                <div style="padding: 0.5rem; background: rgba(234, 179, 8, 0.1); border-radius: 6px; margin-bottom: 1rem; font-size: 0.875rem;">
+                    🔄 <strong>短期反彈中</strong> - 觀察是否持續
+                </div>
+                
+                
+                <!-- 資金流向分析 -->
+                
+                
+                <div style="margin-bottom: 1rem;">
+                    <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem;">📊 資金流向分佈 (24H交易量)</div>
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                        
+                        
+                        <span style="padding: 0.25rem 0.5rem; background: rgba(34, 197, 94, 0.2); border-radius: 4px; font-size: 0.75rem;">
+                            🔷 原生幣
+                            73.7%
+                        </span>
+                        
+                        
+                        
+                        <span style="padding: 0.25rem 0.5rem; background: rgba(255,255,255,0.05); border-radius: 4px; font-size: 0.75rem;">
+                            💵 穩定幣
+                            17.8%
+                        </span>
+                        
+                        
+                        
+                        
+                        
+                        <span style="padding: 0.25rem 0.5rem; background: rgba(255,255,255,0.05); border-radius: 4px; font-size: 0.75rem;">
+                            🚀 Altcoin
+                            8.6%
+                        </span>
+                        
+                        
+                    </div>
+                    
+                </div>
+                
+                
+                <!-- 🐋 鯨魚吸籌代幣 (穩健長線) -->
+                
+                
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>代幣</th>
+                            <th>價格</th>
+                            <th>24H</th>
+                            <th>交易量</th>
+                            <th>買壓</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        
+                        <tr>
+                            <td><a href="https://dexscreener.com/aptos/liquidswapv0p5-2297" target="_blank">DOODOO</a></td>
+                            <td>$0.085500</td>
+                            <td class="positive">0.75%</td>
+                            <td>$14</td>
+                            <td>0.00</td>
+                        </tr>
+                        
+                        <tr>
+                            <td><a href="https://dexscreener.com/aptos/liquidswapv0p5-2044" target="_blank">STAPT</a></td>
+                            <td>$2.240000</td>
+                            <td class="positive">0.34%</td>
+                            <td>$1</td>
+                            <td>0.00</td>
+                        </tr>
+                        
+                    </tbody>
+                </table>
+                
+            </div>
+            
+            <div class="card">
+                <div class="chain-header">
+                    <span class="chain-name">🌐 Hyperliquid L1</span>
+                    
+                    <span class="status-badge status-stable">🟢 穩健增長</span>
+                    
+                </div>
+                <div class="metrics">
+                    <span>💰 TVL: $1,425,892,243</span>
+                </div>
+                
+                <!-- 多時間框架分析 -->
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; margin: 1rem 0; padding: 0.75rem; background: rgba(255,255,255,0.03); border-radius: 8px;">
+                    <div style="text-align: center;">
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">24H</div>
+                        <div class="positive" style="font-weight: 600;">+0.89%</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">1週</div>
+                        <div class="negative" style="font-weight: 600;">-3.57%</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">1月</div>
+                        <div class="negative" style="font-weight: 600;">-19.48%</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">3月</div>
+                        <div class="negative" style="font-weight: 600;">-40.67%</div>
+                    </div>
+                </div>
+                
+                <!-- 趨勢判定 -->
+                
+                
+                
+                
+                <div style="padding: 0.5rem; background: rgba(234, 179, 8, 0.1); border-radius: 6px; margin-bottom: 1rem; font-size: 0.875rem;">
+                    🔄 <strong>短期反彈中</strong> - 觀察是否持續
+                </div>
+                
+                
+                <!-- 資金流向分析 -->
+                
+                
+                <div style="margin-bottom: 1rem;">
+                    <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem;">📊 資金流向分佈 (24H交易量)</div>
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                    </div>
+                    
+                </div>
+                
+                
+                <!-- 🐋 鯨魚吸籌代幣 (穩健長線) -->
+                
+                
+                
+            </div>
+            
+            <div class="card">
+                <div class="chain-header">
+                    <span class="chain-name">🌐 Arbitrum</span>
+                    
+                    <span class="status-badge status-stable">🟢 穩健增長</span>
+                    
+                </div>
+                <div class="metrics">
+                    <span>💰 TVL: $3,046,907,093</span>
+                </div>
+                
+                <!-- 多時間框架分析 -->
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; margin: 1rem 0; padding: 0.75rem; background: rgba(255,255,255,0.03); border-radius: 8px;">
+                    <div style="text-align: center;">
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">24H</div>
+                        <div class="positive" style="font-weight: 600;">+0.70%</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">1週</div>
+                        <div class="positive" style="font-weight: 600;">+7.48%</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">1月</div>
+                        <div class="positive" style="font-weight: 600;">+1.35%</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">3月</div>
+                        <div class="negative" style="font-weight: 600;">-25.83%</div>
+                    </div>
+                </div>
+                
+                <!-- 趨勢判定 -->
+                
+                
+                
+                
+                <div style="padding: 0.5rem; background: rgba(34, 197, 94, 0.1); border-radius: 6px; margin-bottom: 1rem; font-size: 0.875rem;">
+                    📈 <strong>短中長期多頭</strong> - 趨勢向上
+                </div>
+                
+                
+                <!-- 資金流向分析 -->
+                
+                
+                <div style="margin-bottom: 1rem;">
+                    <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem;">📊 資金流向分佈 (24H交易量)</div>
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                        
+                        
+                        <span style="padding: 0.25rem 0.5rem; background: rgba(255,255,255,0.05); border-radius: 4px; font-size: 0.75rem;">
+                            🔷 原生幣
+                            31.9%
+                        </span>
+                        
+                        
+                        
+                        <span style="padding: 0.25rem 0.5rem; background: rgba(255,255,255,0.05); border-radius: 4px; font-size: 0.75rem;">
+                            💵 穩定幣
+                            13.5%
+                        </span>
+                        
+                        
+                        
+                        
+                        
+                        <span style="padding: 0.25rem 0.5rem; background: rgba(34, 197, 94, 0.2); border-radius: 4px; font-size: 0.75rem;">
+                            🚀 Altcoin
+                            54.6%
+                        </span>
+                        
+                        
+                    </div>
+                    
+                    <div style="margin-top: 0.5rem; font-size: 0.8rem; color: var(--green);">🎯 Alpha 機會！資金主要流向個別代幣</div>
+                    
+                </div>
+                
+                
+                <!-- 🐋 鯨魚吸籌代幣 (穩健長線) -->
+                
+                
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>代幣</th>
+                            <th>價格</th>
+                            <th>24H</th>
+                            <th>交易量</th>
+                            <th>買壓</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        
+                        <tr>
+                            <td><a href="https://dexscreener.com/arbitrum/0xe461f84c3fe6bcdd1162eb0ef4284f3bb6e4cad3" target="_blank">PENDLE</a></td>
+                            <td>$2.200000</td>
+                            <td class="positive">1.02%</td>
+                            <td>$435,921</td>
+                            <td>1.03</td>
+                        </tr>
+                        
+                        <tr>
+                            <td><a href="https://dexscreener.com/arbitrum/0x105ba85d9047daf3f9fe941d8188d4b9a6900388" target="_blank">ZRO</a></td>
+                            <td>$1.400000</td>
+                            <td class="positive">5.77%</td>
+                            <td>$19,271</td>
+                            <td>0.33</td>
+                        </tr>
+                        
+                        <tr>
+                            <td><a href="https://dexscreener.com/arbitrum/0x9b6ff025aee245d314c09f57b72f0de6e231c3a6" target="_blank">GNS</a></td>
+                            <td>$1.150000</td>
+                            <td class="negative">-0.31%</td>
+                            <td>$99,782</td>
+                            <td>0.16</td>
+                        </tr>
+                        
+                        <tr>
+                            <td><a href="https://dexscreener.com/arbitrum/0x1106db7165a8d4a8559b441ecdee14a5d5070dbc" target="_blank">MAGIC</a></td>
+                            <td>$0.100100</td>
+                            <td class="positive">2.52%</td>
+                            <td>$4,982</td>
+                            <td>0.10</td>
+                        </tr>
+                        
+                        <tr>
+                            <td><a href="https://dexscreener.com/arbitrum/0xc99be44383bc8d82357f5a1d9ae9976ee9d75bee" target="_blank">GMX</a></td>
+                            <td>$8.120000</td>
+                            <td class="positive">1.03%</td>
+                            <td>$4,242</td>
+                            <td>0.06</td>
+                        </tr>
+                        
+                    </tbody>
+                </table>
+                
+            </div>
+            
+            <div class="card">
+                <div class="chain-header">
+                    <span class="chain-name">🌐 Vaulta</span>
+                    
+                    <span class="status-badge status-accel">🚀 加速流入</span>
+                    
+                </div>
+                <div class="metrics">
+                    <span>💰 TVL: $387,446,213</span>
+                </div>
+                
+                <!-- 多時間框架分析 -->
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; margin: 1rem 0; padding: 0.75rem; background: rgba(255,255,255,0.03); border-radius: 8px;">
+                    <div style="text-align: center;">
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">24H</div>
+                        <div class="positive" style="font-weight: 600;">+0.59%</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">1週</div>
+                        <div class="positive" style="font-weight: 600;">+2.28%</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">1月</div>
+                        <div class="negative" style="font-weight: 600;">-4.01%</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">3月</div>
+                        <div class="negative" style="font-weight: 600;">-7.10%</div>
+                    </div>
+                </div>
+                
+                <!-- 趨勢判定 -->
+                
+                
+                
+                
+                <div style="padding: 0.5rem; background: rgba(234, 179, 8, 0.1); border-radius: 6px; margin-bottom: 1rem; font-size: 0.875rem;">
+                    🔄 <strong>短期反彈中</strong> - 觀察是否持續
+                </div>
+                
+                
+                <!-- 資金流向分析 -->
+                
+                
+                <div style="margin-bottom: 1rem;">
+                    <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem;">📊 資金流向分佈 (24H交易量)</div>
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                    </div>
+                    
+                </div>
+                
+                
+                <!-- 🐋 鯨魚吸籌代幣 (穩健長線) -->
+                
+                
+                
+            </div>
+            
+            <div class="card">
+                <div class="chain-header">
+                    <span class="chain-name">🌐 Ethereum</span>
+                    
+                    <span class="status-badge status-stable">🟢 穩健增長</span>
+                    
+                </div>
+                <div class="metrics">
+                    <span>💰 TVL: $72,530,186,871</span>
+                </div>
+                
+                <!-- 多時間框架分析 -->
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; margin: 1rem 0; padding: 0.75rem; background: rgba(255,255,255,0.03); border-radius: 8px;">
+                    <div style="text-align: center;">
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">24H</div>
+                        <div class="positive" style="font-weight: 600;">+0.41%</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">1週</div>
+                        <div class="positive" style="font-weight: 600;">+5.77%</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">1月</div>
+                        <div class="positive" style="font-weight: 600;">+4.15%</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">3月</div>
+                        <div class="negative" style="font-weight: 600;">-23.21%</div>
+                    </div>
+                </div>
+                
+                <!-- 趨勢判定 -->
+                
+                
+                
+                
+                <div style="padding: 0.5rem; background: rgba(34, 197, 94, 0.1); border-radius: 6px; margin-bottom: 1rem; font-size: 0.875rem;">
+                    📈 <strong>短中長期多頭</strong> - 趨勢向上
+                </div>
+                
+                
+                <!-- 資金流向分析 -->
+                
+                
+                <div style="margin-bottom: 1rem;">
+                    <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem;">📊 資金流向分佈 (24H交易量)</div>
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                        
+                        
+                        <span style="padding: 0.25rem 0.5rem; background: rgba(255,255,255,0.05); border-radius: 4px; font-size: 0.75rem;">
+                            🔷 原生幣
+                            3.2%
+                        </span>
+                        
+                        
+                        
+                        <span style="padding: 0.25rem 0.5rem; background: rgba(255,255,255,0.05); border-radius: 4px; font-size: 0.75rem;">
+                            💵 穩定幣
+                            17.7%
+                        </span>
+                        
+                        
+                        
+                        
+                        
+                        <span style="padding: 0.25rem 0.5rem; background: rgba(34, 197, 94, 0.2); border-radius: 4px; font-size: 0.75rem;">
+                            🚀 Altcoin
+                            79.1%
+                        </span>
+                        
+                        
+                    </div>
+                    
+                    <div style="margin-top: 0.5rem; font-size: 0.8rem; color: var(--green);">🎯 Alpha 機會！資金主要流向個別代幣</div>
+                    
+                </div>
+                
+                
+                <!-- 🐋 鯨魚吸籌代幣 (穩健長線) -->
+                
+                <div style="background: rgba(99, 102, 241, 0.05); border: 1px solid rgba(99, 102, 241, 0.1); border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
+                    <div style="font-size: 0.9rem; font-weight: 600; color: var(--accent); margin-bottom: 0.75rem;">🐋 鯨魚潛伏 (穩健累積)</div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>代幣</th>
+                                <th>24H漲幅</th>
+                                <th>流動性</th>
+                                <th>交易量</th>
+                                <th>累積方式</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            
+                            <tr>
+                                <td><a href="https://dexscreener.com/ethereum/0xa43fe16908251ee70ef74718545e4fe6c5ccec9f" target="_blank">PEPE</a></td>
+                                <td class="positive">+12.56%</td>
+                                <td>$41,760,335</td>
+                                <td>$8,629,168</td>
+                                <td style="font-size: 0.75rem; color: var(--text-muted);">存活995天 | 買819賣766 (52%買入)</td>
+                            </tr>
+                            
+                            <tr>
+                                <td><a href="https://dexscreener.com/ethereum/0x2c683fad51da2cd17793219cc86439c1875c353e" target="_blank">ETH+</a></td>
+                                <td class="positive">+1.15%</td>
+                                <td>$19,615,893</td>
+                                <td>$602,765</td>
+                                <td style="font-size: 0.75rem; color: var(--text-muted);">存活215天 | 買90賣81 (53%買入)</td>
+                            </tr>
+                            
+                            <tr>
+                                <td><a href="https://dexscreener.com/ethereum/0x971add32ea87f10bd192671630be3be8a11b8623" target="_blank">CVXCRV</a></td>
+                                <td class="positive">+5.22%</td>
+                                <td>$10,620,470</td>
+                                <td>$182,348</td>
+                                <td style="font-size: 0.75rem; color: var(--text-muted);">存活1033天 | 買86賣77 (53%買入)</td>
+                            </tr>
+                            
+                            <tr>
+                                <td><a href="https://dexscreener.com/ethereum/0x08bfa22bb3e024cdfeb3eca53c0cb93bf59c4147" target="_blank">EUSD</a></td>
+                                <td class="positive">+0.08%</td>
+                                <td>$5,596,170</td>
+                                <td>$105,222</td>
+                                <td style="font-size: 0.75rem; color: var(--text-muted);">存活584天 | 買88賣53 (62%買入)</td>
+                            </tr>
+                            
+                            <tr>
+                                <td><a href="https://dexscreener.com/ethereum/0xc4704f13d5e08b27b039d53873e813dd2fad99d9" target="_blank">MANYU</a></td>
+                                <td class="positive">+8.99%</td>
+                                <td>$822,710</td>
+                                <td>$264,375</td>
+                                <td style="font-size: 0.75rem; color: var(--text-muted);">存活186天 | 買525賣358 (59%買入)</td>
+                            </tr>
+                            
+                        </tbody>
+                    </table>
+                </div>
+                
+                
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>代幣</th>
+                            <th>價格</th>
+                            <th>24H</th>
+                            <th>交易量</th>
+                            <th>買壓</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        
+                        <tr>
+                            <td><a href="https://dexscreener.com/ethereum/0xf15b73e7f5edcfc0d91da289c21d9af89cf377ce" target="_blank">BEAR</a></td>
+                            <td>$0.013330</td>
+                            <td class="negative">-40.14%</td>
+                            <td>$456,774</td>
+                            <td>4.17</td>
+                        </tr>
+                        
+                        <tr>
+                            <td><a href="https://dexscreener.com/ethereum/0x05767d9ef41dc40689678ffca0608878fb3de906" target="_blank">CVX</a></td>
+                            <td>$2.053000</td>
+                            <td class="positive">19.61%</td>
+                            <td>$932,064</td>
+                            <td>2.86</td>
+                        </tr>
+                        
+                        <tr>
+                            <td><a href="https://dexscreener.com/ethereum/0xf48e2d9b367594be8fd287ab61332e8b80a6912e" target="_blank">ATLAS</a></td>
+                            <td>$0.000000</td>
+                            <td class="positive">3.17%</td>
+                            <td>$264,957</td>
+                            <td>2.21</td>
+                        </tr>
+                        
+                        <tr>
+                            <td><a href="https://dexscreener.com/ethereum/0xbc7ce7b6b5437d7d715fbb1cc7b4ec12399c5516" target="_blank">YEE</a></td>
+                            <td>$0.024700</td>
+                            <td class="positive">39.78%</td>
+                            <td>$1,709,396</td>
+                            <td>1.53</td>
+                        </tr>
+                        
+                        <tr>
+                            <td><a href="https://dexscreener.com/ethereum/0xc2eab7d33d3cb97692ecb231a5d0e4a649cb539d" target="_blank">MOG</a></td>
+                            <td>$0.000000</td>
+                            <td class="positive">20.85%</td>
+                            <td>$4,481,033</td>
+                            <td>0.43</td>
+                        </tr>
+                        
+                    </tbody>
+                </table>
+                
+            </div>
+            
+            <div class="card">
+                <div class="chain-header">
+                    <span class="chain-name">🌐 BSC</span>
+                    
+                    <span class="status-badge status-stable">🟢 穩健增長</span>
+                    
+                </div>
+                <div class="metrics">
+                    <span>💰 TVL: $6,773,235,430</span>
+                </div>
+                
+                <!-- 多時間框架分析 -->
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; margin: 1rem 0; padding: 0.75rem; background: rgba(255,255,255,0.03); border-radius: 8px;">
+                    <div style="text-align: center;">
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">24H</div>
+                        <div class="positive" style="font-weight: 600;">+0.41%</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">1週</div>
+                        <div class="positive" style="font-weight: 600;">+5.55%</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">1月</div>
+                        <div class="negative" style="font-weight: 600;">-3.85%</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">3月</div>
+                        <div class="negative" style="font-weight: 600;">-20.61%</div>
+                    </div>
+                </div>
+                
+                <!-- 趨勢判定 -->
+                
+                
+                
+                
+                <div style="padding: 0.5rem; background: rgba(234, 179, 8, 0.1); border-radius: 6px; margin-bottom: 1rem; font-size: 0.875rem;">
+                    🔄 <strong>短期反彈中</strong> - 觀察是否持續
+                </div>
+                
+                
+                <!-- 資金流向分析 -->
+                
+                
+                <div style="margin-bottom: 1rem;">
+                    <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem;">📊 資金流向分佈 (24H交易量)</div>
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <span style="padding: 0.25rem 0.5rem; background: rgba(34, 197, 94, 0.2); border-radius: 4px; font-size: 0.75rem;">
+                            🚀 Altcoin
+                            100.0%
+                        </span>
+                        
+                        
+                    </div>
+                    
+                    <div style="margin-top: 0.5rem; font-size: 0.8rem; color: var(--green);">🎯 Alpha 機會！資金主要流向個別代幣</div>
+                    
+                </div>
+                
+                
+                <!-- 🐋 鯨魚吸籌代幣 (穩健長線) -->
+                
+                <div style="background: rgba(99, 102, 241, 0.05); border: 1px solid rgba(99, 102, 241, 0.1); border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
+                    <div style="font-size: 0.9rem; font-weight: 600; color: var(--accent); margin-bottom: 0.75rem;">🐋 鯨魚潛伏 (穩健累積)</div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>代幣</th>
+                                <th>24H漲幅</th>
+                                <th>流動性</th>
+                                <th>交易量</th>
+                                <th>累積方式</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            
+                            <tr>
+                                <td><a href="https://dexscreener.com/bsc/0xaead6bd31dd66eb3a6216aaf271d0e661585b0b1" target="_blank">ASTER</a></td>
+                                <td class="positive">+0.96%</td>
+                                <td>$2,946,950</td>
+                                <td>$454,533</td>
+                                <td style="font-size: 0.75rem; color: var(--text-muted);">存活109天 | 買372賣316 (54%買入)</td>
+                            </tr>
+                            
+                            <tr>
+                                <td><a href="https://dexscreener.com/bsc/0x7d90deedb9f15c1f8fdaccc3b6bc52dc208e9c9a" target="_blank">CREPE</a></td>
+                                <td class="positive">+2.87%</td>
+                                <td>$1,041,418</td>
+                                <td>$112,059</td>
+                                <td style="font-size: 0.75rem; color: var(--text-muted);">存活226天 | 買1568賣832 (65%買入)</td>
+                            </tr>
+                            
+                            <tr>
+                                <td><a href="https://dexscreener.com/bsc/0x258b62531e0d6c8d1e2e7ff23904fd851def77ca" target="_blank">BNBHOLDER</a></td>
+                                <td class="positive">+9.47%</td>
+                                <td>$829,203</td>
+                                <td>$642,341</td>
+                                <td style="font-size: 0.75rem; color: var(--text-muted);">存活87天 | 買2269賣2153 (51%買入)</td>
+                            </tr>
+                            
+                            <tr>
+                                <td><a href="https://dexscreener.com/bsc/0xb2505b8a1ab470acfbc12dd255e7fa298a23ab67" target="_blank">BIBI</a></td>
+                                <td class="positive">+13.65%</td>
+                                <td>$399,416</td>
+                                <td>$620,053</td>
+                                <td style="font-size: 0.75rem; color: var(--text-muted);">存活130天 | 買1191賣1085 (52%買入)</td>
+                            </tr>
+                            
+                        </tbody>
+                    </table>
+                </div>
+                
+                
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>代幣</th>
+                            <th>價格</th>
+                            <th>24H</th>
+                            <th>交易量</th>
+                            <th>買壓</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        
+                        <tr>
+                            <td><a href="https://dexscreener.com/bsc/0xab6685a4f0c5f5bc6cf1928613e83fad00136ef4" target="_blank">来坐牢吧</a></td>
+                            <td>$0.000016</td>
+                            <td class="negative">-85.31%</td>
+                            <td>$4,870,859</td>
+                            <td>301.71</td>
+                        </tr>
+                        
+                        <tr>
+                            <td><a href="https://dexscreener.com/bsc/0x8e5f900d2b9a1d344c181058e8a2b4af9cd86d3e" target="_blank">CRYPTO WINTER</a></td>
+                            <td>$0.000088</td>
+                            <td class="positive">12.23%</td>
+                            <td>$2,010,720</td>
+                            <td>53.94</td>
+                        </tr>
+                        
+                        <tr>
+                            <td><a href="https://dexscreener.com/bsc/0x9cf746e45a0cbfbc39c928b66953d086b942f7fa" target="_blank">HAPPY-SCI</a></td>
+                            <td>$0.001150</td>
+                            <td class="positive">1601.00%</td>
+                            <td>$5,091,115</td>
+                            <td>38.74</td>
+                        </tr>
+                        
+                        <tr>
+                            <td><a href="https://dexscreener.com/bsc/0x8dd1610052d4d7ccbeb687417a2333a90b012e27" target="_blank">人生K线</a></td>
+                            <td>$0.000753</td>
+                            <td class="negative">-73.85%</td>
+                            <td>$4,412,910</td>
+                            <td>33.02</td>
+                        </tr>
+                        
+                        <tr>
+                            <td><a href="https://dexscreener.com/bsc/0xa651c8deb3ff9f8d56a26e72042b7a8a1f433480" target="_blank">我踏马来了</a></td>
+                            <td>$0.000326</td>
+                            <td class="positive">58.14%</td>
+                            <td>$1,652,055</td>
+                            <td>19.98</td>
+                        </tr>
+                        
+                    </tbody>
+                </table>
+                
+            </div>
+            
+            <div class="card">
+                <div class="chain-header">
+                    <span class="chain-name">🌐 Mantle</span>
+                    
+                    <span class="status-badge status-accel">🚀 加速流入</span>
+                    
+                </div>
+                <div class="metrics">
+                    <span>💰 TVL: $336,621,885</span>
+                </div>
+                
+                <!-- 多時間框架分析 -->
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; margin: 1rem 0; padding: 0.75rem; background: rgba(255,255,255,0.03); border-radius: 8px;">
+                    <div style="text-align: center;">
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">24H</div>
+                        <div class="positive" style="font-weight: 600;">+0.26%</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">1週</div>
+                        <div class="positive" style="font-weight: 600;">+0.39%</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">1月</div>
+                        <div class="negative" style="font-weight: 600;">-4.64%</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">3月</div>
+                        <div class="positive" style="font-weight: 600;">+32.17%</div>
+                    </div>
+                </div>
+                
+                <!-- 趨勢判定 -->
+                
+                
+                
+                
+                <div style="padding: 0.5rem; background: rgba(234, 179, 8, 0.1); border-radius: 6px; margin-bottom: 1rem; font-size: 0.875rem;">
+                    🔄 <strong>短期反彈中</strong> - 觀察是否持續
+                </div>
+                
+                
+                <!-- 資金流向分析 -->
+                
+                
+                <div style="margin-bottom: 1rem;">
+                    <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem;">📊 資金流向分佈 (24H交易量)</div>
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                        
+                        
+                        <span style="padding: 0.25rem 0.5rem; background: rgba(34, 197, 94, 0.2); border-radius: 4px; font-size: 0.75rem;">
+                            🔷 原生幣
+                            56.8%
+                        </span>
+                        
+                        
+                        
+                        <span style="padding: 0.25rem 0.5rem; background: rgba(255,255,255,0.05); border-radius: 4px; font-size: 0.75rem;">
+                            💵 穩定幣
+                            43.0%
+                        </span>
+                        
+                        
+                        
+                        
+                        
+                        <span style="padding: 0.25rem 0.5rem; background: rgba(255,255,255,0.05); border-radius: 4px; font-size: 0.75rem;">
+                            🚀 Altcoin
+                            0.2%
+                        </span>
+                        
+                        
+                    </div>
+                    
+                </div>
+                
+                
+                <!-- 🐋 鯨魚吸籌代幣 (穩健長線) -->
+                
+                
+                
+            </div>
+            
+            <div class="card">
+                <div class="chain-header">
+                    <span class="chain-name">🌐 Polygon</span>
+                    
+                    <span class="status-badge status-stable">⚠️ 資金流出</span>
+                    
+                </div>
+                <div class="metrics">
+                    <span>💰 TVL: $1,090,659,051</span>
+                </div>
+                
+                <!-- 多時間框架分析 -->
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; margin: 1rem 0; padding: 0.75rem; background: rgba(255,255,255,0.03); border-radius: 8px;">
+                    <div style="text-align: center;">
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">24H</div>
+                        <div class="negative" style="font-weight: 600;">-0.69%</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">1週</div>
+                        <div class="negative" style="font-weight: 600;">-6.58%</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">1月</div>
+                        <div class="negative" style="font-weight: 600;">-11.93%</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">3月</div>
+                        <div class="negative" style="font-weight: 600;">-7.07%</div>
+                    </div>
+                </div>
+                
+                <!-- 趨勢判定 -->
+                
+                
+                
+                
+                <div style="padding: 0.5rem; background: rgba(239, 68, 68, 0.1); border-radius: 6px; margin-bottom: 1rem; font-size: 0.875rem;">
+                    ⚠️ <strong>持續下跌</strong> - 需謹慎
+                </div>
+                
+                
+                <!-- 資金流向分析 -->
+                
+                
+                <div style="margin-bottom: 1rem;">
+                    <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem;">📊 資金流向分佈 (24H交易量)</div>
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <span style="padding: 0.25rem 0.5rem; background: rgba(34, 197, 94, 0.2); border-radius: 4px; font-size: 0.75rem;">
+                            🚀 Altcoin
+                            100.0%
+                        </span>
+                        
+                        
+                    </div>
+                    
+                    <div style="margin-top: 0.5rem; font-size: 0.8rem; color: var(--green);">🎯 Alpha 機會！資金主要流向個別代幣</div>
+                    
+                </div>
+                
+                
+                <!-- 🐋 鯨魚吸籌代幣 (穩健長線) -->
+                
+                <div style="background: rgba(99, 102, 241, 0.05); border: 1px solid rgba(99, 102, 241, 0.1); border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
+                    <div style="font-size: 0.9rem; font-weight: 600; color: var(--accent); margin-bottom: 0.75rem;">🐋 鯨魚潛伏 (穩健累積)</div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>代幣</th>
+                                <th>24H漲幅</th>
+                                <th>流動性</th>
+                                <th>交易量</th>
+                                <th>累積方式</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            
+                            <tr>
+                                <td><a href="https://dexscreener.com/polygon/0x304e57c752e854e9a233ae82fcc42f7568b81180" target="_blank">IXT</a></td>
+                                <td class="positive">+12.81%</td>
+                                <td>$106,366</td>
+                                <td>$23,902</td>
+                                <td style="font-size: 0.75rem; color: var(--text-muted);">存活1501天 | 買116賣93 (56%買入)</td>
+                            </tr>
+                            
+                        </tbody>
+                    </table>
+                </div>
+                
+                
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>代幣</th>
+                            <th>價格</th>
+                            <th>24H</th>
+                            <th>交易量</th>
+                            <th>買壓</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        
+                        <tr>
+                            <td><a href="https://dexscreener.com/polygon/0x6699f00b75741fc7ca4d20e190f763086f77cb41" target="_blank">SUT</a></td>
+                            <td>$1.120000</td>
+                            <td class="positive">26.10%</td>
+                            <td>$290,927</td>
+                            <td>0.44</td>
+                        </tr>
+                        
+                        <tr>
+                            <td><a href="https://dexscreener.com/polygon/0x44720a6f572649526ac9073cae9200755cc78e0a" target="_blank">AAVE</a></td>
+                            <td>$165.190000</td>
+                            <td class="positive">3.20%</td>
+                            <td>$41,020</td>
+                            <td>0.38</td>
+                        </tr>
+                        
+                        <tr>
+                            <td><a href="https://dexscreener.com/polygon/0xde2d1fd2e8238aba80a5b80c7262e4833d92f624" target="_blank">QUICK</a></td>
+                            <td>$0.011940</td>
+                            <td class="positive">0.93%</td>
+                            <td>$61,531</td>
+                            <td>0.33</td>
+                        </tr>
+                        
+                        <tr>
+                            <td><a href="https://dexscreener.com/polygon/0x304e57c752e854e9a233ae82fcc42f7568b81180" target="_blank">IXT</a></td>
+                            <td>$0.277300</td>
+                            <td class="positive">12.81%</td>
+                            <td>$23,902</td>
+                            <td>0.22</td>
+                        </tr>
+                        
+                        <tr>
+                            <td><a href="https://dexscreener.com/polygon/0x6d1f31e55816141c3359c868ef9503378afc590f" target="_blank">KARMA</a></td>
+                            <td>$0.018850</td>
+                            <td class="positive">3.34%</td>
+                            <td>$22,474</td>
+                            <td>0.20</td>
+                        </tr>
+                        
+                    </tbody>
+                </table>
+                
+            </div>
+            
+        </div>
+
+        
+
+        
+        <div class="section">
+            <h2 class="section-title">🌳 長線價值發現 (90天流動性成長 > 20%)</h2>
+            <div class="new-token-grid">
+                
+                <div class="new-token-card" style="border-color: rgba(34, 197, 94, 0.3); background: rgba(34, 197, 94, 0.05);">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <strong>来坐牢吧</strong>
+                        <span class="status-badge" style="background:rgba(34, 197, 94, 0.2); color:#4ade80;">+586.2%</span>
+                    </div>
+                    <div style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.75rem;">
+                        <div>鏈: bsc</div>
+                        <div>流動性: $110,783</div>
+                        <div style="font-size: 0.75rem; margin-top: 0.25rem;">追蹤: 2026-01-04 起</div>
+                        <div style="font-size: 0.75rem;">出現: 7 次</div>
+                    </div>
+                </div>
+                
+                <div class="new-token-card" style="border-color: rgba(34, 197, 94, 0.3); background: rgba(34, 197, 94, 0.05);">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <strong>HAPPY-SCI</strong>
+                        <span class="status-badge" style="background:rgba(34, 197, 94, 0.2); color:#4ade80;">+66.5%</span>
+                    </div>
+                    <div style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.75rem;">
+                        <div>鏈: bsc</div>
+                        <div>流動性: $164,440</div>
+                        <div style="font-size: 0.75rem; margin-top: 0.25rem;">追蹤: 2026-01-04 起</div>
+                        <div style="font-size: 0.75rem;">出現: 7 次</div>
+                    </div>
+                </div>
+                
+                <div class="new-token-card" style="border-color: rgba(34, 197, 94, 0.3); background: rgba(34, 197, 94, 0.05);">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <strong>FAFO</strong>
+                        <span class="status-badge" style="background:rgba(34, 197, 94, 0.2); color:#4ade80;">+47.2%</span>
+                    </div>
+                    <div style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.75rem;">
+                        <div>鏈: solana</div>
+                        <div>流動性: $185,034</div>
+                        <div style="font-size: 0.75rem; margin-top: 0.25rem;">追蹤: 2026-01-04 起</div>
+                        <div style="font-size: 0.75rem;">出現: 21 次</div>
+                    </div>
+                </div>
+                
+                <div class="new-token-card" style="border-color: rgba(34, 197, 94, 0.3); background: rgba(34, 197, 94, 0.05);">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <strong>人生K线</strong>
+                        <span class="status-badge" style="background:rgba(34, 197, 94, 0.2); color:#4ade80;">+39.0%</span>
+                    </div>
+                    <div style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.75rem;">
+                        <div>鏈: bsc</div>
+                        <div>流動性: $179,713</div>
+                        <div style="font-size: 0.75rem; margin-top: 0.25rem;">追蹤: 2026-01-04 起</div>
+                        <div style="font-size: 0.75rem;">出現: 21 次</div>
+                    </div>
+                </div>
+                
+                <div class="new-token-card" style="border-color: rgba(34, 197, 94, 0.3); background: rgba(34, 197, 94, 0.05);">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <strong>SAVAX</strong>
+                        <span class="status-badge" style="background:rgba(34, 197, 94, 0.2); color:#4ade80;">+30.8%</span>
+                    </div>
+                    <div style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.75rem;">
+                        <div>鏈: avalanche</div>
+                        <div>流動性: $782,893</div>
+                        <div style="font-size: 0.75rem; margin-top: 0.25rem;">追蹤: 2026-01-04 起</div>
+                        <div style="font-size: 0.75rem;">出現: 21 次</div>
+                    </div>
+                </div>
+                
+                <div class="new-token-card" style="border-color: rgba(34, 197, 94, 0.3); background: rgba(34, 197, 94, 0.05);">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <strong>CRYPTOVC</strong>
+                        <span class="status-badge" style="background:rgba(34, 197, 94, 0.2); color:#4ade80;">+24.6%</span>
+                    </div>
+                    <div style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.75rem;">
+                        <div>鏈: base</div>
+                        <div>流動性: $126,865</div>
+                        <div style="font-size: 0.75rem; margin-top: 0.25rem;">追蹤: 2026-01-04 起</div>
+                        <div style="font-size: 0.75rem;">出現: 10 次</div>
+                    </div>
+                </div>
+                
+                <div class="new-token-card" style="border-color: rgba(34, 197, 94, 0.3); background: rgba(34, 197, 94, 0.05);">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <strong>RIVER</strong>
+                        <span class="status-badge" style="background:rgba(34, 197, 94, 0.2); color:#4ade80;">+22.4%</span>
+                    </div>
+                    <div style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.75rem;">
+                        <div>鏈: bsc</div>
+                        <div>流動性: $181,424</div>
+                        <div style="font-size: 0.75rem; margin-top: 0.25rem;">追蹤: 2026-01-04 起</div>
+                        <div style="font-size: 0.75rem;">出現: 17 次</div>
+                    </div>
+                </div>
+                
+                <div class="new-token-card" style="border-color: rgba(34, 197, 94, 0.3); background: rgba(34, 197, 94, 0.05);">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <strong>ZORA</strong>
+                        <span class="status-badge" style="background:rgba(34, 197, 94, 0.2); color:#4ade80;">+21.2%</span>
+                    </div>
+                    <div style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.75rem;">
+                        <div>鏈: base</div>
+                        <div>流動性: $606,686</div>
+                        <div style="font-size: 0.75rem; margin-top: 0.25rem;">追蹤: 2026-01-04 起</div>
+                        <div style="font-size: 0.75rem;">出現: 21 次</div>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+        
+    </div>
+</body>
+</html>
+    

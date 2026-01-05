@@ -1,0 +1,63 @@
+name: Chain Money Flow Monitor
+
+on:
+  schedule:
+    # 每 30 分鐘執行一次 (注意: GitHub Action 有時會有延遲)
+    - cron: '*/30 * * * *'
+  # 允許手動觸發
+  workflow_dispatch:
+  # 允許推送時觸發 (方便測試)
+  push:
+    branches:
+      - main
+
+
+
+jobs:
+  run-monitor:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # 需要寫入權限來提交資料庫和報告
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run Monitor Script
+        env:
+          # 將 Discord Webhook 設定在 GitHub Secrets 中，變數名稱為 DISCORD_WEBHOOK
+          # 如果沒有設定，請修改 full_chain_monitor.py 中的預設值
+          DISCORD_WEBHOOK_URL_ENV: ${{ secrets.DISCORD_WEBHOOK }}
+        run: |
+          # 執行腳本 (請確保腳本內的 SCHEDULE_INTERVAL = 0，設為單次執行模式)
+          # 無論是透過 sed 修改還是直接執行
+          sed -i 's/SCHEDULE_INTERVAL = 1800/SCHEDULE_INTERVAL = 0/' full_chain_monitor.py
+          python full_chain_monitor.py
+
+      - name: Commit and Push Report & DB
+        run: |
+          # 設定 git 用戶
+          git config --global user.name 'GitHub Action Bot'
+          git config --global user.email 'action@github.com'
+          
+          # 添加生成的報告和資料庫變更
+          git add reports/
+          git add chain_data.db
+          
+          # 檢查是否有變更此提交
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "📈 Auto-update: Reports and Database [skip ci]"
+            git push
+          fi
