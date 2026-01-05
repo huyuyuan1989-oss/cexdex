@@ -209,6 +209,16 @@ class CapitalFlowSummary:
     # 🔔 關鍵閾值狀態 (Threshold Status)
     threshold_breaches: List[str] = field(default_factory=list)  # 突破歷史閾值的項目
     
+    # 📊 期貨資金費率 (Funding Rate)
+    btc_funding_rate: float = 0.0  # BTC 資金費率 (%)
+    eth_funding_rate: float = 0.0  # ETH 資金費率 (%)
+    funding_interpretation: str = ""  # 資金費率解讀
+    
+    # 💵 穩定幣流通量 (Stablecoin Supply)
+    stablecoin_total_supply: float = 0.0  # 穩定幣總流通量
+    stablecoin_7d_change: float = 0.0  # 7日變化 (%)
+    stablecoin_interpretation: str = ""  # 穩定幣解讀
+    
     # 公鏈明細
     chain_flows: List[ChainFlowData] = field(default_factory=list)
 
@@ -1185,13 +1195,17 @@ def generate_command_center_data(
             chain_flow.stablecoin_pct = breakdown.get('stablecoin', {}).get('volume_pct', 0)
             chain_flow.altcoin_pct = breakdown.get('altcoin', {}).get('volume_pct', 0)
             chain_flow.btc_pct = breakdown.get('btc', {}).get('volume_pct', 0)
-            
-            # 計算淨流向
-            total_net = sum(
-                breakdown.get(cat, {}).get('net_flow_count', 0)
-                for cat in ['native', 'stablecoin', 'altcoin', 'btc']
-            )
-            chain_flow.net_flow_direction = "流入 📈" if total_net > 0 else "流出 📉"
+        
+        # 根據 TVL 24H 變化判定流入/流出 (修正邏輯)
+        # 計算流入/流出金額
+        chain_flow.net_flow_amount = chain_flow.current_tvl * (chain_flow.tvl_24h_change / 100)
+        
+        if chain_flow.tvl_24h_change > 0.5:
+            chain_flow.net_flow_direction = "流入 📈"
+        elif chain_flow.tvl_24h_change < -0.5:
+            chain_flow.net_flow_direction = "流出 📉"
+        else:
+            chain_flow.net_flow_direction = "持平 ➖"
         
         summary.chain_flows.append(chain_flow)
     
@@ -1273,6 +1287,19 @@ def generate_cex_dex_html_section(cex_dex_summary: CEXDEXSummary, cex_summary: O
     cex_change_class = "positive" if cex_dex_summary.cex_24h_change > 0 else "negative"
     dex_change_class = "positive" if cex_dex_summary.dex_24h_change > 0 else "negative"
     
+    # 計算 24H 流入/流出金額
+    cex_24h_amount = cex_dex_summary.cex_total_tvl * (cex_dex_summary.cex_24h_change / 100)
+    dex_24h_amount = cex_dex_summary.dex_total_tvl * (cex_dex_summary.dex_24h_change / 100)
+    
+    # 格式化金額
+    def fmt_amount(amt):
+        if abs(amt) >= 1e9:
+            return f"${amt/1e9:+.2f}B"
+        elif abs(amt) >= 1e6:
+            return f"${amt/1e6:+.1f}M"
+        else:
+            return f"${amt/1e3:+.0f}K"
+    
     html = f'''
     <div class="card" style="background: linear-gradient(135deg, rgba(251, 191, 36, 0.05), rgba(249, 115, 22, 0.05)); border: 1px solid rgba(251, 191, 36, 0.2);">
         <div class="card-title">🏦 CEX + DEX 資金整合分析</div>
@@ -1284,7 +1311,7 @@ def generate_cex_dex_html_section(cex_dex_summary: CEXDEXSummary, cex_summary: O
                 <div style="font-size: 1.75rem; font-weight: 700; color: #fbbf24;">${cex_dex_summary.cex_total_tvl/1e9:.1f}B</div>
                 <div style="font-size: 0.85rem; color: var(--text-muted);">佔比 {cex_dex_summary.cex_share_pct:.1f}%</div>
                 <div class="{cex_change_class}" style="font-size: 0.85rem; margin-top: 0.25rem;">
-                    24H: {cex_dex_summary.cex_24h_change:+.2f}%
+                    24H: {cex_dex_summary.cex_24h_change:+.2f}% ({fmt_amount(cex_24h_amount)})
                 </div>
             </div>
             <div style="text-align: center; padding: 1rem; background: rgba(99, 102, 241, 0.1); border-radius: 10px;">
@@ -1292,7 +1319,7 @@ def generate_cex_dex_html_section(cex_dex_summary: CEXDEXSummary, cex_summary: O
                 <div style="font-size: 1.75rem; font-weight: 700; color: var(--accent);">${cex_dex_summary.dex_total_tvl/1e9:.1f}B</div>
                 <div style="font-size: 0.85rem; color: var(--text-muted);">佔比 {cex_dex_summary.dex_share_pct:.1f}%</div>
                 <div class="{dex_change_class}" style="font-size: 0.85rem; margin-top: 0.25rem;">
-                    24H: {cex_dex_summary.dex_24h_change:+.2f}%
+                    24H: {cex_dex_summary.dex_24h_change:+.2f}% ({fmt_amount(dex_24h_amount)})
                 </div>
             </div>
         </div>
@@ -1357,6 +1384,73 @@ def generate_cex_dex_html_section(cex_dex_summary: CEXDEXSummary, cex_summary: O
     return html
 
 
+def generate_market_indicators_html(summary: CapitalFlowSummary) -> str:
+    """生成期貨資金費率和穩定幣流通量的 HTML 區塊"""
+    
+    # 如果沒有數據，返回空字串
+    if summary.btc_funding_rate == 0 and summary.stablecoin_total_supply == 0:
+        return ""
+    
+    # 期貨資金費率顏色
+    def get_funding_color(rate):
+        if rate > 0.03:
+            return "#ef4444"  # 紅 - 過熱
+        elif rate > 0.01:
+            return "#f97316"  # 橙
+        elif rate > -0.01:
+            return "#22c55e"  # 綠 - 正常
+        else:
+            return "#3b82f6"  # 藍 - 空頭
+    
+    btc_color = get_funding_color(summary.btc_funding_rate)
+    eth_color = get_funding_color(summary.eth_funding_rate)
+    
+    # 穩定幣變化顏色
+    stable_color = "#22c55e" if summary.stablecoin_7d_change > 0 else "#ef4444"
+    
+    html = f'''
+    <div class="card" style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(147, 51, 234, 0.05)); border: 1px solid rgba(59, 130, 246, 0.2);">
+        <div class="card-title">📊 市場輔助指標</div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <!-- 期貨資金費率 -->
+            <div style="padding: 1rem; background: rgba(255,255,255,0.02); border-radius: 10px;">
+                <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.75rem;">⚡ 期貨資金費率 (Funding Rate)</div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+                    <div style="text-align: center; padding: 0.5rem; background: rgba(251, 191, 36, 0.1); border-radius: 8px;">
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">🟡 BTC</div>
+                        <div style="font-size: 1.25rem; font-weight: 700; color: {btc_color};">{summary.btc_funding_rate:.4f}%</div>
+                    </div>
+                    <div style="text-align: center; padding: 0.5rem; background: rgba(99, 102, 241, 0.1); border-radius: 8px;">
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">🔷 ETH</div>
+                        <div style="font-size: 1.25rem; font-weight: 700; color: {eth_color};">{summary.eth_funding_rate:.4f}%</div>
+                    </div>
+                </div>
+                <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.5rem; text-align: center;">
+                    {summary.funding_interpretation}
+                </div>
+            </div>
+            
+            <!-- 穩定幣流通量 -->
+            <div style="padding: 1rem; background: rgba(255,255,255,0.02); border-radius: 10px;">
+                <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.75rem;">💵 穩定幣流通量</div>
+                <div style="text-align: center;">
+                    <div style="font-size: 1.5rem; font-weight: 700; color: #22c55e;">${summary.stablecoin_total_supply/1e9:.1f}B</div>
+                    <div style="font-size: 0.85rem; color: {stable_color}; margin-top: 0.25rem;">
+                        7D: {summary.stablecoin_7d_change:+.2f}%
+                    </div>
+                </div>
+                <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.5rem; text-align: center;">
+                    {summary.stablecoin_interpretation}
+                </div>
+            </div>
+        </div>
+    </div>
+    '''
+    
+    return html
+
+
 def generate_command_center_html(
     summary: CapitalFlowSummary,
     period_comparison: Dict[str, PeriodComparison],
@@ -1382,13 +1476,25 @@ def generate_command_center_html(
     chain_rows = ""
     for chain in sorted(summary.chain_flows, key=lambda x: x.tvl_24h_change, reverse=True):
         change_class = "positive" if chain.tvl_24h_change > 0 else "negative"
+        c7d_class = "positive" if chain.tvl_7d_change > 0 else "negative"
+        c30d_class = "positive" if chain.tvl_30d_change > 0 else "negative"
+        
+        # 格式化金額
+        if abs(chain.net_flow_amount) >= 1e9:
+            amount_str = f"${chain.net_flow_amount/1e9:+.2f}B"
+        elif abs(chain.net_flow_amount) >= 1e6:
+            amount_str = f"${chain.net_flow_amount/1e6:+.1f}M"
+        else:
+            amount_str = f"${chain.net_flow_amount/1e3:+.0f}K"
+        
         chain_rows += f"""
         <tr>
             <td><strong>{chain.chain_name}</strong></td>
             <td>${chain.current_tvl/1e9:.2f}B</td>
             <td class="{change_class}">{chain.tvl_24h_change:+.2f}%</td>
-            <td class="{'positive' if chain.tvl_7d_change > 0 else 'negative'}">{chain.tvl_7d_change:+.2f}%</td>
-            <td class="{'positive' if chain.tvl_30d_change > 0 else 'negative'}">{chain.tvl_30d_change:+.2f}%</td>
+            <td class="{change_class}">{amount_str}</td>
+            <td class="{c7d_class}">{chain.tvl_7d_change:+.2f}%</td>
+            <td class="{c30d_class}">{chain.tvl_30d_change:+.2f}%</td>
             <td>{chain.net_flow_direction}</td>
         </tr>
         """
@@ -1688,6 +1794,9 @@ def generate_command_center_html(
         <!-- CEX + DEX 整合數據 -->
         {generate_cex_dex_html_section(cex_dex_summary, cex_summary) if cex_dex_summary else ""}
         
+        <!-- 市場輔助指標 (期貨資金費率 + 穩定幣流通量) -->
+        {generate_market_indicators_html(summary)}
+        
         <!-- 公鏈資金週期比較 -->
         <div class="card">
             <div class="card-title">⛓️ 公鏈資金週期比較</div>
@@ -1696,7 +1805,8 @@ def generate_command_center_html(
                     <tr>
                         <th>公鏈</th>
                         <th>TVL</th>
-                        <th>24H</th>
+                        <th>24H 變化</th>
+                        <th>24H 金額</th>
                         <th>7D</th>
                         <th>30D</th>
                         <th>流向</th>
@@ -1757,7 +1867,8 @@ async def run_command_center_analysis(
     chains: list,
     all_tokens: dict,
     all_flow_analysis: dict,
-    cex_data: list
+    cex_data: list,
+    market_indicators: dict = None
 ) -> Tuple[CapitalFlowSummary, str]:
     """
     執行資金流向主控台分析
@@ -1797,6 +1908,26 @@ async def run_command_center_analysis(
     
     # ===== 🎯 填充戰鬥機駕駛艙儀表數據 =====
     summary = enrich_cockpit_data(summary, period_comparison, cex_dex_summary)
+    
+    # ===== 📊 填充期貨資金費率和穩定幣數據 =====
+    if market_indicators:
+        funding = market_indicators.get('funding', {})
+        stables = market_indicators.get('stablecoins', {})
+        
+        # 期貨資金費率
+        summary.btc_funding_rate = funding.get('btc', {}).get('rate', 0)
+        summary.eth_funding_rate = funding.get('eth', {}).get('rate', 0)
+        
+        # 綜合解讀
+        btc_interp = funding.get('btc', {}).get('interpretation', '')
+        eth_interp = funding.get('eth', {}).get('interpretation', '')
+        summary.funding_interpretation = btc_interp if btc_interp else eth_interp
+        
+        # 穩定幣流通量
+        summary.stablecoin_total_supply = stables.get('total_supply', 0)
+        summary.stablecoin_7d_change = stables.get('change_7d', 0)
+        summary.stablecoin_interpretation = stables.get('interpretation', '')
+    
     logger.info(f"✈️ 戰鬥儀表: 情緒={summary.fear_greed_score}, 動量={summary.momentum_score}, 緊迫={summary.urgency_score}")
     
     # 儲存快照

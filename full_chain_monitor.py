@@ -1490,6 +1490,156 @@ async def get_cex_data_async(session):
     cex_list.sort(key=lambda x: x['tvl'], reverse=True)
     return cex_list[:10]  # 返回前 10 大
 
+
+async def get_funding_rates_async(session):
+    """
+    🔧 獲取期貨資金費率 (Funding Rate)
+    來源: Coinglass 公開 API (免費)
+    
+    資金費率解讀:
+    - 正值 > 0.01%: 多頭擁擠，市場過熱
+    - 負值 < -0.01%: 空頭擁擠，可能反彈
+    - 接近 0: 市場平衡
+    """
+    logger.info("📊 正在獲取期貨資金費率...")
+    
+    # 備用方案：使用多個交易所的公開 API
+    funding_data = {
+        'btc': {'rate': 0, 'oi_change': 0, 'interpretation': ''},
+        'eth': {'rate': 0, 'oi_change': 0, 'interpretation': ''},
+    }
+    
+    try:
+        # 嘗試 Binance 公開 API (無需 API Key)
+        binance_url = "https://fapi.binance.com/fapi/v1/premiumIndex"
+        data = await fetch_with_retry(session, binance_url)
+        
+        if data:
+            for item in data:
+                symbol = item.get('symbol', '')
+                rate = float(item.get('lastFundingRate', 0)) * 100  # 轉換為百分比
+                
+                if symbol == 'BTCUSDT':
+                    funding_data['btc']['rate'] = rate
+                elif symbol == 'ETHUSDT':
+                    funding_data['eth']['rate'] = rate
+            
+            # 解讀資金費率
+            for coin in ['btc', 'eth']:
+                rate = funding_data[coin]['rate']
+                if rate > 0.05:
+                    funding_data[coin]['interpretation'] = "🔴 極度過熱 - 多頭擁擠，謹慎追高"
+                elif rate > 0.02:
+                    funding_data[coin]['interpretation'] = "🟠 偏多頭 - 資金成本升高"
+                elif rate > 0.005:
+                    funding_data[coin]['interpretation'] = "🟡 略偏多 - 正常範圍"
+                elif rate > -0.005:
+                    funding_data[coin]['interpretation'] = "🟢 中性 - 市場平衡"
+                elif rate > -0.02:
+                    funding_data[coin]['interpretation'] = "🟡 略偏空 - 正常範圍"
+                else:
+                    funding_data[coin]['interpretation'] = "🟢 空頭擁擠 - 可能反彈機會"
+            
+            logger.info(f"✅ 資金費率獲取成功: BTC {funding_data['btc']['rate']:.4f}%, ETH {funding_data['eth']['rate']:.4f}%")
+        else:
+            logger.warning("⚠️ 無法獲取 Binance 資金費率")
+            
+    except Exception as e:
+        logger.warning(f"⚠️ 資金費率獲取失敗: {e}")
+    
+    return funding_data
+
+
+async def get_stablecoin_supply_async(session):
+    """
+    💵 獲取穩定幣流通量數據
+    來源: DefiLlama Stablecoins API
+    
+    穩定幣流通量解讀:
+    - 增加: 新資金入場，利好
+    - 減少: 資金流出市場，利空
+    """
+    logger.info("💵 正在獲取穩定幣流通量...")
+    
+    stablecoin_data = {
+        'total_supply': 0,
+        'total_supply_7d': 0,
+        'change_24h': 0,
+        'change_7d': 0,
+        'top_stables': [],
+        'interpretation': ''
+    }
+    
+    try:
+        # DefiLlama Stablecoins API
+        url = "https://stablecoins.llama.fi/stablecoins?includePrices=true"
+        data = await fetch_with_retry(session, url)
+        
+        if data and 'peggedAssets' in data:
+            total_supply = 0
+            top_stables = []
+            
+            for stable in data['peggedAssets'][:10]:  # 前 10 大穩定幣
+                name = stable.get('name', '')
+                symbol = stable.get('symbol', '')
+                circulating = stable.get('circulating', {})
+                
+                # 獲取當前流通量
+                peg_usd = circulating.get('peggedUSD', 0) or 0
+                
+                if peg_usd > 1e9:  # 只追蹤 > $1B 的穩定幣
+                    top_stables.append({
+                        'name': name,
+                        'symbol': symbol,
+                        'supply': peg_usd,
+                        'change_7d': stable.get('circulatingPrevWeek', {}).get('peggedUSD', 0) or 0
+                    })
+                    total_supply += peg_usd
+            
+            stablecoin_data['total_supply'] = total_supply
+            stablecoin_data['top_stables'] = sorted(top_stables, key=lambda x: x['supply'], reverse=True)[:5]
+            
+            # 計算 7D 變化
+            total_prev_week = sum(s.get('change_7d', 0) for s in top_stables)
+            if total_prev_week > 0:
+                stablecoin_data['change_7d'] = ((total_supply - total_prev_week) / total_prev_week) * 100
+            
+            # 解讀
+            if stablecoin_data['change_7d'] > 2:
+                stablecoin_data['interpretation'] = "🟢 穩定幣快速增發 → 大量新資金入場"
+            elif stablecoin_data['change_7d'] > 0.5:
+                stablecoin_data['interpretation'] = "🟢 穩定幣溫和增長 → 資金持續流入"
+            elif stablecoin_data['change_7d'] > -0.5:
+                stablecoin_data['interpretation'] = "🟡 穩定幣流通量穩定 → 市場平衡"
+            elif stablecoin_data['change_7d'] > -2:
+                stablecoin_data['interpretation'] = "🟠 穩定幣小幅減少 → 部分資金離場"
+            else:
+                stablecoin_data['interpretation'] = "🔴 穩定幣大幅減少 → 資金加速流出"
+            
+            logger.info(f"✅ 穩定幣數據獲取成功: 總量 ${total_supply/1e9:.1f}B")
+        else:
+            logger.warning("⚠️ 無法獲取穩定幣數據")
+            
+    except Exception as e:
+        logger.warning(f"⚠️ 穩定幣數據獲取失敗: {e}")
+    
+    return stablecoin_data
+
+
+async def get_market_indicators_async(session):
+    """
+    📈 獲取市場輔助指標
+    整合：期貨資金費率 + 穩定幣流通量
+    """
+    funding_data = await get_funding_rates_async(session)
+    stablecoin_data = await get_stablecoin_supply_async(session)
+    
+    return {
+        'funding': funding_data,
+        'stablecoins': stablecoin_data
+    }
+
+
 async def fetch_dexscreener_sentiment(session):
     # Fallback: DEX Screener (Uniswap/Raydium)
     pairs = {
@@ -3328,6 +3478,48 @@ def print_terminal_report(chains, all_tokens, all_flow_analysis, new_tokens, cro
     print(f"   ├─ 系統準確率: {stats['accuracy']:.1f}%")
     print(f"   └─ 執行耗時: {stats['execution_time']:.2f} 秒\n")
     
+    # ==== 新增：期貨資金費率 + 穩定幣流通量 ====
+    market_indicators = stats.get('market_indicators', {})
+    if market_indicators:
+        funding = market_indicators.get('funding', {})
+        stables = market_indicators.get('stablecoins', {})
+        
+        print(f"{Fore.YELLOW}📈 市場輔助指標:{Style.RESET_ALL}")
+        
+        # 期貨資金費率
+        if funding.get('btc', {}).get('rate', 0) != 0 or funding.get('eth', {}).get('rate', 0) != 0:
+            btc_rate = funding.get('btc', {}).get('rate', 0)
+            eth_rate = funding.get('eth', {}).get('rate', 0)
+            btc_interp = funding.get('btc', {}).get('interpretation', '')
+            eth_interp = funding.get('eth', {}).get('interpretation', '')
+            
+            btc_color = Fore.GREEN if btc_rate < 0.02 else (Fore.RED if btc_rate > 0.03 else Fore.YELLOW)
+            eth_color = Fore.GREEN if eth_rate < 0.02 else (Fore.RED if eth_rate > 0.03 else Fore.YELLOW)
+            
+            print(f"   📊 期貨資金費率 (Funding Rate):")
+            print(f"      BTC: {btc_color}{btc_rate:.4f}%{Style.RESET_ALL} - {btc_interp}")
+            print(f"      ETH: {eth_color}{eth_rate:.4f}%{Style.RESET_ALL} - {eth_interp}")
+        
+        # 穩定幣流通量
+        if stables.get('total_supply', 0) > 0:
+            total_supply = stables.get('total_supply', 0)
+            change_7d = stables.get('change_7d', 0)
+            interp = stables.get('interpretation', '')
+            
+            supply_color = Fore.GREEN if change_7d > 0 else Fore.RED
+            
+            print(f"   💵 穩定幣流通量:")
+            print(f"      總量: ${total_supply/1e9:.1f}B ({supply_color}7D: {change_7d:+.2f}%{Style.RESET_ALL})")
+            print(f"      {interp}")
+            
+            # 顯示前 3 大穩定幣
+            top_stables = stables.get('top_stables', [])[:3]
+            if top_stables:
+                stable_str = " | ".join([f"{s['symbol']} ${s['supply']/1e9:.1f}B" for s in top_stables])
+                print(f"      Top 3: {stable_str}")
+        
+        print()
+    
     # ==== 🔄 新增：跨鏈原生幣強弱對比 (國際匯率) ====
     native_strength = analyze_cross_chain_native_strength(all_flow_analysis, chains)
     if native_strength:
@@ -3705,7 +3897,9 @@ async def run_analysis():
         
         # 4. 獲取 CEX 數據 (新增) & 宏觀市場情緒
         cex_data = await get_cex_data_async(session)
-        market_sentiment = None
+        
+        # 4.5 獲取市場輔助指標 (期貨資金費率 + 穩定幣流通量)
+        market_indicators = await get_market_indicators_async(session)
         
         # 5. 鏈間資金流動分析
         cross_flows = await detect_cross_chain_flows(active_chains, outflow_chains)
@@ -3724,7 +3918,8 @@ async def run_analysis():
             'anomalies': 0,  # TODO: 實作異常偵測計數
             'accuracy': accuracy_data['accuracy'],
             'execution_time': execution_time,
-            'next_scan': next_scan
+            'next_scan': next_scan,
+            'market_indicators': market_indicators  # 期貨資金費率 + 穩定幣流通量
         }
         
         # 6. 終端機報告
@@ -3748,7 +3943,7 @@ async def run_analysis():
             )
             
             command_center_summary, command_center_html = await run_command_center_analysis(
-                active_chains, all_tokens, all_flow_analysis, cex_data
+                active_chains, all_tokens, all_flow_analysis, cex_data, market_indicators
             )
             
             # 生成 CEX+DEX 整合數據
