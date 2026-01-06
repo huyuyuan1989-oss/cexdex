@@ -231,6 +231,11 @@ class CapitalFlowSummary:
     stablecoin_7d_change: float = 0.0  # 7日變化 (%)
     stablecoin_interpretation: str = ""  # 穩定幣解讀
     
+    # 🎯 行動建議儀表 (Action Dashboard)
+    position_size_recommendation: str = "➖ 維持現狀或 30-50%"  # 倉位大小建議
+    key_levels: str = ""  # 重點關注公鏈/資產
+    risk_warning: str = ""  # 風險提示
+    
     # 公鏈明細
     chain_flows: List[ChainFlowData] = field(default_factory=list)
 
@@ -970,6 +975,29 @@ def enrich_cockpit_data(
     # 5. 時間緊迫性
     summary.urgency_score, summary.opportunity_window = calculate_urgency_score(summary, summary.alerts)
     
+    # 6. 行動儀表板補充
+    # 倉位建議
+    if summary.trading_signal in [TradingSignal.STRONG_BUY, TradingSignal.BUY]:
+        summary.position_size_recommendation = "📈 加倉 60-80%"
+    elif summary.trading_signal in [TradingSignal.SELL, TradingSignal.STRONG_SELL]:
+        summary.position_size_recommendation = "📉 減倉至 20-30%"
+    else:
+        summary.position_size_recommendation = "➖ 維持現狀或 30-50%"
+    
+    # 重點關注
+    if summary.target_chains:
+        summary.key_levels = ", ".join(summary.target_chains[:3])
+    else:
+        summary.key_levels = summary.dominant_inflow_chain if summary.dominant_inflow_chain else "市場觀察中"
+    
+    # 風險提示
+    if summary.alert_level >= 2:
+        summary.risk_warning = "⚠️ " + (summary.alerts[0] if summary.alerts else "注意市場波動")
+    elif summary.total_tvl_24h_change < -3:
+        summary.risk_warning = "⚠️ 資金流出加速，注意風險"
+    else:
+        summary.risk_warning = "✅ 風險可控"
+    
     return summary
 
 
@@ -1478,7 +1506,7 @@ def generate_market_indicators_html(summary: CapitalFlowSummary) -> str:
 def generate_command_center_html(
     summary: CapitalFlowSummary, 
     period_comparison: PeriodComparison,
-    conversions: List[CapitalConversion],
+    conversions: List[dict],
     whale_targets: dict,
     cex_dex_summary: Optional[CEXDEXSummary] = None,
     cex_summary: Optional[dict] = None,
@@ -1509,6 +1537,46 @@ def generate_command_center_html(
             return f"${amt/1e3:+.0f}K"
         else:
             return f"${amt:+.0f}"
+    
+    # 生成大資金動向表格行
+    def generate_whale_rows(targets):
+        rows = ""
+        if not targets or not isinstance(targets, dict):
+            return "<tr><td colspan='5' style='text-align:center;color:var(--text-muted);'>暫無大資金異動</td></tr>"
+        
+        # 取得 details 內的分類資料
+        details = targets.get('details', targets)
+        
+        category_names = {
+            'stablecoin': '💵 穩定幣',
+            'native': '🔷 原生幣',
+            'altcoin': '🚀 Altcoin',
+            'btc': '🟡 BTC'
+        }
+        
+        for category, data in details.items():
+            if not isinstance(data, dict):
+                continue
+            tokens = data.get('tokens', [])
+            chains = data.get('chains', [])
+            volume = data.get('total_volume', 0)
+            
+            if volume > 0 and tokens:
+                # 顯示該類別的摘要行
+                chain_str = ', '.join(set(chains[:3])) if chains else 'N/A'
+                token_str = ', '.join(set(tokens[:5])) if tokens else 'N/A'
+                rows += f"""
+        <tr>
+            <td><strong>{category_names.get(category, category)}</strong></td>
+            <td>{chain_str}</td>
+            <td class="positive">買入中</td>
+            <td>${volume:,.0f}</td>
+            <td style="font-size:0.85rem">{token_str}</td>
+        </tr>"""
+        
+        if not rows:
+            rows = "<tr><td colspan='5' style='text-align:center;color:var(--text-muted);'>暫無大資金異動</td></tr>"
+        return rows
     
     # 生成公鏈表格行 (24H | W1 | W2 | W3 | W4)
     chain_rows = ""
