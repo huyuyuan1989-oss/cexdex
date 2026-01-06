@@ -1489,6 +1489,25 @@ async def get_cex_data_async(session):
     來源: DefiLlama Protocols (category='CEX')
     """
     logger.info("🏦 正在獲取 CEX 資產數據...")
+    
+    # --- 新增: 獲取 BTC 歷史價格基準 ---
+    btc_price_map = {}
+    try:
+        import ccxt
+        logger.info("📈 正在獲取 BTC 歷史價格基準 (用於計算真實資金流向)...")
+        def get_btc_history():
+            ex = ccxt.binance({'enableRateLimit': True})
+            return ex.fetch_ohlcv('BTC/USDT', '1d', limit=60)
+        
+        ohlcv = await asyncio.to_thread(get_btc_history)
+        for candle in ohlcv:
+            ts_sec = candle[0] // 1000
+            btc_price_map[ts_sec] = candle[4] # Close price
+            
+    except Exception as e:
+        logger.warning(f"無法獲取 BTC 歷史價格: {e}")
+    # --------------------------------
+
     url = "https://api.llama.fi/protocols"
     
     data = await fetch_with_retry(session, url)
@@ -1622,14 +1641,45 @@ async def get_cex_data_async(session):
                          
                          other_usd = total_usd - stable_usd
                          
+                         # --- 價格調整算法 (Price-Adjusted Flow) ---
+                         # 尋找對應時間點的 BTC 價格
+                         def _get_btc_p(ts):
+                             if not btc_price_map: return None
+                             # 簡單線性搜尋最近點 (數據少，效能OK)
+                             best = None
+                             mind = 86400 * 3
+                             for t, p in btc_price_map.items():
+                                 d = abs(t - ts)
+                                 if d < mind:
+                                     mind = d
+                                     best = p
+                             return best
+
+                         p_past = _get_btc_p(closest_record['date'])
+                         p_curr = _get_btc_p(current_date)
+                         
+                         btc_multiplier = 1.0
+                         if p_past and p_curr and p_past > 0:
+                             btc_multiplier = p_curr / p_past
+                         
+                         # 核心邏輯：從變動中剔除 "Beta" (市場漲跌)
+                         # 預期非穩定幣資產 (如果大戶完全不動) = 過去資產 * BTC漲幅
+                         expected_other = past_other * btc_multiplier
+                         
+                         # 真實流向 (Alpha) = 當前資產 - 預期資產
+                         # 如果 > 0: 代表有額外充值
+                         # 如果 < 0: 代表有提幣 (即使總值可能增加)
+                         real_other_flow = other_usd - expected_other
+                         
+                         # 穩定幣流向 (不需調整)
+                         stable_flow = stable_usd - past_stable
+                         
                          total_change_pct = ((total_usd - past_total) / past_total) * 100
-                         stable_change_usd = stable_usd - past_stable
-                         other_change_usd = other_usd - past_other
                          
                          history_data[period_name] = {
                              'total_pct': total_change_pct,
-                             'stable_change': stable_change_usd,
-                             'other_change': other_change_usd
+                             'stable_change': stable_flow,
+                             'other_change': real_other_flow # 這裡儲存的是調整後的流向
                          }
             
             cex['history_data'] = history_data

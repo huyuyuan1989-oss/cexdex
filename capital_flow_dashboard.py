@@ -1075,11 +1075,16 @@ def analyze_cex_flows(cex_data: list) -> Tuple[List[CEXFlowData], dict]:
                 # 混合情況，看最近一週 (W1)
                 w1_data = history.get('w1', {})
                 w1_s = w1_data.get('stable_change', 0)
+                w1_o = w1_data.get('other_change', 0) # 這是 Price-Adjusted Net Flow
+                
                 if w1_s > 20_000_000:
-                    final_interpretation = "📈 近週強力吸籌"
+                    final_interpretation = "💰 外部資金注入 (準備買進)"
                     inflow_count += 1
+                elif w1_o > 50_000_000: # 剔除漲幅後仍大量流入 -> 潛在砸盤
+                    final_interpretation = "⚠️ 冷錢包充值 (潛在賣壓)"
+                    outflow_count += 1 
                 elif w1_s < -20_000_000:
-                    final_interpretation = "📉 近週資金出逃"
+                    final_interpretation = "📉 資金撤離 (DeFi/冷錢包)"
                     outflow_count += 1
         
         # 如果趨勢分析沒有結果 (例如數據不足)，或是中性，則使用原本的 24H 判斷計數
@@ -1497,7 +1502,7 @@ def generate_cex_dex_html_section(cex_dex_summary: CEXDEXSummary, cex_summary: O
                     detail_html = f'''
                     <div style="font-size:0.65rem; white-space:nowrap; line-height:1.2; margin-top:2px;">
                         <span style="color:#22c55e" title="穩定幣變動">💵{fmt_m_val(s_chg)}</span><br>
-                        <span style="color:#f97316" title="非穩定幣變動">🚀{fmt_m_val(o_chg)}</span>
+                        <span style="color:#f97316" title="非穩定幣淨流向 (已剔除幣價漲幅)">🚀{fmt_m_val(o_chg)}</span>
                     </div>
                     '''
                 
