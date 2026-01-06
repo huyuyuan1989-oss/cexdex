@@ -125,6 +125,11 @@ class CEXFlowData:
     stablecoin_pct: float = 0.0      # 穩定幣佔比 (0-100)
     non_stablecoin_pct: float = 0.0  # 非穩定幣佔比 (0-100)
     inflow_type: str = ""            # "潛在買盤" / "潛在賣壓" / "中性"
+    
+    # 歷史詳細數據 (24H, W1-W4)
+    # Key: '24h', 'w1', 'w2', 'w3', 'w4'
+    # Value: {'total_pct': ..., 'stable_usd': ..., 'other_usd': ...}
+    history_data: dict = field(default_factory=dict)
 
 
 @dataclass
@@ -1074,7 +1079,8 @@ def analyze_cex_flows(cex_data: list) -> Tuple[List[CEXFlowData], dict]:
             market_share=market_share,
             stablecoin_pct=cex.get('stablecoin_pct', 0),
             non_stablecoin_pct=cex.get('non_stablecoin_pct', 0),
-            inflow_type=api_inflow
+            inflow_type=api_inflow,
+            history_data=cex.get('history_data', {})
         )
         cex_flows.append(cex_flow)
         
@@ -1423,29 +1429,79 @@ def generate_cex_dex_html_section(cex_dex_summary: CEXDEXSummary, cex_summary: O
             other_pct = cex.non_stablecoin_pct
             
             if stable_pct == 0 and other_pct == 0:
-                composition_html = '<span style="color:var(--text-muted); font-size:0.8rem;">計算中...</span>'
+                composition_html = '<span style="color:var(--text-muted); font-size:0.8rem;">-</span>'
             else:
                 composition_html = f'''
-                <div style="width:120px;">
+                <div style="width:100px;">
                     <div style="display:flex; height:6px; width:100%; background:rgba(255,255,255,0.1); border-radius:3px; overflow:hidden; margin-bottom:4px;">
                         <div style="width:{stable_pct}%; background:#22c55e;" title="穩定幣: {stable_pct:.1f}%"></div>
                         <div style="width:{other_pct}%; background:#f97316;" title="非穩定幣: {other_pct:.1f}%"></div>
                     </div>
                     <div style="font-size:0.65rem; color:var(--text-muted); display:flex; justify-content:space-between;">
-                        <span style="color:#22c55e">💵 {stable_pct:.0f}%</span>
-                        <span style="color:#f97316">🚀 {other_pct:.0f}%</span>
+                        <span style="color:#22c55e">{stable_pct:.0f}%</span>
+                        <span style="color:#f97316">{other_pct:.0f}%</span>
                     </div>
                 </div>
                 '''
+
+            # 歷史數據 helper
+            def fmt_m_val(val):
+                 if not val: return "$0"
+                 abs_val = abs(val)
+                 sign = "+" if val > 0 else "-"
+                 if abs_val >= 1e9: return f"{sign}${abs_val/1e9:.1f}B"
+                 elif abs_val >= 1e6: return f"{sign}${abs_val/1e6:.0f}M"
+                 elif abs_val >= 1e3: return f"{sign}${abs_val/1e3:.0f}K"
+                 else: return f"{sign}${abs_val:.0f}"
+
+            def get_period_html(key, fallback_pct=0):
+                # 優先使用 history_data
+                data = cex.history_data.get(key)
+                if data:
+                    pct = data['total_pct']
+                    s_chg = data['stable_change']
+                    o_chg = data['other_change']
+                else:
+                    # Fallback (只有 pct，沒有 breakdown)
+                    pct = fallback_pct
+                    s_chg = 0
+                    o_chg = 0
+                    if pct == 0: return '<span style="color:var(--text-muted)">-</span>'
+                
+                pct_clz = "positive" if pct > 0 else "negative"
+                
+                detail_html = ""
+                if s_chg != 0 or o_chg != 0:
+                    detail_html = f'''
+                    <div style="font-size:0.65rem; white-space:nowrap; line-height:1.2; margin-top:2px;">
+                        <span style="color:#22c55e" title="穩定幣變動">💵{fmt_m_val(s_chg)}</span><br>
+                        <span style="color:#f97316" title="非穩定幣變動">🚀{fmt_m_val(o_chg)}</span>
+                    </div>
+                    '''
+                
+                return f'''
+                <div>
+                    <div class="{pct_clz}" style="font-weight:bold;">{pct:+.1f}%</div>
+                    {detail_html}
+                </div>
+                '''
+
+            row_24h = get_period_html('24h', cex.tvl_24h_change)
+            row_w1 = get_period_html('w1', cex.tvl_7d_change)
+            row_w2 = get_period_html('w2')
+            row_w3 = get_period_html('w3')
+            row_w4 = get_period_html('w4')
 
             cex_rows += f'''
             <tr>
                 <td><strong>{cex.name}</strong></td>
                 <td>${cex.tvl/1e9:.2f}B</td>
-                <td class="{c24h_class}">{cex.tvl_24h_change:+.2f}%</td>
-                <td class="{c7d_class}">{cex.tvl_7d_change:+.2f}%</td>
-                <td>{cex.market_share:.1f}%</td>
                 <td>{composition_html}</td>
+                <td>{row_24h}</td>
+                <td>{row_w1}</td>
+                <td>{row_w2}</td>
+                <td>{row_w3}</td>
+                <td>{row_w4}</td>
                 <td style="font-size:0.8rem;">{cex.flow_direction}</td>
             </tr>
             '''
@@ -1461,10 +1517,12 @@ def generate_cex_dex_html_section(cex_dex_summary: CEXDEXSummary, cex_summary: O
                     <tr>
                         <th>交易所</th>
                         <th>TVL</th>
+                        <th>資產構成</th>
                         <th>24H</th>
-                        <th>7D</th>
-                        <th>市場佔比</th>
-                        <th>資產構成 (穩定/非穩)</th>
+                        <th>W1 (7D)</th>
+                        <th>W2 (14D)</th>
+                        <th>W3 (21D)</th>
+                        <th>W4 (28D)</th>
                         <th>流向解析</th>
                     </tr>
                 </thead>

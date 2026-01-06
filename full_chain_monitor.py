@@ -1583,6 +1583,56 @@ async def get_cex_data_async(session):
                      cex['inflow_type'] = "📉 購買力減弱"
                 else:
                     cex['inflow_type'] = "📈 提幣囤貨 (DeFi/冷錢包)"
+            
+            # --- 新增: 計算歷史 W1-W4 變化 ---
+            current_date = latest['date']
+            history_data = {}
+            
+            history_periods = {
+                '24h': 1,
+                'w1': 7, 
+                'w2': 14, 
+                'w3': 21, 
+                'w4': 28
+            }
+            
+            for period_name, days in history_periods.items():
+                target_ts = current_date - (days * 86400)
+                
+                # 尋找最近記錄 (倒序遍歷)
+                closest_record = None
+                min_diff = 86400 * 3 # 容許 3 天誤差 (有時數據點會缺失)
+                
+                for record in reversed(detail_data['tokensInUsd']):
+                    diff = abs(record['date'] - target_ts)
+                    if diff < min_diff:
+                        min_diff = diff
+                        closest_record = record
+                    
+                    if record['date'] < target_ts - 86400*3:
+                        break # 太早了，不用再找
+                
+                if closest_record:
+                    past_tokens = closest_record.get('tokens', {})
+                    past_total = sum(past_tokens.values())
+                    
+                    if past_total > 0:
+                         past_stable = sum(v for k, v in past_tokens.items() if k in stablecoins or ('USD' in k and 'WETH' not in k and 'BTC' not in k))
+                         past_other = past_total - past_stable
+                         
+                         other_usd = total_usd - stable_usd
+                         
+                         total_change_pct = ((total_usd - past_total) / past_total) * 100
+                         stable_change_usd = stable_usd - past_stable
+                         other_change_usd = other_usd - past_other
+                         
+                         history_data[period_name] = {
+                             'total_pct': total_change_pct,
+                             'stable_change': stable_change_usd,
+                             'other_change': other_change_usd
+                         }
+            
+            cex['history_data'] = history_data
                     
         except Exception as e:
             logger.debug(f"無法獲取 {cex['name']} 詳細資訊: {e}")
