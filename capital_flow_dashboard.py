@@ -77,6 +77,18 @@ class ChainFlowData:
     tvl_7d_change: float = 0.0
     tvl_30d_change: float = 0.0
     
+    # 每週獨立變化 (% 和 金額)
+    tvl_w1_change: float = 0.0   # 第1週 (最近7天)
+    tvl_w2_change: float = 0.0   # 第2週 (7-14天)
+    tvl_w3_change: float = 0.0   # 第3週 (14-21天)  
+    tvl_w4_change: float = 0.0   # 第4週 (21-28天)
+    
+    tvl_24h_amount: float = 0.0   # 24H 流入/流出金額
+    tvl_w1_amount: float = 0.0    # 第1週金額
+    tvl_w2_amount: float = 0.0    # 第2週金額
+    tvl_w3_amount: float = 0.0    # 第3週金額
+    tvl_w4_amount: float = 0.0    # 第4週金額
+    
     # 資金流向佔比
     native_pct: float = 0.0       # 原生幣佔比
     stablecoin_pct: float = 0.0   # 穩定幣佔比
@@ -1186,7 +1198,18 @@ def generate_command_center_data(
             current_tvl=chain.get('tvl', 0),
             tvl_24h_change=chain.get('change_1d', 0),
             tvl_7d_change=chain.get('change_7d', 0),
-            tvl_30d_change=chain.get('change_30d', 0)
+            tvl_30d_change=chain.get('change_30d', 0),
+            # 每週獨立變化
+            tvl_w1_change=chain.get('change_w1', chain.get('change_7d', 0)),
+            tvl_w2_change=chain.get('change_w2', 0),
+            tvl_w3_change=chain.get('change_w3', 0),
+            tvl_w4_change=chain.get('change_w4', 0),
+            # 每週金額
+            tvl_24h_amount=chain.get('amount_24h', 0),
+            tvl_w1_amount=chain.get('amount_w1', 0),
+            tvl_w2_amount=chain.get('amount_w2', 0),
+            tvl_w3_amount=chain.get('amount_w3', 0),
+            tvl_w4_amount=chain.get('amount_w4', 0)
         )
         
         if flow and flow.get('breakdown'):
@@ -1198,7 +1221,7 @@ def generate_command_center_data(
         
         # 根據 TVL 24H 變化判定流入/流出 (修正邏輯)
         # 計算流入/流出金額
-        chain_flow.net_flow_amount = chain_flow.current_tvl * (chain_flow.tvl_24h_change / 100)
+        chain_flow.net_flow_amount = chain_flow.tvl_24h_amount if chain_flow.tvl_24h_amount != 0 else chain_flow.current_tvl * (chain_flow.tvl_24h_change / 100)
         
         if chain_flow.tvl_24h_change > 0.5:
             chain_flow.net_flow_direction = "流入 📈"
@@ -1447,19 +1470,21 @@ def generate_market_indicators_html(summary: CapitalFlowSummary) -> str:
         </div>
     </div>
     '''
+
     
     return html
 
 
 def generate_command_center_html(
-    summary: CapitalFlowSummary,
-    period_comparison: Dict[str, PeriodComparison],
-    conversions: List[dict],
+    summary: CapitalFlowSummary, 
+    period_comparison: PeriodComparison,
+    conversions: List[CapitalConversion],
     whale_targets: dict,
     cex_dex_summary: Optional[CEXDEXSummary] = None,
-    cex_summary: Optional[dict] = None
+    cex_summary: Optional[dict] = None,
+    full_report_html: str = None
 ) -> str:
-    """生成資金流向主控台 HTML 報告 (含 CEX+DEX 整合)"""
+    """生成資金流向主控台 HTML 報告 (Tab 整合版)"""
     
     # 交易信號顏色
     signal_colors = {
@@ -1472,29 +1497,37 @@ def generate_command_center_html(
     
     signal_color = signal_colors.get(summary.trading_signal, "#fbbf24")
     
-    # 生成公鏈表格行
+    # 格式化金額輔助函數 (金額為 0 時顯示 —)
+    def fmt_amt(amt):
+        if amt == 0:
+            return "—"
+        elif abs(amt) >= 1e9:
+            return f"${amt/1e9:+.2f}B"
+        elif abs(amt) >= 1e6:
+            return f"${amt/1e6:+.1f}M"
+        elif abs(amt) >= 1e3:
+            return f"${amt/1e3:+.0f}K"
+        else:
+            return f"${amt:+.0f}"
+    
+    # 生成公鏈表格行 (24H | W1 | W2 | W3 | W4)
     chain_rows = ""
     for chain in sorted(summary.chain_flows, key=lambda x: x.tvl_24h_change, reverse=True):
-        change_class = "positive" if chain.tvl_24h_change > 0 else "negative"
-        c7d_class = "positive" if chain.tvl_7d_change > 0 else "negative"
-        c30d_class = "positive" if chain.tvl_30d_change > 0 else "negative"
-        
-        # 格式化金額
-        if abs(chain.net_flow_amount) >= 1e9:
-            amount_str = f"${chain.net_flow_amount/1e9:+.2f}B"
-        elif abs(chain.net_flow_amount) >= 1e6:
-            amount_str = f"${chain.net_flow_amount/1e6:+.1f}M"
-        else:
-            amount_str = f"${chain.net_flow_amount/1e3:+.0f}K"
+        c24h_class = "positive" if chain.tvl_24h_change > 0 else "negative"
+        cw1_class = "positive" if chain.tvl_w1_change > 0 else "negative"
+        cw2_class = "positive" if chain.tvl_w2_change > 0 else "negative"
+        cw3_class = "positive" if chain.tvl_w3_change > 0 else "negative"
+        cw4_class = "positive" if chain.tvl_w4_change > 0 else "negative"
         
         chain_rows += f"""
         <tr>
             <td><strong>{chain.chain_name}</strong></td>
             <td>${chain.current_tvl/1e9:.2f}B</td>
-            <td class="{change_class}">{chain.tvl_24h_change:+.2f}%</td>
-            <td class="{change_class}">{amount_str}</td>
-            <td class="{c7d_class}">{chain.tvl_7d_change:+.2f}%</td>
-            <td class="{c30d_class}">{chain.tvl_30d_change:+.2f}%</td>
+            <td class="{c24h_class}">{chain.tvl_24h_change:+.2f}%<br><small>{fmt_amt(chain.tvl_24h_amount)}</small></td>
+            <td class="{cw1_class}">{chain.tvl_w1_change:+.2f}%<br><small>{fmt_amt(chain.tvl_w1_amount)}</small></td>
+            <td class="{cw2_class}">{chain.tvl_w2_change:+.2f}%<br><small>{fmt_amt(chain.tvl_w2_amount)}</small></td>
+            <td class="{cw3_class}">{chain.tvl_w3_change:+.2f}%<br><small>{fmt_amt(chain.tvl_w3_amount)}</small></td>
+            <td class="{cw4_class}">{chain.tvl_w4_change:+.2f}%<br><small>{fmt_amt(chain.tvl_w4_amount)}</small></td>
             <td>{chain.net_flow_direction}</td>
         </tr>
         """
@@ -1509,7 +1542,8 @@ def generate_command_center_html(
             'btc': '🟡 BTC'
         }.get(conv['category'], conv['category'])
         
-        dir_class = "positive" if conv['direction'] == "流入" else "negative"
+        dir_class = "positive" if "流入" in conv['direction'] else "negative"
+        
         conversion_rows += f"""
         <tr>
             <td>{conv['chain']}</td>
@@ -1519,6 +1553,9 @@ def generate_command_center_html(
             <td>{', '.join(conv['top_tokens'][:3])}</td>
         </tr>
         """
+    
+    # 處理完整報告 HTML (跳脫處理以安全嵌入 iframe)
+    safe_full_report_html = full_report_html.replace('"', '&quot;') if full_report_html else ""
     
     html = f"""
 <!DOCTYPE html>
@@ -1537,6 +1574,8 @@ def generate_command_center_html(
             --orange: #f97316;
             --text: #e2e8f0;
             --text-muted: #94a3b8;
+            --tab-active-bg: rgba(99, 102, 241, 0.2);
+            --tab-hover-bg: rgba(255, 255, 255, 0.05);
         }}
         * {{ margin: 0; padding: 0; box-sizing: border-box; }}
         body {{
@@ -1544,8 +1583,20 @@ def generate_command_center_html(
             background: var(--bg-dark);
             color: var(--text);
             padding: 1rem;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
         }}
-        .container {{ max-width: 1400px; margin: 0 auto; }}
+        .container {{ 
+            max-width: 1400px; 
+            margin: 0 auto; 
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }}
+        .header-section {{ flex: 0 0 auto; margin-bottom: 1rem; }}
         h1 {{
             font-size: 1.75rem;
             background: linear-gradient(135deg, var(--accent), #a855f7);
@@ -1553,66 +1604,42 @@ def generate_command_center_html(
             -webkit-text-fill-color: transparent;
             margin-bottom: 0.5rem;
         }}
-        .timestamp {{ color: var(--text-muted); margin-bottom: 1.5rem; }}
+        .timestamp {{ color: var(--text-muted); margin-bottom: 1rem; }}
+        .tabs {{ display: flex; gap: 0.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.5rem; }}
+        .tab-btn {{
+            background: transparent; border: 1px solid rgba(255,255,255,0.1); color: var(--text-muted); padding: 0.5rem 1rem;
+            border-radius: 8px; cursor: pointer; transition: all 0.2s; font-size: 0.9rem; display: flex; align-items: center; gap: 0.5rem;
+        }}
+        .tab-btn:hover {{ background: var(--tab-hover-bg); color: var(--text); }}
+        .tab-btn.active {{ background: var(--tab-active-bg); border-color: var(--accent); color: var(--accent); font-weight: 600; }}
+        .tab-content {{ flex: 1 1 auto; overflow-y: auto; display: none; padding-right: 0.5rem; }}
+        .tab-content.active {{ display: block; }}
+        .iframe-container {{ width: 100%; height: 100%; border: none; background: white; border-radius: 8px; }}
         
-        /* 交易信號燈 */
         .signal-panel {{
             background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(168, 85, 247, 0.1));
             border: 2px solid {signal_color};
-            border-radius: 16px;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-            text-align: center;
+            border-radius: 16px; padding: 1.5rem; margin-bottom: 1.5rem; text-align: center;
         }}
-        .signal-value {{
-            font-size: 2rem;
-            font-weight: 700;
-            color: {signal_color};
-            margin-bottom: 0.5rem;
-        }}
-        .signal-phase {{
-            font-size: 1.25rem;
-            color: var(--text);
-        }}
+        .signal-value {{ font-size: 2rem; font-weight: 700; color: {signal_color}; margin-bottom: 0.5rem; }}
+        .signal-phase {{ font-size: 1.25rem; color: var(--text); }}
         
-        /* 數據卡片 */
-        .stats-grid {{
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-        }}
-        .stat-card {{
-            background: var(--bg-card);
-            border-radius: 12px;
-            padding: 1rem;
-            border: 1px solid rgba(255,255,255,0.05);
-        }}
+        .stats-grid {{ display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem; }}
+        .stat-card {{ background: var(--bg-card); border-radius: 12px; padding: 1rem; border: 1px solid rgba(255,255,255,0.05); }}
         .stat-label {{ color: var(--text-muted); font-size: 0.75rem; margin-bottom: 0.25rem; }}
         .stat-value {{ font-size: 1.5rem; font-weight: 700; }}
         .stat-change {{ font-size: 0.8rem; margin-top: 0.25rem; }}
         .positive {{ color: var(--green); }}
         .negative {{ color: var(--red); }}
         
-        /* 表格 */
         .card {{ background: var(--bg-card); border-radius: 12px; padding: 1rem; margin-bottom: 1rem; }}
         .card-title {{ font-size: 1.1rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }}
         table {{ width: 100%; border-collapse: collapse; }}
         th, td {{ padding: 0.75rem; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.85rem; }}
         th {{ color: var(--text-muted); font-size: 0.7rem; text-transform: uppercase; }}
         
-        /* 資金分佈圖 */
-        .flow-distribution {{
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 0.75rem;
-            margin-bottom: 1rem;
-        }}
-        .flow-item {{
-            text-align: center;
-            padding: 1rem;
-            border-radius: 8px;
-        }}
+        .flow-distribution {{ display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem; margin-bottom: 1rem; }}
+        .flow-item {{ text-align: center; padding: 1rem; border-radius: 8px; }}
         .flow-native {{ background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); }}
         .flow-stable {{ background: rgba(99, 102, 241, 0.1); border: 1px solid rgba(99, 102, 241, 0.3); }}
         .flow-altcoin {{ background: rgba(249, 115, 22, 0.1); border: 1px solid rgba(249, 115, 22, 0.3); }}
@@ -1620,240 +1647,214 @@ def generate_command_center_html(
         .flow-pct {{ font-size: 1.5rem; font-weight: 700; }}
         .flow-label {{ font-size: 0.75rem; color: var(--text-muted); }}
         
-        /* 週期比較 */
-        .period-compare {{
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 0.5rem;
-            padding: 0.75rem;
-            background: rgba(255,255,255,0.02);
-            border-radius: 8px;
-            margin-top: 0.5rem;
-        }}
+        .period-compare {{ display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5rem; padding: 0.75rem; background: rgba(255,255,255,0.02); border-radius: 8px; margin-top: 0.5rem; }}
         .period-item {{ text-align: center; }}
         .period-label {{ font-size: 0.65rem; color: var(--text-muted); }}
         .period-value {{ font-size: 0.9rem; font-weight: 600; }}
         
-        /* 解讀區 */
-        .interpretation {{
-            background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(168, 85, 247, 0.05));
-            border-left: 3px solid var(--accent);
-            padding: 1rem;
-            border-radius: 0 8px 8px 0;
-            margin-top: 1rem;
-        }}
+        .interpretation {{ background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(168, 85, 247, 0.05)); border-left: 3px solid var(--accent); padding: 1rem; border-radius: 0 8px 8px 0; margin-top: 1rem; }}
         
         @media (max-width: 768px) {{
             .stats-grid {{ grid-template-columns: repeat(2, 1fr); }}
             .flow-distribution {{ grid-template-columns: repeat(2, 1fr); }}
+            body {{ overflow: auto; height: auto; display: block; }}
+            .container {{ height: auto; }}
+            .tab-content {{ overflow: visible; }}
+            .iframe-container {{ height: 100vh; }}
         }}
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🎛️ 資金流向主控台</h1>
-        <p class="timestamp">更新時間: {summary.timestamp.strftime('%Y-%m-%d %H:%M:%S')}</p>
-        
-        <!-- 交易信號燈 -->
-        <div class="signal-panel">
-            <div class="signal-value">{summary.trading_signal.value}</div>
-            <div class="signal-phase">{summary.market_phase.value}</div>
+        <!-- Header & Tabs -->
+        <div class="header-section">
+            <h1>🎛️ 資金流向主控台</h1>
+            <p class="timestamp">更新時間: {summary.timestamp.strftime('%Y-%m-%d %H:%M:%S')}</p>
+            
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab('dashboard')">🎛️ 資金主控台</button>
+                <button class="tab-btn" onclick="switchTab('full-report')">🔗 全鏈詳細分析報告</button>
+            </div>
         </div>
-        
-        <!-- 🎯 戰鬥機駕駛艙 - 核心儀表板 -->
-        <div class="card" style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.05), rgba(249, 115, 22, 0.05)); border: 1px solid rgba(239, 68, 68, 0.3); margin-bottom: 1.5rem;">
-            <div class="card-title" style="font-size: 1.2rem;">✈️ 戰鬥儀表板 - Combat Dashboard</div>
+
+        <!-- Tab 1: Dashboard -->
+        <div id="dashboard" class="tab-content active">
+            <!-- 交易信號燈 -->
+            <div class="signal-panel">
+                <div class="signal-value">{summary.trading_signal.value}</div>
+                <div class="signal-phase">{summary.market_phase.value}</div>
+            </div>
             
-            <!-- 警報區 -->
-            {generate_alerts_html(summary.alerts, summary.alert_level)}
-            
-            <!-- 核心指標網格 -->
-            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin: 1rem 0;">
-                <!-- 情緒溫度計 -->
-                <div style="text-align: center; padding: 1rem; background: rgba(255,255,255,0.03); border-radius: 10px;">
-                    <div style="font-size: 0.75rem; color: var(--text-muted);">🌡️ 恐懼/貪婪</div>
-                    <div style="font-size: 2rem; font-weight: 700; color: {'var(--green)' if summary.fear_greed_score >= 50 else 'var(--red)'};">{summary.fear_greed_score}</div>
-                    <div style="font-size: 0.85rem;">{summary.sentiment_label}</div>
+            <!-- 🎯 戰鬥機駕駛艙 - 核心儀表板 -->
+            <div class="card" style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.05), rgba(249, 115, 22, 0.05)); border: 1px solid rgba(239, 68, 68, 0.3); margin-bottom: 1.5rem;">
+                <div class="card-title" style="font-size: 1.2rem;">✈️ 戰鬥儀表板 - Combat Dashboard</div>
+                
+                <!-- 警報區 -->
+                {generate_alerts_html(summary.alerts, summary.alert_level)}
+                
+                <!-- 核心指標網格 -->
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin: 1rem 0;">
+                    <!-- 情緒溫度計 -->
+                    <div style="text-align: center; padding: 1rem; background: rgba(255,255,255,0.03); border-radius: 10px;">
+                        <div style="font-size: 0.75rem; color: var(--text-muted);">🌡️ 恐懼/貪婪</div>
+                        <div style="font-size: 2rem; font-weight: 700; color: {'var(--green)' if summary.fear_greed_score >= 50 else 'var(--red)'};">{summary.fear_greed_score}</div>
+                        <div style="font-size: 0.85rem;">{summary.sentiment_label}</div>
+                    </div>
+                    
+                    <!-- 動量雷達 -->
+                    <div style="text-align: center; padding: 1rem; background: rgba(255,255,255,0.03); border-radius: 10px;">
+                        <div style="font-size: 0.75rem; color: var(--text-muted);">⚡ 動量雷達</div>
+                        <div style="font-size: 2rem; font-weight: 700; color: {'var(--green)' if summary.momentum_score > 0 else ('var(--red)' if summary.momentum_score < 0 else 'var(--text-muted)')};">{summary.momentum_score:+d}</div>
+                        <div style="font-size: 0.85rem;">{summary.momentum_direction}</div>
+                    </div>
+                    
+                    <!-- 時間緊迫性 -->
+                    <div style="text-align: center; padding: 1rem; background: rgba(255,255,255,0.03); border-radius: 10px;">
+                        <div style="font-size: 0.75rem; color: var(--text-muted);">⏱️ 緊迫程度</div>
+                        <div style="font-size: 2rem; font-weight: 700; color: {'var(--red)' if summary.urgency_score >= 7 else ('var(--orange)' if summary.urgency_score >= 4 else 'var(--green)')};">{summary.urgency_score}/10</div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted);">{summary.opportunity_window[:15]}...</div>
+                    </div>
+                    
+                    <!-- 資金流速 -->
+                    <div style="text-align: center; padding: 1rem; background: rgba(255,255,255,0.03); border-radius: 10px;">
+                        <div style="font-size: 0.75rem; color: var(--text-muted);">📊 資金流速</div>
+                        <div style="font-size: 2rem; font-weight: 700; color: {'var(--green)' if summary.velocity_24h > 0 else 'var(--red)'};">{summary.velocity_24h:+.3f}%</div>
+                        <div style="font-size: 0.85rem; color: var(--text-muted);">每小時變化</div>
+                    </div>
                 </div>
                 
-                <!-- 動量雷達 -->
-                <div style="text-align: center; padding: 1rem; background: rgba(255,255,255,0.03); border-radius: 10px;">
-                    <div style="font-size: 0.75rem; color: var(--text-muted);">⚡ 動量雷達</div>
-                    <div style="font-size: 2rem; font-weight: 700; color: {'var(--green)' if summary.momentum_score > 0 else ('var(--red)' if summary.momentum_score < 0 else 'var(--text-muted)')};">{summary.momentum_score:+d}</div>
-                    <div style="font-size: 0.85rem;">{summary.momentum_direction}</div>
-                </div>
-                
-                <!-- 時間緊迫性 -->
-                <div style="text-align: center; padding: 1rem; background: rgba(255,255,255,0.03); border-radius: 10px;">
-                    <div style="font-size: 0.75rem; color: var(--text-muted);">⏱️ 緊迫程度</div>
-                    <div style="font-size: 2rem; font-weight: 700; color: {'var(--red)' if summary.urgency_score >= 7 else ('var(--orange)' if summary.urgency_score >= 4 else 'var(--green)')};">{summary.urgency_score}/10</div>
-                    <div style="font-size: 0.75rem; color: var(--text-muted);">{summary.opportunity_window[:15]}...</div>
-                </div>
-                
-                <!-- 資金流速 -->
-                <div style="text-align: center; padding: 1rem; background: rgba(255,255,255,0.03); border-radius: 10px;">
-                    <div style="font-size: 0.75rem; color: var(--text-muted);">📊 資金流速</div>
-                    <div style="font-size: 2rem; font-weight: 700; color: {'var(--green)' if summary.velocity_24h > 0 else 'var(--red)'};">{summary.velocity_24h:+.3f}%</div>
-                    <div style="font-size: 0.85rem; color: var(--text-muted);">每小時變化</div>
-                </div>
-            </div>
-            
-            <!-- 行動建議區 -->
-            <div style="background: rgba(99, 102, 241, 0.1); border-radius: 10px; padding: 1rem; margin-top: 0.5rem;">
-                <div style="font-size: 1.1rem; font-weight: 600; margin-bottom: 0.75rem;">🎯 建議行動</div>
-                <div style="font-size: 1rem; margin-bottom: 0.75rem;">{summary.primary_action}</div>
-                
-                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 1rem;">
-                    <div>
-                        <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.25rem;">📍 倉位建議</div>
-                        <div style="font-weight: 600;">{summary.position_suggestion}</div>
-                    </div>
-                    <div>
-                        <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.25rem;">⛓️ 關注公鏈</div>
-                        <div style="font-weight: 500;">{', '.join(summary.target_chains[:3])}</div>
-                    </div>
-                    <div>
-                        <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.25rem;">💰 資產配置</div>
-                        <div style="font-weight: 500;">{', '.join(summary.target_assets[:2])}</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- 總體數據 -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-label">📊 全市場 TVL</div>
-                <div class="stat-value">${summary.total_tvl/1e9:.2f}B</div>
-                <div class="stat-change {'positive' if summary.total_tvl_24h_change > 0 else 'negative'}">
-                    24H: {summary.total_tvl_24h_change:+.2f}%
-                </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">📈 週變化</div>
-                <div class="stat-value {'positive' if summary.total_tvl_7d_change > 0 else 'negative'}">{summary.total_tvl_7d_change:+.2f}%</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">📅 月變化</div>
-                <div class="stat-value {'positive' if summary.total_tvl_30d_change > 0 else 'negative'}">{summary.total_tvl_30d_change:+.2f}%</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">🎯 主要流向</div>
-                <div class="stat-value" style="font-size: 1rem;">{summary.dominant_flow_type}</div>
-            </div>
-        </div>
-        
-        <!-- 資金分佈 -->
-        <div class="card">
-            <div class="card-title">💰 全市場資金分佈</div>
-            <div class="flow-distribution">
-                <div class="flow-item flow-native">
-                    <div class="flow-pct" style="color: var(--green);">{summary.global_native_pct:.1f}%</div>
-                    <div class="flow-label">🔷 原生幣</div>
-                </div>
-                <div class="flow-item flow-stable">
-                    <div class="flow-pct" style="color: var(--accent);">{summary.global_stablecoin_pct:.1f}%</div>
-                    <div class="flow-label">💵 穩定幣</div>
-                </div>
-                <div class="flow-item flow-altcoin">
-                    <div class="flow-pct" style="color: var(--orange);">{summary.global_altcoin_pct:.1f}%</div>
-                    <div class="flow-label">🚀 Altcoin</div>
-                </div>
-                <div class="flow-item flow-btc">
-                    <div class="flow-pct" style="color: #fbbf24;">{summary.global_btc_pct:.1f}%</div>
-                    <div class="flow-label">🟡 BTC</div>
-                </div>
-            </div>
-            
-            <!-- 週期比較 -->
-            <div class="period-compare">
-                <div class="period-item">
-                    <div class="period-label">當前</div>
-                    <div class="period-value">穩定幣 {summary.global_stablecoin_pct:.1f}%</div>
-                </div>
-                <div class="period-item">
-                    <div class="period-label">vs 上週</div>
-                    <div class="period-value {'positive' if summary.global_stablecoin_pct < summary.last_week_stablecoin_pct else 'negative'}">
-                        {summary.global_stablecoin_pct - summary.last_week_stablecoin_pct:+.1f}%
-                    </div>
-                </div>
-                <div class="period-item">
-                    <div class="period-label">vs 上月</div>
-                    <div class="period-value {'positive' if summary.global_stablecoin_pct < summary.last_month_stablecoin_pct else 'negative'}">
-                        {summary.global_stablecoin_pct - summary.last_month_stablecoin_pct:+.1f}%
+                <!-- 行動建議區 -->
+                <div style="background: rgba(99, 102, 241, 0.1); border-radius: 10px; padding: 1rem; margin-top: 0.5rem;">
+                    <div style="font-size: 1.1rem; font-weight: 600; margin-bottom: 0.75rem;">🎯 建議行動</div>
+                    <div style="font-size: 1rem; margin-bottom: 0.75rem;">{summary.primary_action}</div>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 1rem;">
+                        <div style="background: rgba(255,255,255,0.05); padding: 0.75rem; border-radius: 8px;">
+                            <div style="font-size: 0.75rem; color: var(--text-muted);">倉位建議</div>
+                            <div style="font-weight: 600;">{summary.position_size_recommendation}</div>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.05); padding: 0.75rem; border-radius: 8px;">
+                            <div style="font-size: 0.75rem; color: var(--text-muted);">重點關注</div>
+                            <div style="font-weight: 600;">{summary.key_levels}</div>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.05); padding: 0.75rem; border-radius: 8px;">
+                            <div style="font-size: 0.75rem; color: var(--text-muted);">風險提示</div>
+                            <div style="font-weight: 600;">{summary.risk_warning}</div>
+                        </div>
                     </div>
                 </div>
             </div>
             
-            <div class="interpretation">
-                <strong>💡 大資金動向解讀：</strong><br>
-                {whale_targets.get('interpretation', '數據分析中...')}
+            <!-- CEX + DEX 整合數據 -->
+            {generate_cex_dex_html_section(cex_dex_summary, cex_summary) if cex_dex_summary else ""}
+            
+            <!-- 市場輔助指標 (期貨資金費率 + 穩定幣流通量) -->
+            {generate_market_indicators_html(summary)}
+            
+            <!-- 公鏈資金週期比較 -->
+            <div class="card">
+                <div class="card-title">⛓️ 公鏈資金每週獨立統計 (24H + W1~W4)</div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>公鏈</th>
+                            <th>TVL</th>
+                            <th>24H</th>
+                            <th>W1<br><small>(本週)</small></th>
+                            <th>W2<br><small>(上週)</small></th>
+                            <th>W3<br><small>(2週前)</small></th>
+                            <th>W4<br><small>(3週前)</small></th>
+                            <th>流向</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {chain_rows}
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- 資金轉換追蹤 -->
+            <div class="card">
+                <div class="card-title">🔄 資金轉換追蹤 (資金以什麼形式流動)</div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>公鏈</th>
+                            <th>類別</th>
+                            <th>流向</th>
+                            <th>交易量佔比</th>
+                            <th>熱門代幣</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {conversion_rows}
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- 大資金動向 -->
+            <div class="card">
+                <div class="card-title">🐳 大資金動向 (Whale Watch)</div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>代幣</th>
+                            <th>鏈</th>
+                            <th>24H 漲跌</th>
+                            <th>流動性</th>
+                            <th>大戶行為</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {generate_whale_rows(whale_targets)}
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- 操作建議 -->
+            <div class="card">
+                <div class="card-title">📋 操作建議</div>
+                <div class="interpretation" style="margin-top: 0;">
+                    <p><strong>當前信號：</strong> {summary.trading_signal.value}</p>
+                    <p><strong>市場階段：</strong> {summary.market_phase.value}</p>
+                    <br>
+                    <p><strong>💡 策略建議：</strong></p>
+                    <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                        <li>觀察主要資金流入的公鏈生態，尋找 Alpha 機會。</li>
+                        <li>若穩定幣大量流入，可能預示著購買力增強。</li>
+                        <li>若原生幣大量流出，注意避險。</li>
+                        <li>密切關注大戶持續累積的代幣。</li>
+                    </ul>
+                </div>
             </div>
         </div>
-        
-        <!-- CEX + DEX 整合數據 -->
-        {generate_cex_dex_html_section(cex_dex_summary, cex_summary) if cex_dex_summary else ""}
-        
-        <!-- 市場輔助指標 (期貨資金費率 + 穩定幣流通量) -->
-        {generate_market_indicators_html(summary)}
-        
-        <!-- 公鏈資金週期比較 -->
-        <div class="card">
-            <div class="card-title">⛓️ 公鏈資金週期比較</div>
-            <table>
-                <thead>
-                    <tr>
-                        <th>公鏈</th>
-                        <th>TVL</th>
-                        <th>24H 變化</th>
-                        <th>24H 金額</th>
-                        <th>7D</th>
-                        <th>30D</th>
-                        <th>流向</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {chain_rows}
-                </tbody>
-            </table>
+
+        <!-- Tab 2: Full Report (Embedded) -->
+        <div id="full-report" class="tab-content">
+            <iframe class="iframe-container" srcdoc="{safe_full_report_html}"></iframe>
         </div>
-        
-        <!-- 資金轉換追蹤 -->
-        <div class="card">
-            <div class="card-title">🔄 資金轉換追蹤 (資金以什麼形式流動)</div>
-            <table>
-                <thead>
-                    <tr>
-                        <th>公鏈</th>
-                        <th>類型</th>
-                        <th>方向</th>
-                        <th>佔比</th>
-                        <th>主要代幣</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {conversion_rows}
-                </tbody>
-            </table>
-        </div>
-        
-        <!-- 操作建議 -->
-        <div class="card">
-            <div class="card-title">📋 操作建議</div>
-            <div class="interpretation" style="margin-top: 0;">
-                <p><strong>當前信號：</strong> {summary.trading_signal.value}</p>
-                <p><strong>市場階段：</strong> {summary.market_phase.value}</p>
-                <br>
-                <p><strong>💡 策略建議：</strong></p>
-                <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
-                    {"<li>資金正在流入市場，可考慮增加倉位</li>" if summary.total_tvl_24h_change > 0 else "<li>資金正在流出，建議謹慎操作或減倉</li>"}
-                    {"<li>Altcoin 活躍度上升，尋找 Alpha 機會</li>" if summary.global_altcoin_pct > 35 else ""}
-                    {"<li>穩定幣佔比上升，避險情緒濃厚</li>" if summary.global_stablecoin_pct > 40 else ""}
-                    <li>主要關注: {summary.dominant_inflow_chain} (資金流入最多)</li>
-                </ul>
-            </div>
-        </div>
-    </div>
+    </div> <!-- End Container -->
+
+    <script>
+        function switchTab(tabId) {{
+            // 隱藏所有內容
+            document.querySelectorAll('.tab-content').forEach(content => {{
+                content.classList.remove('active');
+            }});
+            
+            // 移除所有按鈕激活狀態
+            document.querySelectorAll('.tab-btn').forEach(btn => {{
+                btn.classList.remove('active');
+            }});
+            
+            // 激活選中的 Tab
+            document.getElementById(tabId).classList.add('active');
+            
+            // 激活對應按鈕
+            const btn = document.querySelector(`button[onclick="switchTab('${{tabId}}')"]`);
+            if (btn) btn.classList.add('active');
+        }}
+    </script>
 </body>
 </html>
     """
@@ -1868,7 +1869,8 @@ async def run_command_center_analysis(
     all_tokens: dict,
     all_flow_analysis: dict,
     cex_data: list,
-    market_indicators: dict = None
+    market_indicators: dict = None,
+    full_report_html: str = None
 ) -> Tuple[CapitalFlowSummary, str]:
     """
     執行資金流向主控台分析
@@ -1882,6 +1884,10 @@ async def run_command_center_analysis(
     
     # 生成主控台數據
     summary = generate_command_center_data(chains, all_tokens, all_flow_analysis, cex_data)
+    
+    # 填入市場指標 (如果有的話)
+    if market_indicators:
+        update_market_indicators(summary, market_indicators)
     
     # 獲取週期比較
     period_comparison = calculate_period_comparison()
@@ -1909,38 +1915,45 @@ async def run_command_center_analysis(
     # ===== 🎯 填充戰鬥機駕駛艙儀表數據 =====
     summary = enrich_cockpit_data(summary, period_comparison, cex_dex_summary)
     
-    # ===== 📊 填充期貨資金費率和穩定幣數據 =====
-    if market_indicators:
-        funding = market_indicators.get('funding', {})
-        stables = market_indicators.get('stablecoins', {})
-        
-        # 期貨資金費率
-        summary.btc_funding_rate = funding.get('btc', {}).get('rate', 0)
-        summary.eth_funding_rate = funding.get('eth', {}).get('rate', 0)
-        
-        # 綜合解讀
-        btc_interp = funding.get('btc', {}).get('interpretation', '')
-        eth_interp = funding.get('eth', {}).get('interpretation', '')
-        summary.funding_interpretation = btc_interp if btc_interp else eth_interp
-        
-        # 穩定幣流通量
-        summary.stablecoin_total_supply = stables.get('total_supply', 0)
-        summary.stablecoin_7d_change = stables.get('change_7d', 0)
-        summary.stablecoin_interpretation = stables.get('interpretation', '')
-    
     logger.info(f"✈️ 戰鬥儀表: 情緒={summary.fear_greed_score}, 動量={summary.momentum_score}, 緊迫={summary.urgency_score}")
     
     # 儲存快照
     save_capital_flow_snapshot(summary)
     
-    # 生成 HTML (現在包含 CEX+DEX 和戰鬥儀表)
+    # 生成 HTML (包含 CEX+DEX、戰鬥儀表和完整報告 Tab)
     html_content = generate_command_center_html(
-        summary, period_comparison, conversions, whale_targets,
+        summary, 
+        period_comparison, 
+        conversions, 
+        whale_targets,
         cex_dex_summary=cex_dex_summary,
-        cex_summary=cex_summary
+        cex_summary=cex_summary,
+        full_report_html=full_report_html
     )
     
     return summary, html_content
+
+def update_market_indicators(summary: CapitalFlowSummary, market_indicators: dict):
+    """更新市場輔助指標到 summary"""
+    if not market_indicators:
+        return
+        
+    funding = market_indicators.get('funding', {})
+    stables = market_indicators.get('stablecoins', {})
+    
+    # 期貨資金費率
+    summary.btc_funding_rate = funding.get('btc', {}).get('rate', 0)
+    summary.eth_funding_rate = funding.get('eth', {}).get('rate', 0)
+    
+    # 綜合解讀
+    btc_interp = funding.get('btc', {}).get('interpretation', '')
+    eth_interp = funding.get('eth', {}).get('interpretation', '')
+    summary.funding_interpretation = btc_interp if btc_interp else eth_interp
+    
+    # 穩定幣流通量
+    summary.stablecoin_total_supply = stables.get('total_supply', 0)
+    summary.stablecoin_7d_change = stables.get('change_7d', 0)
+    summary.stablecoin_interpretation = stables.get('interpretation', '')
 
 
 def print_command_center_terminal(summary: CapitalFlowSummary, whale_targets: dict, cex_dex_summary: Optional[CEXDEXSummary] = None):

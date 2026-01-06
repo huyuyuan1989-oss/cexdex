@@ -1419,7 +1419,7 @@ async def fetch_with_retry(session, url, retries=3, delay=2):
     return None
 
 async def get_chain_historical_tvl(session, chain_name):
-    """獲取單一公鏈的歷史 TVL 數據"""
+    """獲取單一公鏈的歷史 TVL 數據 (含每週獨立計算)"""
     url = f"https://api.llama.fi/v2/historicalChainTvl/{chain_name}"
     data = await fetch_with_retry(session, url)
     
@@ -1432,13 +1432,17 @@ async def get_chain_historical_tvl(session, chain_name):
     # 計算 24H 變動 (1天前)
     tvl_1d_ago = data[-2].get('tvl', current_tvl) if len(data) >= 2 else current_tvl
     
-    # 計算 7D 變動 (7天前)
+    # 計算每週時間點的 TVL
+    # W1: 第1週 (0-7天)  → 比較 day 0 和 day 7
+    # W2: 第2週 (7-14天) → 比較 day 7 和 day 14
+    # W3: 第3週 (14-21天) → 比較 day 14 和 day 21
+    # W4: 第4週 (21-28天) → 比較 day 21 和 day 28
+    
     tvl_7d_ago = data[-8].get('tvl', current_tvl) if len(data) >= 8 else current_tvl
-    
-    # 計算 30D 變動 (30天前 = 1個月)
+    tvl_14d_ago = data[-15].get('tvl', current_tvl) if len(data) >= 15 else current_tvl
+    tvl_21d_ago = data[-22].get('tvl', current_tvl) if len(data) >= 22 else current_tvl
+    tvl_28d_ago = data[-29].get('tvl', current_tvl) if len(data) >= 29 else current_tvl
     tvl_30d_ago = data[-31].get('tvl', current_tvl) if len(data) >= 31 else current_tvl
-    
-    # 計算 90D 變動 (90天前 = 3個月)
     tvl_90d_ago = data[-91].get('tvl', current_tvl) if len(data) >= 91 else current_tvl
     
     # 計算變動百分比
@@ -1447,12 +1451,36 @@ async def get_chain_historical_tvl(session, chain_name):
     change_30d = ((current_tvl - tvl_30d_ago) / tvl_30d_ago * 100) if tvl_30d_ago > 0 else 0
     change_90d = ((current_tvl - tvl_90d_ago) / tvl_90d_ago * 100) if tvl_90d_ago > 0 else 0
     
+    # 每週獨立計算 (W1 = 最近一週內的變化, W2 = 第二週發生的變化, etc.)
+    change_w1 = ((current_tvl - tvl_7d_ago) / tvl_7d_ago * 100) if tvl_7d_ago > 0 else 0
+    change_w2 = ((tvl_7d_ago - tvl_14d_ago) / tvl_14d_ago * 100) if tvl_14d_ago > 0 else 0
+    change_w3 = ((tvl_14d_ago - tvl_21d_ago) / tvl_21d_ago * 100) if tvl_21d_ago > 0 else 0
+    change_w4 = ((tvl_21d_ago - tvl_28d_ago) / tvl_28d_ago * 100) if tvl_28d_ago > 0 else 0
+    
+    # 計算每週金額變化 (以當週結束時的 TVL 計算)
+    amount_24h = current_tvl - tvl_1d_ago
+    amount_w1 = current_tvl - tvl_7d_ago
+    amount_w2 = tvl_7d_ago - tvl_14d_ago
+    amount_w3 = tvl_14d_ago - tvl_21d_ago
+    amount_w4 = tvl_21d_ago - tvl_28d_ago
+    
     return {
         'tvl': current_tvl,
         'change_1d': round(change_1d, 2),
         'change_7d': round(change_7d, 2),
         'change_30d': round(change_30d, 2),
-        'change_90d': round(change_90d, 2)
+        'change_90d': round(change_90d, 2),
+        # 每週獨立變化
+        'change_w1': round(change_w1, 2),
+        'change_w2': round(change_w2, 2),
+        'change_w3': round(change_w3, 2),
+        'change_w4': round(change_w4, 2),
+        # 每週金額
+        'amount_24h': amount_24h,
+        'amount_w1': amount_w1,
+        'amount_w2': amount_w2,
+        'amount_w3': amount_w3,
+        'amount_w4': amount_w4
     }
 
 async def get_cex_data_async(session):
@@ -1745,6 +1773,17 @@ async def get_chain_momentum_async(session):
                 "change_7d": change_7d,
                 "change_30d": change_30d,
                 "change_90d": change_90d,
+                # 每週獨立變化
+                "change_w1": hist_data.get('change_w1', change_7d),
+                "change_w2": hist_data.get('change_w2', 0),
+                "change_w3": hist_data.get('change_w3', 0),
+                "change_w4": hist_data.get('change_w4', 0),
+                # 每週金額
+                "amount_24h": hist_data.get('amount_24h', 0),
+                "amount_w1": hist_data.get('amount_w1', 0),
+                "amount_w2": hist_data.get('amount_w2', 0),
+                "amount_w3": hist_data.get('amount_w3', 0),
+                "amount_w4": hist_data.get('amount_w4', 0),
                 "status": status if change_1d > -MOMENTUM_THRESHOLD else "⚠️ 資金流出"
             })
     
@@ -3930,6 +3969,14 @@ async def run_analysis():
         export_to_json(active_chains, all_tokens, new_tokens, cross_flows)
         html_file = export_to_html(active_chains, all_tokens, all_flow_analysis, new_tokens, long_term_tokens, cross_flows, cex_data, stats)
         
+        # 讀取完整報告 HTML 內容以供嵌入
+        full_report_content = ""
+        try:
+            with open(html_file, 'r', encoding='utf-8') as f:
+                full_report_content = f.read()
+        except Exception as e:
+            logger.error(f"讀取完整報告失敗: {e}")
+
         # 7.5 生成資金流向主控台報告 (新增)
         try:
             from capital_flow_dashboard import (
@@ -3943,7 +3990,8 @@ async def run_analysis():
             )
             
             command_center_summary, command_center_html = await run_command_center_analysis(
-                active_chains, all_tokens, all_flow_analysis, cex_data, market_indicators
+                active_chains, all_tokens, all_flow_analysis, cex_data, market_indicators,
+                full_report_html=full_report_content
             )
             
             # 生成 CEX+DEX 整合數據
@@ -3951,7 +3999,7 @@ async def run_analysis():
             if cex_data:
                 cex_dex_summary = generate_cex_dex_summary(active_chains, cex_data, all_flow_analysis)
             
-            # 儲存主控台報告
+            # 儲存主控台報告 (現在是已整合的版本)
             dashboard_file = REPORT_DIR / f"dashboard_{datetime.now().strftime('%Y%m%d_%H%M%S')}.html"
             with open(dashboard_file, 'w', encoding='utf-8') as f:
                 f.write(command_center_html)
