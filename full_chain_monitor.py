@@ -1218,155 +1218,107 @@ def create_high_pressure_alert_embed(tokens_by_chain):
     }
 
 
-def create_integrated_summary_embed(stats, chains, all_tokens, cex_data, rotation_info, native_strength, new_tokens, cross_flows):
+def create_integrated_summary_embed(stats, active_chains, all_tokens, cex_data, rotation_info, native_strength, new_tokens, cross_flows):
     """
-    建立整合版 Discord 通知 (單一 Embed，避免洗版)
-    包含：輪動週期、原生幣強弱、熱門代幣、市場情緒
+    創建整合摘要 Embed (Discord 通知用)
+    重點：CEX 資金流向、市場情緒、鏈上熱點
     """
-    # 找出最強公鏈和代幣
-    best_chain = max(chains, key=lambda x: x['change_1d']) if chains else None
     
-    all_token_list = []
-    for chain_tokens in all_tokens.values():
-        all_token_list.extend(chain_tokens)
-    best_token = max(all_token_list, key=lambda x: x['change_24h']) if all_token_list else None
+    # 基本狀態
+    market_phase = stats.get('market_phase', 'Unknown')
+    signal = stats.get('trading_signal', 'Neutral')
     
-    # 輪動週期資訊
-    cycle_info = ""
-    if rotation_info:
-        cycle_info = f"""
-**🔄 市場輪動週期:**
-{rotation_info['cycle_phase']}
-💡 {rotation_info['cycle_signal']}
-"""
-    
-    # 原生幣強弱資訊
-    native_info = ""
-    if native_strength and len(native_strength) >= 2:
-        top2 = native_strength[:2]
-        native_info = f"""
-**🌐 原生幣強弱 (貨幣匯率):**
-🥇 {top2[0]['native_symbol']} ({top2[0]['chain']}) {top2[0]['strength_label']} {top2[0]['change_24h']:+.1f}%
-🥈 {top2[1]['native_symbol']} ({top2[1]['chain']}) {top2[1]['strength_label']} {top2[1]['change_24h']:+.1f}%
-"""
-    
-    # 構建描述
-    description = f"""
-📡 **全鏈資金流向分析報告 v3.0**
-━━━━━━━━━━━━━━━━━━━━━━
-{cycle_info}
-{native_info}
-**📊 分析摘要:**
-┣ 🔗 公鏈: **{stats['chains_scanned']}**條 | 🎯 代幣: **{stats['tokens_found']}**個
-┣ 🆕 新幣: **{stats['new_tokens']}**個 | 📈 準確率: **{stats['accuracy']:.1f}%**
-┗ ⏱️ 耗時: **{stats['execution_time']:.1f}s**
-"""
-    
-    if best_chain:
-        description += f"\n🏆 **最強公鏈:** {best_chain['chain_name']} ({best_chain['change_1d']:+.2f}%)"
-    
-    if best_token:
-        description += f"\n🔥 **最熱代幣:** {best_token['symbol']} ({best_token['change_24h']:+.2f}%)"
-    
-    fields = []
-    
-    # CEX 資金流向 (精簡版)
-    if cex_data:
-        top_cex = cex_data[:3]
-        cex_lines = []
-        for cex in top_cex:
-            icon = "🟢" if cex['change_1d'] > 0 else "🔴"
-            cex_lines.append(f"{icon} {cex['name']}: {cex['change_1d']:+.1f}%")
-        fields.append({
-            "name": "🏦 CEX 資金",
-            "value": "\n".join(cex_lines),
-            "inline": True
-        })
-    
-    # 跨鏈流動 (精簡版)
-    if cross_flows:
-        flow_lines = []
-        for f in cross_flows[:3]:
-            flow_lines.append(f"{f['from_chain']} ➡️ {f['to_chain']}")
-        fields.append({
-            "name": "🔄 資金遷移",
-            "value": "\n".join(flow_lines),
-            "inline": True
-        })
-    
-    # 熱門代幣 Top 3
-    if all_token_list:
-        sorted_tokens = sorted(all_token_list, key=lambda x: x['pressure'], reverse=True)[:3]
-        token_lines = []
-        for t in sorted_tokens:
-            token_lines.append(f"**{t['symbol']}** {t['change_24h']:+.1f}%")
-        fields.append({
-            "name": "🔥 熱門代幣",
-            "value": "\n".join(token_lines),
-            "inline": True
-        })
-    
-    # 新幣預覽
-    if new_tokens:
-        new_lines = []
-        for t in new_tokens[:3]:
-            new_lines.append(f"**{t['symbol']}** ({t['chain']})")
-        fields.append({
-            "name": "🆕 新幣首發",
-            "value": "\n".join(new_lines),
-            "inline": True
-        })
-    
-    # ==== 🚦 交易信號燈 (新增) ====
-    if stats.get('trading_signal'):
-        # 根據信號選擇顏色 emoji
-        signal = stats['trading_signal']
-        if '買入' in signal:
-            signal_icon = "🟢"
-        elif '減倉' in signal or '離場' in signal:
-            signal_icon = "🔴"
-        else:
-            signal_icon = "🟡"
-        
-        fields.append({
-            "name": "🚦 交易信號",
-            "value": f"{signal_icon} **{signal}**",
-            "inline": True
-        })
-    
-    if stats.get('market_phase'):
-        fields.append({
-            "name": "📍 市場階段",
-            "value": stats['market_phase'],
-            "inline": True
-        })
-    
-    # ==== 📄 HTML 報告連結 ====
-    html_filename = stats.get('html_file', '')
-    if html_filename:
-        # 提取檔名
-        report_name = Path(html_filename).name
-        report_url = f"{GITHUB_PAGES_BASE_URL}{report_name}"
-        dashboard_url = f"{GITHUB_PAGES_BASE_URL}latest_dashboard.html"
-        fields.append({
-            "name": "📄 詳細報告",
-            "value": f"[📊 完整分析報告]({report_url}) | [🎛️ 資金主控台]({dashboard_url})",
-            "inline": False
-        })
-    
-    # 下次掃描時間
-    footer_text = f"⏰ 下次掃描: {stats['next_scan']}"
-    if stats.get('schedule_interval'):
-        footer_text += f" | 間隔: {stats['schedule_interval'] // 60}分鐘"
-    
-    return {
-        "title": "🔗 全鏈資金流向監控 v3.0",
-        "description": description,
-        "color": 0x6366F1,  # 紫色主題
-        "fields": fields,
-        "footer": {"text": footer_text},
-        "timestamp": datetime.utcnow().isoformat()
+    # 顏色映射
+    color_map = {
+        'STRONG_BUY': 0x22c55e, # Green
+        'BUY': 0x4ade80,
+        'NEUTRAL': 0xfbbf24, # Yellow
+        'SELL': 0xf87171,
+        'STRONG_SELL': 0xef4444 # Red
     }
+    embed_color = color_map.get(signal, 0xfbbf24)
+    
+    # --- 🐋 鯨魚看板 (Whale Watch) ---
+    whale_text = "數據不足"
+    if cex_data and len(cex_data) > 0:
+        # 簡單聚合 24h 數據
+        stable_in = 0
+        cold_out = 0
+        for c in cex_data:
+            if 'history_data' in c:
+                h = c['history_data'].get('24h', {})
+                if h.get('stable_change', 0) > 0:
+                    stable_in += h.get('stable_change', 0)
+                if h.get('other_change', 0) < 0:
+                    cold_out += abs(h.get('other_change', 0))
+        
+        # 格式化
+        def f_money(v):
+            if v >= 1e9: return f"${v/1e9:.1f}B"
+            if v >= 1e6: return f"${v/1e6:.0f}M"
+            return f"${v/1e3:.0f}K"
+            
+        whale_text = f"💰 **穩定幣買盤**: `{f_money(stable_in)}`\n🥶 **冷錢包提現**: `{f_money(cold_out)}`"
+        if cold_out > 50_000_000: # 50M
+             whale_text += "\n⚠️ **大戶囤幣信號偵測!**"
+
+    # --- 構建 Embed ---
+    embed = {
+        "title": f"🚀 全鏈資金戰情室 (Capital Command)",
+        "description": f"**信號**: `{signal}` | **階段**: `{market_phase}`\n*(每 30 分鐘自動更新)*",
+        "color": embed_color,
+        "fields": [
+            {
+                "name": "🐋 鯨魚動向 (24H)",
+                "value": whale_text,
+                "inline": False
+            }
+        ],
+        "footer": {
+            "text": f"更新時間: {datetime.now().strftime('%Y-%m-%d %H:%M')}"
+        }
+    }
+    
+    # 2. CEX vs DEX
+    cex_share = stats.get('cex_share_pct', 0)
+    dex_share = stats.get('dex_share_pct', 0)
+    direction = stats.get('capital_direction', 'Unknown')
+    market_flow = "🟢 流入" if "流入" in direction else ("🔴 流出" if "流出" in direction else "⚪ 平衡")
+    
+    embed['fields'].append({
+        "name": "📊 市場資金分佈",
+        "value": f"**CEX**: `{cex_share}%` | **DEX**: `{dex_share}%`\n**總向**: {market_flow} ({direction})",
+        "inline": False
+    })
+
+    # 3. 領漲公鏈 (如果有)
+    strong_chains = [c for c in active_chains if c.get('momentum_score', 0) >= 80]
+    if strong_chains:
+        chain_txt = ", ".join([f"**{c['name']}**" for c in strong_chains[:3]])
+        embed['fields'].append({
+            "name": "🔥 強勢公鏈",
+            "value": chain_txt,
+            "inline": True
+        })
+
+    # 4. 新幣快訊
+    if new_tokens:
+        new_txt = ", ".join([f"`{t['baseToken']['symbol']}`" for t in new_tokens[:3]])
+        embed['fields'].append({
+            "name": "🆕 新幣掃描",
+            "value": new_txt,
+            "inline": True
+        })
+
+    # 5. 唯一連結
+    report_link = "https://huyuyuan1989-oss.github.io/cexdex/reports/latest.html"
+    embed['fields'].append({
+        "name": "🔗 詳細戰情報告",
+        "value": f"[**點擊查看完整主控台 (Dashboard)**]({report_link})",
+        "inline": False
+    })
+    
+    return embed
 
 
 
@@ -1681,6 +1633,41 @@ async def get_cex_data_async(session):
                              'stable_change': stable_flow,
                              'other_change': real_other_flow # 這裡儲存的是調整後的流向
                          }
+                         
+                         # --- 新增: 計算具體幣種流向 (Token Breakdown) ---
+                         # 找出造成變動最大的幣種, 並非僅僅總量變動
+                         token_diffs = []
+                         all_symbols = set(tokens.keys()) | set(past_tokens.keys())
+                         
+                         for sym in all_symbols:
+                             curr_val = tokens.get(sym, 0)
+                             past_val = past_tokens.get(sym, 0)
+                             diff = curr_val - past_val
+                             
+                             # 過濾小金額 (例如 < $100K) 避免雜訊
+                             if abs(diff) > 100000:
+                                 token_diffs.append((sym, diff))
+                         
+                         # 排序：絕對值最大的變動在前
+                         token_diffs.sort(key=lambda x: abs(x[1]), reverse=True)
+                         
+                         # 取前 5 大變動
+                         top_movers = []
+                         for sym, diff in token_diffs[:5]:
+                              sign = "+" if diff > 0 else "-"
+                              # 格式化: BTC(+$50M)
+                              abs_val = abs(diff)
+                              val_str = ""
+                              if abs_val >= 1e9: val_str = f"${abs_val/1e9:.1f}B"
+                              elif abs_val >= 1e6: val_str = f"${abs_val/1e6:.1f}M"
+                              else: val_str = f"${abs_val/1e3:.0f}K"
+                              
+                              top_movers.append(f"{sym}({sign}{val_str})")
+                         
+                              top_movers.append(f"{sym}({sign}{val_str})")
+                         
+                         history_data[period_name]['top_tokens'] = top_movers
+                         history_data[period_name]['top_tokens_raw'] = token_diffs[:10] # 儲存原始數據供匯總 (Top 10)
             
             cex['history_data'] = history_data
                     

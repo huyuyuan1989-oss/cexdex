@@ -1461,8 +1461,8 @@ def generate_cex_dex_html_section(cex_dex_summary: CEXDEXSummary, cex_summary: O
                 composition_html = f'''
                 <div style="width:100px;">
                     <div style="display:flex; height:6px; width:100%; background:rgba(255,255,255,0.1); border-radius:3px; overflow:hidden; margin-bottom:4px;">
-                        <div style="width:{stable_pct}%; background:#22c55e;" title="穩定幣: {stable_pct:.1f}%"></div>
-                        <div style="width:{other_pct}%; background:#f97316;" title="非穩定幣: {other_pct:.1f}%"></div>
+                        <div style="width:{stable_pct:.2f}%; background:#22c55e;" title="穩定幣: {stable_pct:.1f}%"></div>
+                        <div style="width:{other_pct:.2f}%; background:#f97316;" title="非穩定幣: {other_pct:.1f}%"></div>
                     </div>
                     <div style="font-size:0.65rem; color:var(--text-muted); display:flex; justify-content:space-between;">
                         <span style="color:#22c55e">{stable_pct:.0f}%</span>
@@ -1681,78 +1681,102 @@ def generate_command_center_html(
             other_in_src = []
             other_out_src = []
             
+            # 聚合計算 Top Tokens (Across All CEXs)
+            token_agg = {} # { 'BTC': 500, 'ETH': -200 }
+            
             for c in cex_summary.get("top_10_by_tvl"):
                 hist = c.history_data.get(p_key, {})
                 s = hist.get('stable_change', 0)
-                o = hist.get('other_change', 0) # Price-Adjusted
+                o = hist.get('other_change', 0)
                 
-                # 穩定幣邏輯: 主要關注流入 (Buying Power)
-                if s > 0: 
-                    total_stable_in += s
-                    stable_in_src.append((s, c.name))
-                    
-                # 其他幣邏輯: 區分 Inflow (Deposit) vs Outflow (Withdrawal)
-                if o > 0:
-                    total_other_in += o
-                    other_in_src.append((o, c.name))
-                elif o < 0:
-                    val = abs(o)
-                    total_other_out += val
-                    other_out_src.append((val, c.name))
+                # 累加總量
+                if s > 0: total_stable_in += s
+                if o > 0: total_other_in += o
+                elif o < 0: total_other_out += abs(o)
+                
+                # 累加 Token 詳細數據
+                raw_tokens = hist.get('top_tokens_raw', [])
+                for sym, amt in raw_tokens:
+                    token_agg[sym] = token_agg.get(sym, 0) + amt
+
+            # 處理來源字串
+            # (這裡可以保留原本的 CEX Source 邏輯，或改用 Token)
+            # 用戶需求: "冷錢包流入流出的幣種" -> 我們優先顯示幣種
             
-            # 排序取前 3
-            def get_top_str(src_list):
-                if not src_list: return "—"
-                src_list.sort(key=lambda x: x[0], reverse=True)
-                # 只取前 3 個名字，若名字太長可縮寫 (這裡暫時直接顯示)
-                top_3 = [name.replace(" Exchange", "").replace(" Global", "") for _, name in src_list[:3]]
-                return ", ".join(top_3)
+            # 分類幣種: 穩定幣 vs 其他
+            stablecoins = ['USDT', 'USDC', 'DAI', 'FDUSD', 'TUSD', 'USDD', 'BUSD', 'PYUSD', 'GUSD', 'USDE']
             
-            top_stable = get_top_str(stable_in_src)
-            top_other_in = get_top_str(other_in_src)
-            top_other_out = get_top_str(other_out_src)
+            top_stable_tokens = []
+            top_risk_tokens = [] # 充值 (賣壓)
+            top_cold_tokens = [] # 提現 (屯幣)
             
-            # Row HTML
+            for sym, amt in token_agg.items():
+                is_stable = sym in stablecoins or ('USD' in sym and 'BTC' not in sym and 'ETH' not in sym)
+                
+                if is_stable:
+                    if amt > 0: top_stable_tokens.append((sym, amt))
+                else:
+                    if amt > 0: top_risk_tokens.append((sym, amt))
+                    elif amt < 0: top_cold_tokens.append((sym, abs(amt)))
+            
+            # 輔助: 生成 Token HTML String
+            def get_token_html(token_list, color, limit=3):
+                if not token_list: return ""
+                token_list.sort(key=lambda x: x[1], reverse=True)
+                
+                items = []
+                for sym, val in token_list[:limit]:
+                    val_s = fmt_amt(val).replace("+", "").replace("$", "") # 簡化顯示
+                    items.append(f"<span style='background:rgba(255,255,255,0.08); padding:2px 6px; border-radius:4px; margin-right:4px; margin-bottom:2px; display:inline-block; font-size:0.75rem;'>{sym} {val_s}</span>")
+                return "".join(items)
+
+            token_stable_html = get_token_html(top_stable_tokens, "#22c55e")
+            token_risk_html = get_token_html(top_risk_tokens, "#f97316")
+            token_cold_html = get_token_html(top_cold_tokens, "#3b82f6")
+            
+            # Row HTML (Mobile Friendly)
+            # 使用 Flexbox 或保持 Table 但優化 Padding
             rows_html += f'''
-            <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.2s;">
-                <td style="padding:12px 10px; color:#ccc; font-weight:500;">{p_name}</td>
+            <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                <td style="padding:12px 8px; color:#ccc; font-weight:500; white-space:nowrap;">{p_name}</td>
                 
-                <!-- 穩定幣流入 -->
-                <td style="padding:12px 10px; background:rgba(34, 197, 94, 0.02);">
-                    <div style="color:#22c55e; font-weight:bold; font-size:1.05rem;">{fmt_amt(total_stable_in)}</div>
-                    <div style="font-size:0.75rem; color:#666; margin-top:4px; line-height:1.2; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:200px;">源: {top_stable}</div>
+                <!-- 穩定幣 -->
+                <td style="padding:12px 8px; background:rgba(34, 197, 94, 0.03); vertical-align:top;">
+                    <div style="color:#22c55e; font-weight:bold; font-size:1rem;">{fmt_amt(total_stable_in)}</div>
+                    <div style="margin-top:4px;">{token_stable_html}</div>
                 </td>
                 
-                <!-- 其他幣充值 (賣壓) -->
-                <td style="padding:12px 10px; background:rgba(249, 115, 22, 0.02);">
-                    <div style="color:#f97316; font-weight:bold; font-size:1.05rem;">{fmt_amt(total_other_in)}</div>
-                    <div style="font-size:0.75rem; color:#666; margin-top:4px; line-height:1.2; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:200px;">源: {top_other_in}</div>
+                <!-- 危險充值 -->
+                <td style="padding:12px 8px; background:rgba(249, 115, 22, 0.03); vertical-align:top;">
+                    <div style="color:#f97316; font-weight:bold; font-size:1rem;">{fmt_amt(total_other_in)}</div>
+                    <div style="margin-top:4px;">{token_risk_html}</div>
                 </td>
                 
-                <!-- 其他幣提現 (屯幣) -->
-                <td style="padding:12px 10px; background:rgba(59, 130, 246, 0.02);">
-                    <div style="color:#3b82f6; font-weight:bold; font-size:1.05rem;">{fmt_amt(total_other_out)}</div>
-                    <div style="font-size:0.75rem; color:#666; margin-top:4px; line-height:1.2; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:200px;">源: {top_other_out}</div>
+                <!-- 冷錢包提現 -->
+                <td style="padding:12px 8px; background:rgba(59, 130, 246, 0.03); vertical-align:top;">
+                    <div style="color:#3b82f6; font-weight:bold; font-size:1rem;">{fmt_amt(total_other_out)}</div>
+                    <div style="margin-top:4px;">{token_cold_html}</div>
                 </td>
             </tr>
             '''
             
         whale_monitor_html = f'''
-        <div class="card" style="margin-top: 1rem; border-top: 4px solid var(--accent); box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
-            <div class="card-header" style="padding-bottom:1rem; border-bottom:1px solid rgba(255,255,255,0.05);">
-                <div class="card-title" style="font-size:1.1rem;">
+        <div class="card" style="margin-top: 1rem; border-top: 4px solid var(--accent); box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.05);">
+            <div class="card-header" style="padding:12px 16px; border-bottom:1px solid rgba(255,255,255,0.05); display:flex; justify-content:space-between; align-items:center;">
+                <div class="card-title" style="font-size:1.1rem; margin:0;">
                     <span style="margin-right:8px;">🐋</span> 
-                    鯨魚與冷錢包動向深度分析 (Whale Deep Dive)
+                    鯨魚與冷錢包動向 (Whale Deep Dive)
                 </div>
             </div>
-            <div style="overflow-x: auto;">
-                <table style="width:100%; border-collapse:collapse; font-size:0.9rem;">
+            
+            <div style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
+                <table style="width:100%; border-collapse:collapse; min-width:600px;">
                     <thead>
                         <tr style="background:rgba(255,255,255,0.02); text-align:left;">
-                            <th style="padding:12px 10px; color:#888; font-weight:normal; width:10%;">週期</th>
-                            <th style="padding:12px 10px; color:#22c55e; font-weight:normal; width:30%;">💰 穩定幣買盤注入 <div style="font-size:0.7rem; opacity:0.7;">(總流入量)</div></th>
-                            <th style="padding:12px 10px; color:#f97316; font-weight:normal; width:30%;">⚠️ 危險充值信號 <div style="font-size:0.7rem; opacity:0.7;">(其他幣流入/潛在賣壓)</div></th>
-                            <th style="padding:12px 10px; color:#3b82f6; font-weight:normal; width:30%;">🥶 冷錢包提現屯幣 <div style="font-size:0.7rem; opacity:0.7;">(其他幣流出/長期持有)</div></th>
+                            <th style="padding:10px 8px; color:#888; font-weight:normal; width:10%;">週期</th>
+                            <th style="padding:10px 8px; color:#22c55e; font-weight:normal; width:30%;">💰 穩定幣買盤</th>
+                            <th style="padding:10px 8px; color:#f97316; font-weight:normal; width:30%;">⚠️ 潛在賣壓 (充值)</th>
+                            <th style="padding:10px 8px; color:#3b82f6; font-weight:normal; width:30%;">🥶 冷錢包 (提現)</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -1760,9 +1784,9 @@ def generate_command_center_html(
                     </tbody>
                 </table>
             </div>
-             <div style="padding: 10px; font-size:0.75rem; color:var(--text-muted); text-align:right; border-top:1px solid rgba(255,255,255,0.05); margin-top:5px;">
-                * 數據每 30 分鐘更新。顯示該類別的前 3 大來源交易所。<br>
-                * "充值"與"提現"數值均已剔除幣價漲跌幅 (Price Adjusted)，代表真實資產流動。
+             <div style="padding: 10px 16px; font-size:0.75rem; color:var(--text-muted); text-align:right; border-top:1px solid rgba(255,255,255,0.05);">
+                * 數據每 30 分鐘更新。顯示主要流動幣種 (Top 3)。<br>
+                * 數值已排除幣價波動 (Price Adjusted)，代表真實籌碼流動。
             </div>
         </div>
         '''
