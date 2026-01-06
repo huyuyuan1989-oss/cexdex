@@ -1043,30 +1043,52 @@ def analyze_cex_flows(cex_data: list) -> Tuple[List[CEXFlowData], dict]:
         market_share = (tvl / total_cex_tvl * 100) if total_cex_tvl > 0 else 0
         
         # 判定資金流向
-        # 判定資金流向 (整合詳細分析)
+        # 判定資金流向 (整合詳細分析 & 歷史趨勢)
         api_inflow = cex.get('inflow_type', '')
+        history = cex.get('history_data', {})
         
-        if "計算中" not in api_inflow and api_inflow:
-             # 如果有詳細分析，優先使用
-             flow_direction = api_inflow
-             interpretation = f"穩定幣佔比: {cex.get('stablecoin_pct', 0):.1f}%"
-             if "買盤" in api_inflow:
-                 inflow_count += 1
-             elif "賣壓" in api_inflow or "減弱" in api_inflow:
-                 outflow_count += 1
-        else:
-            # 簡單判定 (備用)
-            if change_24h > 0.5:
-                flow_direction = "📥 流入 CEX"
-                interpretation = "潛在賣壓 (假設)"
+        # 高級趨勢分析 (基於 W1-W4 穩定幣流向)
+        stable_inflow_weeks = 0  # 穩定幣流入週數
+        stable_outflow_weeks = 0 # 穩定幣流出週數
+        periods_checked = 0
+        
+        for p in ['w1', 'w2', 'w3', 'w4']:
+            if p in history:
+                periods_checked += 1
+                s_chg = history[p].get('stable_change', 0)
+                if s_chg > 5_000_000: # 門檻 > 5M USD
+                    stable_inflow_weeks += 1
+                elif s_chg < -5_000_000:
+                    stable_outflow_weeks += 1
+        
+        # 決定最終顯示的流向解析
+        final_interpretation = api_inflow # 預設使用 24H 判斷
+        
+        if periods_checked >= 2: # 至少有 2 週數據
+            if stable_inflow_weeks >= periods_checked - 1: # 幾乎每週都在流入
+                final_interpretation = "📅 月度持續吸籌"
                 inflow_count += 1
-            elif change_24h < -0.5:
-                flow_direction = "📤 流出 CEX"
-                interpretation = "提幣囤貨 (假設)"
+            elif stable_outflow_weeks >= periods_checked - 1: # 幾乎每週都在流出
+                final_interpretation = "📅 月度購買力減弱"
                 outflow_count += 1
             else:
-                flow_direction = "➖ 持平"
-                interpretation = "資金平衡"
+                # 混合情況，看最近一週 (W1)
+                w1_data = history.get('w1', {})
+                w1_s = w1_data.get('stable_change', 0)
+                if w1_s > 20_000_000:
+                    final_interpretation = "📈 近週強力吸籌"
+                    inflow_count += 1
+                elif w1_s < -20_000_000:
+                    final_interpretation = "📉 近週資金出逃"
+                    outflow_count += 1
+        
+        # 如果趨勢分析沒有結果 (例如數據不足)，或是中性，則使用原本的 24H 判斷計數
+        if final_interpretation == api_inflow:
+             if "買盤" in api_inflow: inflow_count += 1
+             elif "賣壓" in api_inflow or "減弱" in api_inflow: outflow_count += 1
+             
+        interpretation = f"穩定幣佔比: {cex.get('stablecoin_pct', 0):.1f}%"
+        flow_direction = final_interpretation
         
         cex_flow = CEXFlowData(
             name=cex.get('name', ''),
