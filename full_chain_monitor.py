@@ -4239,19 +4239,20 @@ async def run_analysis():
             with open(dashboard_file, 'w', encoding='utf-8') as f:
                 f.write(command_center_html)
             
-            # 同時更新 latest_dashboard.html
-            latest_dashboard = REPORT_DIR / "latest_dashboard.html"
-            with open(latest_dashboard, 'w', encoding='utf-8') as f:
+            # 同時更新 latest.html (覆蓋舊版報告，作為唯一入口)
+            latest_report = REPORT_DIR / "latest.html"
+            with open(latest_report, 'w', encoding='utf-8') as f:
                 f.write(command_center_html)
             
             logger.info(f"🎛️ 資金流向主控台報告已生成: {dashboard_file}")
+            logger.info(f"✅ 已整合為單一報告: {latest_report}")
             
             # 輸出主控台摘要 (含 CEX+DEX)
             whale_targets = identify_whale_accumulation_targets(all_flow_analysis)
             print_command_center_terminal(command_center_summary, whale_targets, cex_dex_summary)
             
             # 添加主控台連結和 CEX+DEX 數據到 stats
-            stats['dashboard_file'] = str(latest_dashboard)
+            stats['dashboard_file'] = str(latest_report)
             stats['trading_signal'] = command_center_summary.trading_signal.value
             stats['market_phase'] = command_center_summary.market_phase.value
             
@@ -4271,7 +4272,7 @@ async def run_analysis():
         
         # 添加 schedule_interval 到 stats
         stats['schedule_interval'] = SCHEDULE_INTERVAL
-        stats['html_file'] = str(html_file)
+        stats['html_file'] = str(latest_report)
         
         # ==== 只發送 1 個整合摘要通知 ====
         # 計算輪動週期
