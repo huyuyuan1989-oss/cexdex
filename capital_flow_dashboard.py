@@ -1085,7 +1085,7 @@ def analyze_cex_flows(cex_data: list) -> Tuple[List[CEXFlowData], dict]:
         'inflow_count': inflow_count,
         'outflow_count': outflow_count,
         'trend_interpretation': cex_trend,
-        'top_3_by_tvl': sorted(cex_flows, key=lambda x: x.tvl, reverse=True)[:3],
+        'top_10_by_tvl': sorted(cex_flows, key=lambda x: x.tvl, reverse=True)[:10],
         'top_inflows': sorted([c for c in cex_flows if c.tvl_24h_change > 0], 
                               key=lambda x: x.tvl_24h_change, reverse=True)[:3],
         'top_outflows': sorted([c for c in cex_flows if c.tvl_24h_change < 0], 
@@ -1392,9 +1392,9 @@ def generate_cex_dex_html_section(cex_dex_summary: CEXDEXSummary, cex_summary: O
     '''
     
     # CEX 交易所明細
-    if cex_summary and cex_summary.get("top_3_by_tvl"):
+    if cex_summary and cex_summary.get("top_10_by_tvl"):
         cex_rows = ""
-        for cex in cex_summary.get("top_3_by_tvl", []):
+        for cex in cex_summary.get("top_10_by_tvl", []):
             c24h_class = "positive" if cex.tvl_24h_change > 0 else "negative"
             c7d_class = "positive" if cex.tvl_7d_change > 0 else "negative"
             cex_rows += f'''
