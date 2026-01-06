@@ -1485,7 +1485,7 @@ async def get_chain_historical_tvl(session, chain_name):
 
 async def get_cex_data_async(session):
     """
-    獲取中心化交易所 (CEX) 的資產數據
+    獲取中心化交易所 (CEX) 的資產數據與資產構成
     來源: DefiLlama Protocols (category='CEX')
     """
     logger.info("🏦 正在獲取 CEX 資產數據...")
@@ -1506,74 +1506,209 @@ async def get_cex_data_async(session):
                 cex_list.append({
                     'name': p['name'],
                     'symbol': p.get('symbol', ''),
+                    'slug': p.get('slug', ''), # 重要：獲取 slug
                     'tvl': tvl,
                     'change_1d': p.get('change_1d', 0) or 0,
                     'change_7d': p.get('change_7d', 0) or 0,
-                    'logo': p.get('logo', '')
+                    'logo': p.get('logo', ''),
+                    # 初始化新欄位
+                    'stablecoin_pct': 0,
+                    'non_stablecoin_pct': 0,
+                    'inflow_type': '計算中...'
                 })
             except (KeyError, TypeError) as e:
                 logger.debug(f"跳過無效 CEX 數據: {e}")
                 continue
     
     cex_list.sort(key=lambda x: x['tvl'], reverse=True)
-    return cex_list[:10]  # 返回前 10 大
+    top_cex = cex_list[:10]  # 只處理前 10 大
+    
+    # 並行獲取詳細資產分佈
+    logger.info(f"🔍 正在深入分析前 {len(top_cex)} 大 CEX 的資產構成...")
+    
+    async def enrich_cex_details(cex):
+        slug = cex.get('slug')
+        if not slug:
+            return
+            
+        detail_url = f"https://api.llama.fi/protocol/{slug}"
+        try:
+            detail_data = await fetch_with_retry(session, detail_url)
+            if not detail_data or 'tokensInUsd' not in detail_data:
+                return
+                
+            # 獲取最新一筆數據 (如果有 tokensInUsd)
+            if not detail_data['tokensInUsd']:
+                return
+                
+            latest = detail_data['tokensInUsd'][-1]
+            tokens = latest.get('tokens', {})
+            
+            if not tokens:
+                return
+                
+            # 計算穩定幣佔比
+            # 常見穩定幣清單
+            stablecoins = ['USDT', 'USDC', 'DAI', 'FDUSD', 'TUSD', 'USDD', 'BUSD', 'PYUSD', 'GUSD', 'USDE']
+            
+            total_usd = sum(tokens.values())
+            if total_usd == 0:
+                return
+                
+            # 寬鬆匹配: 在清單中 或 包含 'USD' 且非 'USDe' (避免 Ethena 重複計算如果清單已包含) 
+            # 簡單起見，匹配清單 + 包含 "USD" 字串的代幣 (通常是穩定幣)
+            stable_usd = sum(v for k, v in tokens.items() if k in stablecoins or ('USD' in k and 'WETH' not in k and 'BTC' not in k))
+            
+            stable_pct = (stable_usd / total_usd) * 100
+            non_stable_pct = 100 - stable_pct
+            
+            cex['stablecoin_pct'] = stable_pct
+            cex['non_stablecoin_pct'] = non_stable_pct
+            
+            # 判斷流向類型
+            change_24h = cex['change_1d']
+            
+            # 閾值設定
+            if abs(change_24h) < 0.2:
+                 cex['inflow_type'] = "➖ 資金平衡"
+            elif change_24h > 0: # 流入
+                # 如果是流入，看是什麼資產流入
+                # 這裡假設資產分佈代表了流入的成分 (雖然不完全精確，但在大樣本下有效)
+                if stable_pct > 40: # 穩定幣佔比超過 40% 且流入 -> 視為有潛在買盤
+                    cex['inflow_type'] = "📈 潛在買盤 (穩定幣)"
+                else:
+                    cex['inflow_type'] = "📉 潛在賣壓 (資產充值)"
+            else: # 流出
+                if stable_pct > 60: # 穩定幣佔比高但正在流出 -> 購買力減少
+                     cex['inflow_type'] = "📉 購買力減弱"
+                else:
+                    cex['inflow_type'] = "📈 提幣囤貨 (DeFi/冷錢包)"
+                    
+        except Exception as e:
+            logger.debug(f"無法獲取 {cex['name']} 詳細資訊: {e}")
+
+    await asyncio.gather(*[enrich_cex_details(cex) for cex in top_cex])
+    
+    return top_cex
 
 
 async def get_funding_rates_async(session):
     """
-    🔧 獲取期貨資金費率 (Funding Rate)
-    來源: Coinglass 公開 API (免費)
+    🔧 獲取期貨資金費率 (Funding Rate) - 使用 CCXT 多交易所備援
+    
+    支持交易所順序: Binance → Bybit → OKX
     
     資金費率解讀:
     - 正值 > 0.01%: 多頭擁擠，市場過熱
     - 負值 < -0.01%: 空頭擁擠，可能反彈
     - 接近 0: 市場平衡
     """
-    logger.info("📊 正在獲取期貨資金費率...")
+    logger.info("📊 正在獲取期貨資金費率 (CCXT)...")
     
-    # 備用方案：使用多個交易所的公開 API
     funding_data = {
-        'btc': {'rate': 0, 'oi_change': 0, 'interpretation': ''},
-        'eth': {'rate': 0, 'oi_change': 0, 'interpretation': ''},
+        'btc': {'rate': 0, 'oi_change': 0, 'interpretation': '', 'source': ''},
+        'eth': {'rate': 0, 'oi_change': 0, 'interpretation': '', 'source': ''},
     }
     
+    # 嘗試使用 CCXT
     try:
-        # 嘗試 Binance 公開 API (無需 API Key)
-        binance_url = "https://fapi.binance.com/fapi/v1/premiumIndex"
-        data = await fetch_with_retry(session, binance_url)
+        import ccxt
         
-        if data:
-            for item in data:
-                symbol = item.get('symbol', '')
-                rate = float(item.get('lastFundingRate', 0)) * 100  # 轉換為百分比
+        # 交易所優先順序
+        exchanges_to_try = [
+            ('binance', 'BTC/USDT:USDT', 'ETH/USDT:USDT'),
+            ('bybit', 'BTC/USDT:USDT', 'ETH/USDT:USDT'),
+            ('okx', 'BTC/USDT:USDT', 'ETH/USDT:USDT'),
+        ]
+        
+        for exchange_id, btc_symbol, eth_symbol in exchanges_to_try:
+            try:
+                # 使用 asyncio.to_thread 在異步環境中運行同步 CCXT
+                def fetch_funding():
+                    exchange_class = getattr(ccxt, exchange_id)
+                    exchange = exchange_class({
+                        'enableRateLimit': True,
+                        'timeout': 10000,
+                    })
+                    
+                    rates = {}
+                    try:
+                        # 獲取 BTC 資金費率
+                        btc_funding = exchange.fetchFundingRate('BTC/USDT')
+                        if btc_funding and 'fundingRate' in btc_funding:
+                            rates['btc'] = btc_funding['fundingRate'] * 100  # 轉為百分比
+                    except Exception as e:
+                        logger.debug(f"{exchange_id} BTC funding rate error: {e}")
+                    
+                    try:
+                        # 獲取 ETH 資金費率
+                        eth_funding = exchange.fetchFundingRate('ETH/USDT')
+                        if eth_funding and 'fundingRate' in eth_funding:
+                            rates['eth'] = eth_funding['fundingRate'] * 100  # 轉為百分比
+                    except Exception as e:
+                        logger.debug(f"{exchange_id} ETH funding rate error: {e}")
+                    
+                    return rates, exchange_id
                 
-                if symbol == 'BTCUSDT':
-                    funding_data['btc']['rate'] = rate
-                elif symbol == 'ETHUSDT':
-                    funding_data['eth']['rate'] = rate
+                rates, source = await asyncio.to_thread(fetch_funding)
+                
+                if rates.get('btc') is not None:
+                    funding_data['btc']['rate'] = rates['btc']
+                    funding_data['btc']['source'] = source
+                    
+                if rates.get('eth') is not None:
+                    funding_data['eth']['rate'] = rates['eth']
+                    funding_data['eth']['source'] = source
+                
+                # 如果成功獲取到兩個幣種的數據，跳出循環
+                if rates.get('btc') is not None and rates.get('eth') is not None:
+                    logger.info(f"✅ 資金費率獲取成功 ({source.upper()}): BTC {rates['btc']:.4f}%, ETH {rates['eth']:.4f}%")
+                    break
+                    
+            except Exception as e:
+                logger.debug(f"⚠️ {exchange_id} 獲取失敗: {e}")
+                continue
+        
+    except ImportError:
+        logger.warning("⚠️ CCXT 未安裝，嘗試使用備用方案...")
+        # 備用方案：直接使用 aiohttp 請求 Binance API
+        try:
+            binance_url = "https://fapi.binance.com/fapi/v1/premiumIndex"
+            data = await fetch_with_retry(session, binance_url)
             
-            # 解讀資金費率
-            for coin in ['btc', 'eth']:
-                rate = funding_data[coin]['rate']
-                if rate > 0.05:
-                    funding_data[coin]['interpretation'] = "🔴 極度過熱 - 多頭擁擠，謹慎追高"
-                elif rate > 0.02:
-                    funding_data[coin]['interpretation'] = "🟠 偏多頭 - 資金成本升高"
-                elif rate > 0.005:
-                    funding_data[coin]['interpretation'] = "🟡 略偏多 - 正常範圍"
-                elif rate > -0.005:
-                    funding_data[coin]['interpretation'] = "🟢 中性 - 市場平衡"
-                elif rate > -0.02:
-                    funding_data[coin]['interpretation'] = "🟡 略偏空 - 正常範圍"
-                else:
-                    funding_data[coin]['interpretation'] = "🟢 空頭擁擠 - 可能反彈機會"
-            
-            logger.info(f"✅ 資金費率獲取成功: BTC {funding_data['btc']['rate']:.4f}%, ETH {funding_data['eth']['rate']:.4f}%")
-        else:
-            logger.warning("⚠️ 無法獲取 Binance 資金費率")
-            
+            if data:
+                for item in data:
+                    symbol = item.get('symbol', '')
+                    rate = float(item.get('lastFundingRate', 0)) * 100
+                    
+                    if symbol == 'BTCUSDT':
+                        funding_data['btc']['rate'] = rate
+                        funding_data['btc']['source'] = 'binance'
+                    elif symbol == 'ETHUSDT':
+                        funding_data['eth']['rate'] = rate
+                        funding_data['eth']['source'] = 'binance'
+                        
+                logger.info(f"✅ 資金費率獲取成功 (備用): BTC {funding_data['btc']['rate']:.4f}%, ETH {funding_data['eth']['rate']:.4f}%")
+        except Exception as e:
+            logger.warning(f"⚠️ 備用方案也失敗: {e}")
     except Exception as e:
         logger.warning(f"⚠️ 資金費率獲取失敗: {e}")
+    
+    # 解讀資金費率
+    for coin in ['btc', 'eth']:
+        rate = funding_data[coin]['rate']
+        if rate > 0.05:
+            funding_data[coin]['interpretation'] = "🔴 極度過熱 - 多頭擁擠，謹慎追高"
+        elif rate > 0.02:
+            funding_data[coin]['interpretation'] = "🟠 偏多頭 - 資金成本升高"
+        elif rate > 0.005:
+            funding_data[coin]['interpretation'] = "🟡 略偏多 - 正常範圍"
+        elif rate > -0.005:
+            funding_data[coin]['interpretation'] = "🟢 中性 - 市場平衡"
+        elif rate > -0.02:
+            funding_data[coin]['interpretation'] = "🟡 略偏空 - 正常範圍"
+        else:
+            funding_data[coin]['interpretation'] = "🟢 空頭擁擠 - 可能反彈機會"
     
     return funding_data
 

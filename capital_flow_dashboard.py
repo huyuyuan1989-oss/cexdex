@@ -120,6 +120,11 @@ class CEXFlowData:
     
     # 市場佔比
     market_share: float = 0.0
+    
+    # 資產構成 (新增)
+    stablecoin_pct: float = 0.0      # 穩定幣佔比 (0-100)
+    non_stablecoin_pct: float = 0.0  # 非穩定幣佔比 (0-100)
+    inflow_type: str = ""            # "潛在買盤" / "潛在賣壓" / "中性"
 
 
 @dataclass
@@ -1033,17 +1038,30 @@ def analyze_cex_flows(cex_data: list) -> Tuple[List[CEXFlowData], dict]:
         market_share = (tvl / total_cex_tvl * 100) if total_cex_tvl > 0 else 0
         
         # 判定資金流向
-        if change_24h > 0.5:
-            flow_direction = "📥 流入 CEX"
-            interpretation = "用戶充值增加，可能準備交易或賣出"
-            inflow_count += 1
-        elif change_24h < -0.5:
-            flow_direction = "📤 流出 CEX"
-            interpretation = "用戶提幣增加，可能轉向 DeFi 或冷錢包"
-            outflow_count += 1
+        # 判定資金流向 (整合詳細分析)
+        api_inflow = cex.get('inflow_type', '')
+        
+        if "計算中" not in api_inflow and api_inflow:
+             # 如果有詳細分析，優先使用
+             flow_direction = api_inflow
+             interpretation = f"穩定幣佔比: {cex.get('stablecoin_pct', 0):.1f}%"
+             if "買盤" in api_inflow:
+                 inflow_count += 1
+             elif "賣壓" in api_inflow or "減弱" in api_inflow:
+                 outflow_count += 1
         else:
-            flow_direction = "➖ 持平"
-            interpretation = "資金流動平衡"
+            # 簡單判定 (備用)
+            if change_24h > 0.5:
+                flow_direction = "📥 流入 CEX"
+                interpretation = "潛在賣壓 (假設)"
+                inflow_count += 1
+            elif change_24h < -0.5:
+                flow_direction = "📤 流出 CEX"
+                interpretation = "提幣囤貨 (假設)"
+                outflow_count += 1
+            else:
+                flow_direction = "➖ 持平"
+                interpretation = "資金平衡"
         
         cex_flow = CEXFlowData(
             name=cex.get('name', ''),
@@ -1053,7 +1071,10 @@ def analyze_cex_flows(cex_data: list) -> Tuple[List[CEXFlowData], dict]:
             tvl_7d_change=change_7d,
             flow_direction=flow_direction,
             flow_interpretation=interpretation,
-            market_share=market_share
+            market_share=market_share,
+            stablecoin_pct=cex.get('stablecoin_pct', 0),
+            non_stablecoin_pct=cex.get('non_stablecoin_pct', 0),
+            inflow_type=api_inflow
         )
         cex_flows.append(cex_flow)
         
@@ -1397,6 +1418,26 @@ def generate_cex_dex_html_section(cex_dex_summary: CEXDEXSummary, cex_summary: O
         for cex in cex_summary.get("top_10_by_tvl", []):
             c24h_class = "positive" if cex.tvl_24h_change > 0 else "negative"
             c7d_class = "positive" if cex.tvl_7d_change > 0 else "negative"
+            # 資產構成 HTML
+            stable_pct = cex.stablecoin_pct
+            other_pct = cex.non_stablecoin_pct
+            
+            if stable_pct == 0 and other_pct == 0:
+                composition_html = '<span style="color:var(--text-muted); font-size:0.8rem;">計算中...</span>'
+            else:
+                composition_html = f'''
+                <div style="width:120px;">
+                    <div style="display:flex; height:6px; width:100%; background:rgba(255,255,255,0.1); border-radius:3px; overflow:hidden; margin-bottom:4px;">
+                        <div style="width:{stable_pct}%; background:#22c55e;" title="穩定幣: {stable_pct:.1f}%"></div>
+                        <div style="width:{other_pct}%; background:#f97316;" title="非穩定幣: {other_pct:.1f}%"></div>
+                    </div>
+                    <div style="font-size:0.65rem; color:var(--text-muted); display:flex; justify-content:space-between;">
+                        <span style="color:#22c55e">💵 {stable_pct:.0f}%</span>
+                        <span style="color:#f97316">🚀 {other_pct:.0f}%</span>
+                    </div>
+                </div>
+                '''
+
             cex_rows += f'''
             <tr>
                 <td><strong>{cex.name}</strong></td>
@@ -1404,7 +1445,8 @@ def generate_cex_dex_html_section(cex_dex_summary: CEXDEXSummary, cex_summary: O
                 <td class="{c24h_class}">{cex.tvl_24h_change:+.2f}%</td>
                 <td class="{c7d_class}">{cex.tvl_7d_change:+.2f}%</td>
                 <td>{cex.market_share:.1f}%</td>
-                <td>{cex.flow_direction}</td>
+                <td>{composition_html}</td>
+                <td style="font-size:0.8rem;">{cex.flow_direction}</td>
             </tr>
             '''
         
@@ -1422,7 +1464,8 @@ def generate_cex_dex_html_section(cex_dex_summary: CEXDEXSummary, cex_summary: O
                         <th>24H</th>
                         <th>7D</th>
                         <th>市場佔比</th>
-                        <th>流向</th>
+                        <th>資產構成 (穩定/非穩)</th>
+                        <th>流向解析</th>
                     </tr>
                 </thead>
                 <tbody>
