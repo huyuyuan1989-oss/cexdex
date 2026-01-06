@@ -1642,6 +1642,17 @@ def generate_command_center_html(
 ) -> str:
     """生成資金流向主控台 HTML 報告 (Tab 整合版)"""
     
+    # 數值格式化輔助函數
+    def fmt_amt(val):
+        if val == 0: return "—"
+        abs_v = abs(val)
+        sign = "+" if val > 0 else "-"
+        # 為了更直觀，我們用 M (百萬) 為主要單位
+        if abs_v >= 1e9: return f"{sign}${abs_v/1e9:.1f}B"
+        if abs_v >= 1e6: return f"{sign}${abs_v/1e6:.1f}M"
+        if abs_v >= 1e3: return f"{sign}${abs_v/1e3:.1f}K"
+        return f"{sign}${val:.0f}"
+    
     # 交易信號顏色
     signal_colors = {
         TradingSignal.STRONG_BUY: "#22c55e",

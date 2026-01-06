@@ -4211,6 +4211,10 @@ async def run_analysis():
                 full_report_content = f.read()
         except Exception as e:
             logger.error(f"讀取完整報告失敗: {e}")
+            
+        # 初始化 latest_report (默認為 html_file)，避免後續參照錯誤
+        latest_report = html_file
+
 
         # 7.5 生成資金流向主控台報告 (新增)
         try:
