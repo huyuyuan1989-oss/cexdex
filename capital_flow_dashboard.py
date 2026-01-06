@@ -1653,79 +1653,94 @@ def generate_command_center_html(
     
     signal_color = signal_colors.get(summary.trading_signal, "#fbbf24")
     
-    # === 新增: 鯨魚與冷錢包動向計算與 HTML 生成 ===
+    # === 新增: 鯨魚與冷錢包動向 (詳細報表版) ===
     whale_monitor_html = ""
     if cex_summary and cex_summary.get("top_10_by_tvl"):
-        w_buy = 0
-        w_sell = 0
-        top_buy_src = []
-        top_sell_src = []
+        periods = [('24h', '24小時'), ('w1', '近 1 週'), ('w2', '近 2 週'), ('w3', '近 3 週'), ('w4', '近 1 月')]
+        rows_html = ""
         
-        for c in cex_summary.get("top_10_by_tvl"):
-            # 取 W1 數據 (最近7天)
-            hist = c.history_data.get('w1', {})
-            s = hist.get('stable_change', 0)
-            o = hist.get('other_change', 0) # Price-Adjusted Net Flow
+        for p_key, p_name in periods:
+            # 聚合計算
+            total_buy = 0
+            total_sell = 0
+            buy_candidates = []
+            sell_candidates = []
             
-            if s > 0: 
-                w_buy += s
-                top_buy_src.append((s, c.name))
-            if o > 0:
-                w_sell += o
-                top_sell_src.append((o, c.name))
+            for c in cex_summary.get("top_10_by_tvl"):
+                hist = c.history_data.get(p_key, {})
+                s = hist.get('stable_change', 0)
+                o = hist.get('other_change', 0) # Price-Adjusted Net Flow
                 
-        top_buy_src.sort(key=lambda x: x[0], reverse=True)
-        top_sell_src.sort(key=lambda x: x[0], reverse=True)
-        
-        main_buy = top_buy_src[0][1] if top_buy_src else "無"
-        main_sell = top_sell_src[0][1] if top_sell_src else "無"
-        
-        # 情緒判定
-        w_sentiment = "🟡 多空平衡"
-        w_color = "#fbbf24"
-        
-        if w_buy > w_sell * 1.3:
-            w_sentiment = "🟢 鯨魚持續吸籌 (Accumulating)"
-            w_color = "#22c55e"
-        elif w_sell > w_buy * 1.3:
-            w_sentiment = "🔴 鯨魚正在倒貨 (Distribution)"
-            w_color = "#ef4444"
+                if s > 0: 
+                    total_buy += s
+                    buy_candidates.append((s, c.name))
+                if o > 0:
+                    total_sell += o
+                    sell_candidates.append((o, c.name))
+            
+            buy_candidates.sort(key=lambda x: x[0], reverse=True)
+            sell_candidates.sort(key=lambda x: x[0], reverse=True)
+            
+            top_buy_str = f"{buy_candidates[0][1]}" if buy_candidates else "—"
+            top_sell_str = f"{sell_candidates[0][1]}" if sell_candidates else "—"
+            
+            # Sentiment
+            sentiment = "🟡 觀望"
+            s_color = "#aaa"
+            s_bg = "rgba(255,255,255,0.05)"
+            
+            if total_buy > total_sell * 1.3:
+                sentiment = "🟢 鯨魚吸籌"
+                s_color = "#22c55e"
+                s_bg = "rgba(34, 197, 94, 0.1)"
+            elif total_sell > total_buy * 1.3:
+                sentiment = "🔴 鯨魚倒貨"
+                s_color = "#ef4444"
+                s_bg = "rgba(239, 68, 68, 0.1)"
+                
+            # Row HTML
+            rows_html += f'''
+            <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.2s;">
+                <td style="padding:12px 10px; color:#ccc; font-weight:500;">{p_name}</td>
+                <td style="padding:12px 10px;">
+                    <div style="color:#22c55e; font-weight:bold; font-size:1.05rem;">{fmt_amt(total_buy)}</div>
+                    <div style="font-size:0.75rem; color:#666; margin-top:2px;">👑 {top_buy_str}</div>
+                </td>
+                <td style="padding:12px 10px;">
+                    <div style="color:#f97316; font-weight:bold; font-size:1.05rem;">{fmt_amt(total_sell)}</div>
+                    <div style="font-size:0.75rem; color:#666; margin-top:2px;">👑 {top_sell_str}</div>
+                </td>
+                <td style="padding:12px 10px; text-align:center;">
+                    <span style="color:{s_color}; background:{s_bg}; border:1px solid {s_color}; padding:4px 8px; border-radius:6px; font-size:0.8rem; font-weight:bold;">{sentiment}</span>
+                </td>
+            </tr>
+            '''
             
         whale_monitor_html = f'''
-        <div class="card" style="margin-top: 1rem; border-left: 4px solid {w_color}; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);">
-            <div class="card-header" style="justify-content: space-between; align-items: center;">
-                <div class="card-title" style="display:flex; align-items:center;">
-                    <span style="font-size:1.2rem; margin-right:8px;">🐋</span> 
-                    鯨魚與冷錢包動向 
-                    <span style="font-size:0.75rem; color:var(--text-muted); font-weight:normal; margin-left:8px; padding:2px 6px; background:rgba(255,255,255,0.05); border-radius:4px;">7D Net Flow (Price-Adjusted)</span>
+        <div class="card" style="margin-top: 1rem; border-top: 4px solid var(--accent); box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+            <div class="card-header" style="padding-bottom:1rem; border-bottom:1px solid rgba(255,255,255,0.05);">
+                <div class="card-title" style="font-size:1.1rem;">
+                    <span style="margin-right:8px;">🐋</span> 
+                    鯨魚與冷錢包動向週報 (Whale Ledger)
                 </div>
-                <div style="font-weight:bold; color:{w_color}; border:1px solid {w_color}; padding: 4px 10px; border-radius:20px; font-size:0.85rem; background:rgba(0,0,0,0.2);">{w_sentiment}</div>
             </div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; padding: 1rem;">
-               <!-- Buying Power -->
-               <div style="background:rgba(34, 197, 94, 0.05); padding:1rem; border-radius:12px; border:1px solid rgba(34, 197, 94, 0.2); position: relative; overflow:hidden;">
-                   <div style="position:absolute; top:-10px; right:-10px; width:60px; height:60px; background:#22c55e; filter:blur(40px); opacity:0.2;"></div>
-                   <div style="color:#22c55e; font-weight:bold; font-size:0.9rem; margin-bottom:0.5rem; display:flex; align-items:center;">
-                       <span style="margin-right:4px;">💰</span> 外部資金注入 (Buy Power)
-                   </div>
-                   <div style="font-size:1.8rem; font-weight:800; color:#22c55e; margin-bottom:0.2rem; letter-spacing:-0.5px;">${w_buy/1e6:,.1f}M</div>
-                   <div style="font-size:0.8rem; color:#888; display:flex; justify-content:space-between;">
-                       <span>總穩定幣淨流入</span>
-                       <span style="color:#ccc;">主要: {main_buy}</span>
-                   </div>
-               </div>
-               <!-- Selling Pressure -->
-               <div style="background:rgba(249, 115, 22, 0.05); padding:1rem; border-radius:12px; border:1px solid rgba(249, 115, 22, 0.2); position: relative; overflow:hidden;">
-                   <div style="position:absolute; top:-10px; right:-10px; width:60px; height:60px; background:#f97316; filter:blur(40px); opacity:0.2;"></div>
-                   <div style="color:#f97316; font-weight:bold; font-size:0.9rem; margin-bottom:0.5rem; display:flex; align-items:center;">
-                       <span style="margin-right:4px;">⚠️</span> 冷錢包充值 (Potential Sell)
-                   </div>
-                   <div style="font-size:1.8rem; font-weight:800; color:#f97316; margin-bottom:0.2rem; letter-spacing:-0.5px;">${w_sell/1e6:,.1f}M</div>
-                   <div style="font-size:0.8rem; color:#888; display:flex; justify-content:space-between;">
-                       <span>總非穩定幣淨充值</span>
-                       <span style="color:#ccc;">主要: {main_sell}</span>
-                   </div>
-               </div>
+            <div style="overflow-x: auto;">
+                <table style="width:100%; border-collapse:collapse; font-size:0.9rem;">
+                    <thead>
+                        <tr style="background:rgba(255,255,255,0.02); text-align:left;">
+                            <th style="padding:12px 10px; color:#888; font-weight:normal; width:15%;">週期</th>
+                            <th style="padding:12px 10px; color:#22c55e; font-weight:normal; width:35%;">💰 外部資金注入 (Buy Power)</th>
+                            <th style="padding:12px 10px; color:#f97316; font-weight:normal; width:35%;">⚠️ 冷錢包充值 (Potential Sell)</th>
+                            <th style="padding:12px 10px; text-align:center; color:#888; font-weight:normal; width:15%;">狀態</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {rows_html}
+                    </tbody>
+                </table>
+            </div>
+             <div style="padding: 10px; font-size:0.75rem; color:var(--text-muted); text-align:right; border-top:1px solid rgba(255,255,255,0.05); margin-top:5px;">
+                * ⚠️ 冷錢包數值已剔除幣價漲幅 (Price Adjusted)，反映真實鏈上轉帳量。 "👑" 代表該時段最大流向交易所。
             </div>
         </div>
         '''
