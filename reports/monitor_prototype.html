@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚡ 加密貨幣即時戰情室 | Crypto Pulse</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700&family=Inter:wght@400;600;800&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            /* Cyberpunk / Fintech Dark Theme */
+            --bg-body: #050505;
+            --bg-card: #111111;
+            --bg-highlight: #1a1a1a;
+
+            --text-primary: #e0e0e0;
+            --text-secondary: #888888;
+            --text-accent: #00ffcc;
+            /* Neon Cyan */
+
+            --border: #333333;
+            --border-glow: rgba(0, 255, 204, 0.3);
+
+            /* Badges */
+            --badge-whale-bg: rgba(255, 215, 0, 0.15);
+            --badge-whale-text: #ffd700;
+            /* Gold */
+            --badge-smart-bg: rgba(180, 80, 255, 0.15);
+            --badge-smart-text: #b450ff;
+            /* Neon Purple */
+            --badge-inst-bg: rgba(0, 150, 255, 0.15);
+            --badge-inst-text: #0096ff;
+            /* Electric Blue */
+
+            /* Alerts */
+            --alert-high-vol: rgba(255, 50, 50, 0.2);
+            --alert-border: #ff3333;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            padding: 1.5rem;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Typography */
+        h1 {
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(90deg, #fff, #aaa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-family: 'Inter', "Noto Sans TC", sans-serif;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 2rem;
+            font-family: 'Roboto Mono', "Noto Sans TC", sans-serif;
+        }
+
+        /* DATA GRID (Table) Styles - Desktop Default */
+        .data-grid {
+            width: 100%;
+            border-collapse: collapse;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .data-grid thead {
+            border-bottom: 2px solid var(--border);
+        }
+
+        .data-grid th {
+            text-align: left;
+            padding: 1rem;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .data-grid td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+        }
+
+        /* Numerical Data Font */
+        .value,
+        .volume,
+        .oi {
+            font-family: 'Roboto Mono', monospace;
+            font-weight: 500;
+        }
+
+        .token-cell {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* 2. SMART MONEY BADGES */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border: 1px solid transparent;
+        }
+
+        .badge-whale {
+            background: var(--badge-whale-bg);
+            color: var(--badge-whale-text);
+            border-color: rgba(255, 215, 0, 0.3);
+        }
+
+        .badge-smart {
+            background: var(--badge-smart-bg);
+            color: var(--badge-smart-text);
+            border-color: rgba(180, 80, 255, 0.3);
+        }
+
+        .badge-inst {
+            background: var(--badge-inst-bg);
+            color: var(--badge-inst-text);
+            border-color: rgba(0, 150, 255, 0.3);
+        }
+
+        /* 3. OUTLIER VISUAL ALERTS (Pulsating Effect) */
+        @keyframes pulse-red {
+            0% {
+                box-shadow: 0 0 0 0 rgba(255, 51, 51, 0.4);
+            }
+
+            70% {
+                box-shadow: 0 0 0 6px rgba(255, 51, 51, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(255, 51, 51, 0);
+            }
+        }
+
+        .row-outlier {
+            position: relative;
+            background: rgba(255, 51, 51, 0.05);
+        }
+
+        .row-outlier::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: var(--alert-border);
+            box-shadow: 0 0 10px var(--alert-border);
+        }
+
+        .value-high {
+            color: #ff3333;
+            font-weight: 700;
+        }
+
+        /* 4. MOBILE RESPONSIVENESS (Table-to-Card Transformation) */
+        @media screen and (max-width: 768px) {
+
+            /* Hide Table Headers */
+            .data-grid thead {
+                display: none;
+            }
+
+            /* Make layout completely block-based */
+            .data-grid,
+            .data-grid tbody,
+            .data-grid tr,
+            .data-grid td {
+                display: block;
+                width: 100%;
+            }
+
+            /* Card Style for Rows */
+            .data-grid tr {
+                margin-bottom: 1.5rem;
+                background: var(--bg-card);
+                border: 1px solid var(--border);
+                border-radius: 12px;
+                padding: 1rem;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            }
+
+            /* Specific Outlier Card Style */
+            .data-grid tr.row-outlier {
+                border-color: var(--alert-border);
+                animation: pulse-red 2s infinite;
+            }
+
+            .data-grid tr.row-outlier::after {
+                display: none;
+            }
+
+            /* Remove side bar for cards */
+
+            /* Flex layout for Cell Content */
+            .data-grid td {
+                display: flex;
+                justify-content: space-between;
+                /* Label Left, Value Right */
+                align-items: center;
+                text-align: right;
+                padding: 0.75rem 0;
+                border-bottom: 1px dashed #333;
+            }
+
+            .data-grid td:last-child {
+                border-bottom: none;
+            }
+
+            /* Add Labels via CSS Content (or use data-label attribute) */
+            .data-grid td::before {
+                content: attr(data-label);
+                float: left;
+                font-weight: 600;
+                color: var(--text-secondary);
+                text-transform: uppercase;
+                font-size: 0.75rem;
+                letter-spacing: 0.5px;
+            }
+
+            /* Special handling for the Token Name (First Cell) */
+            .data-grid td:first-child {
+                justify-content: flex-start;
+                font-size: 1.1rem;
+                font-weight: 800;
+                color: var(--text-primary);
+                border-bottom: 1px solid var(--border);
+                padding-bottom: 0.75rem;
+                margin-bottom: 0.5rem;
+            }
+
+            .data-grid td:first-child::before {
+                display: none;
+            }
+
+            /* No label for Token Name header */
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1>⚡ 加密貨幣即時戰情室</h1>
+        <div class="subtitle">即時主力資金追蹤 & 異常訊號檢測</div>
+
+        <table class="data-grid">
+            <thead>
+                <tr>
+                    <th>資產對</th>
+                    <th>最新價格</th>
+                    <th>24H 成交量</th>
+                    <th>未平倉合約 (OI)</th>
+                    <th>交易訊號</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Row 1: Whale Activity -->
+                <tr>
+                    <td data-label="資產對">
+                        <div class="token-cell">
+                            <span>BTC/USDT</span>
+                            <span class="badge badge-whale">🐋 巨鯨進場</span>
+                        </div>
+                    </td>
+                    <td data-label="最新價格" class="value">$94,520.50</td>
+                    <td data-label="24H 成交量" class="volume">$32.5B</td>
+                    <td data-label="持倉量 (OI)" class="oi">$12.1B (高水位)</td>
+                    <td data-label="訊號">📈 吸籌中 (Accumulation)</td>
+                </tr>
+
+                <!-- Row 2: Outlier (Anomaly) -->
+                <tr class="row-outlier">
+                    <td data-label="資產對">
+                        <div class="token-cell">
+                            <span>SOL/USDT</span>
+                            <span class="badge badge-inst">🏛 機構操盤</span>
+                        </div>
+                    </td>
+                    <td data-label="最新價格" class="value">$188.45</td>
+                    <td data-label="24H 成交量" class="volume value-high">$4.2B (+650%)</td>
+                    <td data-label="持倉量 (OI)" class="oi">$850M</td>
+                    <td data-label="訊號" class="value-high">⚠️ 爆量異常 (VOL SURGE)</td>
+                </tr>
+
+                <!-- Row 3: Smart Money -->
+                <tr>
+                    <td data-label="資產對">
+                        <div class="token-cell">
+                            <span>ETH/USDT</span>
+                            <span class="badge badge-smart">🧠 聰明錢</span>
+                        </div>
+                    </td>
+                    <td data-label="最新價格" class="value">$3,240.10</td>
+                    <td data-label="24H 成交量" class="volume">$15.8B</td>
+                    <td data-label="持倉量 (OI)" class="oi">$9.2B</td>
+                    <td data-label="訊號">➡️ 穩定流入</td>
+                </tr>
+
+                <!-- Row 4: Normal -->
+                <tr>
+                    <td data-label="資產對">
+                        <div class="token-cell">
+                            <span>XRP/USDT</span>
+                        </div>
+                    </td>
+                    <td data-label="最新價格" class="value">$2.45</td>
+                    <td data-label="24H 成交量" class="volume">$800M</td>
+                    <td data-label="持倉量 (OI)" class="oi">$250M</td>
+                    <td data-label="訊號">➖ 中性觀望</td>
+                </tr>
+
+                <!-- Row 5: Another Whale -->
+                <tr>
+                    <td data-label="資產對">
+                        <div class="token-cell">
+                            <span>DOGE/USDT</span>
+                            <span class="badge badge-whale">🐋 巨鯨進場</span>
+                        </div>
+                    </td>
+                    <td data-label="最新價格" class="value">$0.142</td>
+                    <td data-label="24H 成交量" class="volume">$1.2B</td>
+                    <td data-label="持倉量 (OI)" class="oi">$400M</td>
+                    <td data-label="訊號">🚀 拉升中 (Pumping)</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</body>
+
+</html>
