@@ -601,7 +601,8 @@
                                 <th>公鏈名稱</th>
                                 <th @click="sortBy('tvl_total', 'chain')" class="sortable"
                                     :class="{active: chainSortKey === 'tvl_total'}">
-                                    <span class="has-tooltip" data-tooltip="總鎖倉量。代表該鏈內的總資金規模。">TVL</span>
+                                    <span class="has-tooltip"
+                                        data-tooltip="總鎖倉量 (Total Value Locked)。&#10;代表該條區塊鏈上所有 DeFi 協議中鎖定的資金總和。&#10;💡 TVL 越高，代表該生態越繁榮、資金沉澱越多。">TVL</span>
                                     <span class="sort-icon">↕</span>
                                 </th>
                                 <th @click="sortBy('change_24h_pct', 'chain')" class="sortable"
@@ -610,7 +611,8 @@
                                 </th>
                                 <th @click="sortBy('stable_inflow_24h', 'chain')" class="sortable"
                                     :class="{active: chainSortKey === 'stable_inflow_24h'}">
-                                    <span class="has-tooltip" data-tooltip="市場的『乾火藥』。正值代表資金進場準備買幣 (利多)。">穩定幣流入</span>
+                                    <span class="has-tooltip"
+                                        data-tooltip="穩定幣 (USDT/USDC) 24小時淨流入量。&#10;💡 這是市場的『乾火藥』(Buying Power)。&#10;🟢 正值: 資金進場，通常是我們進場做多的信號。&#10;🔴 負值: 資金撤退，可能代表主力正在獲利了結。">穩定幣流入</span>
                                     <span class="sort-icon">↕</span>
                                 </th>
                                 <th style="text-align: left;">AI 智能標籤</th>
@@ -618,15 +620,16 @@
                         </thead>
                         <tbody>
                             <tr v-for="chain in sortedChains" :key="chain.chain">
-                                <td>{{ chain.chain }}</td>
-                                <td class="text-neutral">${{ formatB(chain.tvl_total) }}B</td>
-                                <td :class="chain.change_24h_pct >= 0 ? 'text-green' : 'text-red'">
+                                <td :data-label="'公鏈名稱'">{{ chain.chain }}</td>
+                                <td data-label="TVL" class="text-neutral">${{ formatB(chain.tvl_total) }}B</td>
+                                <td data-label="24H 變動" :class="chain.change_24h_pct >= 0 ? 'text-green' : 'text-red'">
                                     {{ chain.change_24h_pct >= 0 ? '+' : '' }}{{ chain.change_24h_pct }}%
                                 </td>
-                                <td :class="chain.stable_inflow_24h >= 0 ? 'text-green' : 'text-red'">
+                                <td data-label="穩定幣流入 (Buying Power)"
+                                    :class="chain.stable_inflow_24h >= 0 ? 'text-green' : 'text-red'">
                                     ${{ formatM(chain.stable_inflow_24h) }}M
                                 </td>
-                                <td style="text-align: left;">
+                                <td data-label="AI 智能標籤" style="text-align: left;">
                                     <span v-for="tag in chain.tags" :key="tag.type" class="tag"
                                         :class="getTagClass(tag.signal)">
                                         {{ translateTag(tag.type) }}
@@ -651,7 +654,8 @@
                                 <th>交易所</th>
                                 <th @click="sortBy('total_tvl', 'cex')" class="sortable"
                                     :class="{active: cexSortKey === 'total_tvl'}">
-                                    <span class="has-tooltip" data-tooltip="交易所公開錢包資產總值。">TVL</span>
+                                    <span class="has-tooltip"
+                                        data-tooltip="交易所公開錢包資產總值 (Total Assets)。&#10;💡 代表該交易所的資金深度與用戶信任度。">TVL</span>
                                     <span class="sort-icon">↕</span>
                                 </th>
                                 <th @click="sortBy('net_flow_24h', 'cex')" class="sortable"
@@ -660,12 +664,14 @@
                                 </th>
                                 <th @click="sortBy('stablecoin_flow_24h', 'cex')" class="sortable"
                                     :class="{active: cexSortKey === 'stablecoin_flow_24h'}">
-                                    <span class="has-tooltip" data-tooltip="正值代表資金進入交易所 (潛在買盤)。">穩定幣</span>
+                                    <span class="has-tooltip"
+                                        data-tooltip="穩定幣 (USDT/USDC) 24小時淨流入量。&#10;🟢 正值: 資金進入交易所，這通常是潛在買盤 (準備抄底)。&#10;🔴 負值: 資金提現離場，市場購買力下降。">穩定幣</span>
                                     <span class="sort-icon">↕</span>
                                 </th>
                                 <th @click="sortBy('btc_eth_flow_24h', 'cex')" class="sortable"
                                     :class="{active: cexSortKey === 'btc_eth_flow_24h'}">
-                                    <span class="has-tooltip" data-tooltip="潛在賣壓。通常代表大戶將幣轉入交易所準備賣出 (利空)。">BTC/ETH</span>
+                                    <span class="has-tooltip"
+                                        data-tooltip="BTC/ETH 等風險資產 24小時淨流入量。&#10;🔴 正值: 大戶將幣轉入交易所，這通常是潛在賣壓 (準備倒貨)。&#10;🟢 負值: 大戶提幣囤貨，減少了市場上的流通籌碼 (利多)。">BTC/ETH</span>
                                     <span class="sort-icon">↕</span>
                                 </th>
                                 <th style="text-align: left;">AI 智能標籤</th>
@@ -673,18 +679,20 @@
                         </thead>
                         <tbody>
                             <tr v-for="cex in sortedCex" :key="cex.exchange">
-                                <td>{{ cex.exchange }}</td>
-                                <td class="text-neutral">${{ formatB(cex.total_tvl) }}B</td>
-                                <td :class="cex.net_flow_24h >= 0 ? 'text-green' : 'text-red'">
+                                <td :data-label="'交易所'">{{ cex.exchange }}</td>
+                                <td data-label="TVL" class="text-neutral">${{ formatB(cex.total_tvl) }}B</td>
+                                <td data-label="淨流向 (Net)" :class="cex.net_flow_24h >= 0 ? 'text-green' : 'text-red'">
                                     ${{ formatM(cex.net_flow_24h) }}M
                                 </td>
-                                <td :class="cex.stablecoin_flow_24h >= 0 ? 'text-green' : 'text-red'">
+                                <td data-label="穩定幣流向"
+                                    :class="cex.stablecoin_flow_24h >= 0 ? 'text-green' : 'text-red'">
                                     ${{ formatM(cex.stablecoin_flow_24h) }}M
                                 </td>
-                                <td :class="cex.btc_eth_flow_24h >= 0 ? 'text-red' : 'text-green'">
+                                <td data-label="BTC/ETH 流向 (賣壓)"
+                                    :class="cex.btc_eth_flow_24h >= 0 ? 'text-red' : 'text-green'">
                                     ${{ formatM(cex.btc_eth_flow_24h) }}M
                                 </td>
-                                <td style="text-align: left;">
+                                <td data-label="AI 智能標籤" style="text-align: left;">
                                     <span v-for="tag in cex.tags" :key="tag.type" class="tag"
                                         :class="getTagClass(tag.signal)">
                                         {{ translateTag(tag.type) }}
