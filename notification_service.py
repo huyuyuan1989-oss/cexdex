@@ -174,17 +174,17 @@ def check_and_alert(data: Dict[str, Any]) -> int:
     if total_stablecoin_flow > THRESHOLDS['stablecoin_inflow']:
         fields = [
             {
-                "name": "💰 Amount",
+                "name": "💰 金額 (Amount)",
                 "value": f"${total_stablecoin_flow / 1e6:,.1f}M",
                 "inline": True
             },
             {
-                "name": "📍 Source",
-                "value": "All CEX Combined",
+                "name": "📍 來源 (Source)",
+                "value": "所有 CEX 加總",
                 "inline": True
             },
             {
-                "name": "⏰ Time",
+                "name": "⏰ 時間 (Time)",
                 "value": timestamp,
                 "inline": True
             }
@@ -200,7 +200,7 @@ def check_and_alert(data: Dict[str, Any]) -> int:
         
         if top_exchanges:
             fields.append({
-                "name": "🏦 Top Exchanges",
+                "name": "🏦 前三大交易所 (Top Exchanges)",
                 "value": "\n".join(top_exchanges[:3]),
                 "inline": False
             })
@@ -215,7 +215,7 @@ def check_and_alert(data: Dict[str, Any]) -> int:
         )
         
         success = send_discord_alert(
-            title="🟢 Buying Power Alert",
+            title="🟢 購買力警報 (Buying Power)",
             message=description,
             color=COLORS['green'],
             fields=fields
@@ -228,17 +228,17 @@ def check_and_alert(data: Dict[str, Any]) -> int:
     if total_btc_eth_flow > THRESHOLDS['btc_eth_inflow']:
         fields = [
             {
-                "name": "💰 Amount",
+                "name": "💰 金額 (Amount)",
                 "value": f"${total_btc_eth_flow / 1e6:,.1f}M",
                 "inline": True
             },
             {
-                "name": "📍 Source",
-                "value": "All CEX Combined",
+                "name": "📍 來源 (Source)",
+                "value": "所有 CEX 加總",
                 "inline": True
             },
             {
-                "name": "⏰ Time",
+                "name": "⏰ 時間 (Time)",
                 "value": timestamp,
                 "inline": True
             }
@@ -254,7 +254,7 @@ def check_and_alert(data: Dict[str, Any]) -> int:
         
         if top_exchanges:
             fields.append({
-                "name": "🏦 Top Exchanges",
+                "name": "🏦 前三大交易所 (Top Exchanges)",
                 "value": "\n".join(top_exchanges[:3]),
                 "inline": False
             })
@@ -269,7 +269,7 @@ def check_and_alert(data: Dict[str, Any]) -> int:
         )
         
         success = send_discord_alert(
-            title="🔴 Dump Risk Alert",
+            title="🔴 拋售風險警報 (Dump Risk)",
             message=description,
             color=COLORS['red'],
             fields=fields
