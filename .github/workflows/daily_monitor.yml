@@ -46,9 +46,8 @@ jobs:
           git config --global user.name 'GitHub Action Bot'
           git config --global user.email 'action@github.com'
           
-          # 添加生成的報告和資料庫變更
+          # 添加生成的報告變更
           git add reports/
-          git add chain_data.db
           
           # 檢查是否有變更此提交
           if git diff --staged --quiet; then
