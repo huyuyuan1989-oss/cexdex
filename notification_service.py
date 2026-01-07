@@ -349,7 +349,13 @@ def send_summary_notification(data: Dict[str, Any]) -> bool:
     
     return send_discord_alert(
         title="📡 資金流向監控報告",
-        message=f"**{datetime.now().strftime('%Y-%m-%d %H:%M')} 執行完成**",
+        message=(
+            f"**{datetime.now().strftime('%Y-%m-%d %H:%M')} 執行完成**\n\n"
+            f"🔗 **相關連結:**\n"
+            f"• [資金流向戰情室 (Interactive)]({DASHBOARD_URL})\n"
+            f"• [完整數據報告 (Full Report)](https://huyuyuan1989-oss.github.io/cexdex/reports/latest.html)\n"
+            f"• [原始數據源 (Raw JSON)](https://huyuyuan1989-oss.github.io/cexdex/reports/data.json)"
+        ),
         color=color,
         fields=fields
     )

@@ -722,32 +722,40 @@
                                         data-tooltip="BTC/ETH 等風險資產 24小時淨流入量。&#10;🔴 正值: 大戶將幣轉入交易所，這通常是潛在賣壓 (準備倒貨)。&#10;🟢 負值: 大戶提幣囤貨，減少了市場上的流通籌碼 (利多)。">BTC/ETH</span>
                                     <span class="sort-icon">↕</span>
                                 </th>
-                                <th style="text-align: left;">AI 智能標籤</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr v-for="cex in sortedCex" :key="cex.exchange">
-                                <td :data-label="'交易所'">{{ cex.exchange }}</td>
-                                <td data-label="TVL" class="text-neutral">${{ formatB(cex.total_tvl) }}B</td>
-                                <td data-label="淨流向 (Net)" :class="cex.net_flow_24h >= 0 ? 'text-green' : 'text-red'">
-                                    ${{ formatM(cex.net_flow_24h) }}M
-                                </td>
-                                <td data-label="穩定幣流向"
-                                    :class="cex.stablecoin_flow_24h >= 0 ? 'text-green' : 'text-red'">
-                                    ${{ formatM(cex.stablecoin_flow_24h) }}M
-                                </td>
-                                <td data-label="BTC/ETH 流向 (賣壓)"
-                                    :class="cex.btc_eth_flow_24h >= 0 ? 'text-red' : 'text-green'">
-                                    ${{ formatM(cex.btc_eth_flow_24h) }}M
-                                </td>
-                                <td data-label="AI 智能標籤" style="text-align: left;">
-                                    <span v-for="tag in cex.tags" :key="tag.type" class="tag"
-                                        :class="getTagClass(tag.signal)">
-                                        {{ translateTag(tag.type) }}
-                                    </span>
-                                </td>
-                            </tr>
-                        </tbody>
+                                <table class="market-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Asset (資產)</th>
+                                            <th>TVL (鎖倉)</th>
+                                            <th>1H Flow (1小時)</th>
+                                            <th>4H Flow (4小時)</th>
+                                            <th>24H Chg (日變動)</th>
+                                            <th>1W Chg (週變動)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr v-for="chain in chainFlows.chains" :key="chain.name"
+                                            :class="getRowClass(chain)">
+                                            <td data-label="Asset (資產)">
+                                                <div class="token-cell">
+                                                    <span>{{ chain.name }}</span>
+                                                    <span v-if="chain.tags && chain.tags.length"
+                                                        class="badge badge-whale">{{ chain.tags[0] }}</span>
+                                                </div>
+                                            </td>
+                                            <td data-label="TVL (鎖倉)" class="font-mono">{{ formatMoney(chain.tvl) }}
+                                            </td>
+                                            <!-- Placeholder data for new columns until backend is ready -->
+                                            <td data-label="1H Flow (1小時)" class="font-mono text-gray">--</td>
+                                            <td data-label="4H Flow (4小時)" class="font-mono text-gray">--</td>
+                                            <td data-label="24H Chg (日變動)" class="font-mono"
+                                                :class="getValueClass(chain.change_24h)">
+                                                {{ formatPercent(chain.change_24h) }}
+                                            </td>
+                                            <td data-label="1W Chg (週變動)" class="font-mono text-gray">--</td>
+                                        </tr>
+                                    </tbody>
+                                </table>ody>
                     </table>
                 </div>
             </div>
