@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔗 資金流向主控台 | Capital Flow Dashboard</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+    <style>
+        :root {
+            --bg-dark: #0a0a0f;
+            --bg-card: #12121a;
+            --accent: #6366f1;
+            --green: #22c55e;
+            --red: #ef4444;
+            --yellow: #fbbf24;
+            --text: #e2e8f0;
+            --text-muted: #94a3b8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 1.5rem;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 2rem;
+            text-align: center;
+            background: linear-gradient(135deg, var(--accent), #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.25rem;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+            font-size: 0.875rem;
+        }
+
+        /* Sentiment Badge */
+        .sentiment-badge {
+            display: inline-block;
+            padding: 0.5rem 1.5rem;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .sentiment-bullish {
+            background: var(--green);
+            color: #000;
+        }
+
+        .sentiment-bearish {
+            background: var(--red);
+            color: #fff;
+        }
+
+        .sentiment-neutral {
+            background: var(--yellow);
+            color: #000;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            padding: 1rem;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .stat-value.green {
+            color: var(--green);
+        }
+
+        .stat-value.red {
+            color: var(--red);
+        }
+
+        .stat-label {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+        }
+
+        /* Tables */
+        .section {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .section-title {
+            font-size: 1rem;
+            margin-bottom: 0.75rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+        }
+
+        th,
+        td {
+            padding: 0.5rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        th {
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .positive {
+            color: var(--green);
+        }
+
+        .negative {
+            color: var(--red);
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 0.125rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            margin: 0.125rem;
+        }
+
+        .tag-bullish {
+            background: rgba(34, 197, 94, 0.2);
+            color: var(--green);
+        }
+
+        .tag-bearish {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--red);
+        }
+
+        .tag-neutral {
+            background: rgba(251, 191, 36, 0.2);
+            color: var(--yellow);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-muted);
+        }
+
+        .error {
+            text-align: center;
+            padding: 2rem;
+            color: var(--red);
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 1rem;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+        }
+
+        /* Download Button */
+        .download-btn {
+            display: inline-block;
+            background: var(--accent);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 0.875rem;
+            margin-top: 1rem;
+        }
+
+        .download-btn:hover {
+            opacity: 0.8;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app" class="container">
+        <h1>🔗 資金流向主控台</h1>
+        <p class="subtitle">Capital Flow Dashboard | 即時數據來自 data.json</p>
+
+        <!-- Loading State -->
+        <div v-if="loading" class="loading">
+            ⏳ 載入數據中...
+        </div>
+
+        <!-- Error State -->
+        <div v-else-if="error" class="error">
+            ❌ {{ error }}
+        </div>
+
+        <!-- Data Loaded -->
+        <div v-else>
+            <!-- Market Sentiment -->
+            <div style="text-align: center;">
+                <span class="sentiment-badge" :class="sentimentClass">
+                    {{ data.market_sentiment }}
+                </span>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value">💵 ${{ formatB(data.stablecoin_marketcap) }}B</div>
+                    <div class="stat-label">穩定幣總市值</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value"
+                        :class="data.cex_flows?.summary?.total_stablecoin_flow_24h > 0 ? 'green' : 'red'">
+                        ${{ formatM(data.cex_flows?.summary?.total_stablecoin_flow_24h) }}M
+                    </div>
+                    <div class="stat-label">CEX 穩定幣流向 (24H)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value"
+                        :class="data.cex_flows?.summary?.total_btc_eth_flow_24h > 0 ? 'red' : 'green'">
+                        ${{ formatM(data.cex_flows?.summary?.total_btc_eth_flow_24h) }}M
+                    </div>
+                    <div class="stat-label">CEX BTC/ETH 流向 (24H)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">⏱️ {{ formatTime(data.execution_time_seconds) }}s</div>
+                    <div class="stat-label">更新時間: {{ data.generated_at }}</div>
+                </div>
+            </div>
+
+            <!-- Chain Flows Table -->
+            <div class="section">
+                <h2 class="section-title">🔗 公鏈資金流向</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>公鏈</th>
+                            <th>TVL</th>
+                            <th>24H 變動</th>
+                            <th>穩定幣流入</th>
+                            <th>信號</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="chain in data.chain_flows?.chains" :key="chain.chain">
+                            <td><strong>{{ chain.chain }}</strong></td>
+                            <td>${{ formatB(chain.tvl_total) }}B</td>
+                            <td :class="chain.change_24h_pct >= 0 ? 'positive' : 'negative'">
+                                {{ chain.change_24h_pct >= 0 ? '+' : '' }}{{ chain.change_24h_pct }}%
+                            </td>
+                            <td :class="chain.stable_inflow_24h >= 0 ? 'positive' : 'negative'">
+                                ${{ formatM(chain.stable_inflow_24h) }}M
+                            </td>
+                            <td>
+                                <span v-for="tag in chain.tags" :key="tag.type" class="tag"
+                                    :class="getTagClass(tag.signal)">
+                                    {{ tag.type }}
+                                </span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- CEX Flows Table -->
+            <div class="section">
+                <h2 class="section-title">🏦 交易所資金流向</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>交易所</th>
+                            <th>TVL</th>
+                            <th>淨流向</th>
+                            <th>穩定幣</th>
+                            <th>BTC/ETH</th>
+                            <th>信號</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="cex in data.cex_flows?.exchanges" :key="cex.exchange">
+                            <td><strong>{{ cex.exchange }}</strong></td>
+                            <td>${{ formatB(cex.total_tvl) }}B</td>
+                            <td :class="cex.net_flow_24h >= 0 ? 'positive' : 'negative'">
+                                ${{ formatM(cex.net_flow_24h) }}M
+                            </td>
+                            <td :class="cex.stablecoin_flow_24h >= 0 ? 'positive' : 'negative'">
+                                ${{ formatM(cex.stablecoin_flow_24h) }}M
+                            </td>
+                            <td :class="cex.btc_eth_flow_24h >= 0 ? 'negative' : 'positive'">
+                                ${{ formatM(cex.btc_eth_flow_24h) }}M
+                            </td>
+                            <td>
+                                <span v-for="tag in cex.tags" :key="tag.type" class="tag"
+                                    :class="getTagClass(tag.signal)">
+                                    {{ tag.type }}
+                                </span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Download Links -->
+            <div style="text-align: center;">
+                <a href="./data.json" class="download-btn" download>📥 下載 JSON 快照</a>
+                <a href="./history.csv" class="download-btn" download>📊 下載歷史 CSV</a>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Powered by DefiLlama API | 數據每 30 分鐘自動更新</p>
+        </div>
+    </div>
+
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    data: {},
+                    loading: true,
+                    error: null
+                }
+            },
+            computed: {
+                sentimentClass() {
+                    const sentiment = this.data.market_sentiment || '';
+                    if (sentiment.includes('Bullish')) return 'sentiment-bullish';
+                    if (sentiment.includes('Bearish')) return 'sentiment-bearish';
+                    return 'sentiment-neutral';
+                }
+            },
+            methods: {
+                formatB(num) {
+                    return num ? (num / 1e9).toFixed(2) : '0.00';
+                },
+                formatM(num) {
+                    return num ? (num / 1e6).toFixed(1) : '0.0';
+                },
+                formatTime(sec) {
+                    return sec ? sec.toFixed(2) : '0.00';
+                },
+                getTagClass(signal) {
+                    if (signal === 'Bullish') return 'tag-bullish';
+                    if (signal === 'Bearish') return 'tag-bearish';
+                    return 'tag-neutral';
+                },
+                async fetchData() {
+                    try {
+                        const response = await fetch('./data.json');
+                        if (!response.ok) throw new Error('無法載入 data.json');
+                        this.data = await response.json();
+                    } catch (e) {
+                        this.error = e.message;
+                    } finally {
+                        this.loading = false;
+                    }
+                }
+            },
+            mounted() {
+                this.fetchData();
+                // 每 5 分鐘自動刷新
+                setInterval(() => this.fetchData(), 5 * 60 * 1000);
+            }
+        }).mount('#app');
+    </script>
+</body>
+
+</html>
