@@ -35,7 +35,7 @@ COLORS = {
 }
 
 # 儀表板 URL
-DASHBOARD_URL = "https://huyuyuan1989-oss.github.io/cexdex/reports/latest.html"
+DASHBOARD_URL = "https://huyuyuan1989-oss.github.io/cexdex/reports/index.html"
 
 # 閾值設定
 THRESHOLDS = {
