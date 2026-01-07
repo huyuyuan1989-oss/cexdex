@@ -4,18 +4,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🔗 資金流向主控台 | Capital Flow Dashboard</title>
+    <title>🔗 全鏈資金流向戰情室 | Capital Flow Terminal</title>
     <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&display=swap"
+        rel="stylesheet">
     <style>
         :root {
-            --bg-dark: #0a0a0f;
-            --bg-card: #12121a;
+            /* Financial Terminal Theme (Slate-900 base) */
+            --bg-body: #0f172a;
+            /* Slate 900 */
+            --bg-card: #1e293b;
+            /* Slate 800 */
+            --bg-header: #334155;
+            /* Slate 700 */
+            --border: #475569;
+            /* Slate 600 */
+
+            --text-primary: #f8fafc;
+            /* Slate 50 */
+            --text-secondary: #94a3b8;
+            /* Slate 400 */
+
+            /* High Contrast Financial Colors */
+            --bullish: #22c55e;
+            /* Green 500 */
+            --bullish-bg: rgba(34, 197, 94, 0.15);
+            --bearish: #ef4444;
+            /* Red 500 */
+            --bearish-bg: rgba(239, 68, 68, 0.15);
+            --neutral: #fbbf24;
+            /* Amber 400 */
+            --neutral-bg: rgba(251, 191, 36, 0.15);
+
             --accent: #6366f1;
-            --green: #22c55e;
-            --red: #ef4444;
-            --yellow: #fbbf24;
-            --text: #e2e8f0;
-            --text-muted: #94a3b8;
+            /* Indigo 500 */
         }
 
         * {
@@ -25,339 +48,538 @@
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: var(--bg-dark);
-            color: var(--text);
+            font-family: 'Noto Sans TC', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-body);
+            color: var(--text-primary);
             line-height: 1.6;
             padding: 1.5rem;
             min-height: 100vh;
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
         }
 
-        h1 {
-            font-size: 2rem;
-            text-align: center;
-            background: linear-gradient(135deg, var(--accent), #a855f7);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 0.25rem;
-        }
-
-        .subtitle {
-            text-align: center;
-            color: var(--text-muted);
-            margin-bottom: 1.5rem;
-            font-size: 0.875rem;
-        }
-
-        /* Sentiment Badge */
-        .sentiment-badge {
-            display: inline-block;
-            padding: 0.5rem 1.5rem;
-            border-radius: 20px;
+        /* Typography */
+        h1,
+        h2,
+        h3 {
+            font-family: 'Noto Sans TC', sans-serif;
             font-weight: 700;
-            font-size: 1.25rem;
-            margin-bottom: 1.5rem;
+            color: var(--text-primary);
         }
 
-        .sentiment-bullish {
-            background: var(--green);
-            color: #000;
+        .mono {
+            font-family: 'JetBrains Mono', monospace;
         }
 
-        .sentiment-bearish {
-            background: var(--red);
-            color: #fff;
+        /* 2. AI Market Weather Banner */
+        .weather-banner {
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            border: 1px solid transparent;
+            font-weight: 500;
         }
 
-        .sentiment-neutral {
-            background: var(--yellow);
-            color: #000;
+        .weather-bullish {
+            background: rgba(34, 197, 94, 0.1);
+            border-color: var(--bullish);
+            color: #4ade80;
+        }
+
+        .weather-bearish {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: var(--bearish);
+            color: #f87171;
+        }
+
+        .weather-neutral {
+            background: rgba(251, 191, 36, 0.1);
+            border-color: var(--neutral);
+            color: var(--neutral);
         }
 
         /* Stats Grid */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
             gap: 1rem;
-            margin-bottom: 1.5rem;
+            margin-bottom: 2rem;
         }
 
         .stat-card {
             background: var(--bg-card);
-            padding: 1rem;
+            padding: 1.25rem;
             border-radius: 12px;
-            text-align: center;
+            border: 1px solid var(--border);
+            transition: transform 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--accent);
         }
 
         .stat-value {
-            font-size: 1.5rem;
+            font-size: 1.75rem;
             font-weight: 700;
-        }
-
-        .stat-value.green {
-            color: var(--green);
-        }
-
-        .stat-value.red {
-            color: var(--red);
+            margin-bottom: 0.25rem;
+            font-family: 'JetBrains Mono', monospace;
         }
 
         .stat-label {
-            color: var(--text-muted);
-            font-size: 0.75rem;
-            margin-top: 0.25rem;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
         }
 
-        /* Tables */
+        /* Colors */
+        .text-green {
+            color: var(--bullish);
+        }
+
+        .text-red {
+            color: var(--bearish);
+        }
+
+        .text-neutral {
+            color: var(--text-secondary);
+        }
+
+        /* 3. Interactive Tables */
         .section {
-            background: var(--bg-card);
-            border-radius: 12px;
-            padding: 1rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
             margin-bottom: 1rem;
         }
 
-        .section-title {
-            font-size: 1rem;
-            margin-bottom: 0.75rem;
+        .table-container {
+            background: var(--bg-card);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 0.875rem;
-        }
-
-        th,
-        td {
-            padding: 0.5rem;
-            text-align: left;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 0.9rem;
         }
 
         th {
-            color: var(--text-muted);
+            background: var(--bg-header);
+            padding: 1rem;
+            text-align: right;
+            font-weight: 600;
+            color: var(--text-secondary);
+            user-select: none;
+            border-bottom: 2px solid var(--border);
+            white-space: nowrap;
+        }
+
+        th:first-child {
+            text-align: left;
+        }
+
+        td {
+            padding: 1rem;
+            text-align: right;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        td:first-child {
+            text-align: left;
+            font-family: 'Noto Sans TC', sans-serif;
             font-weight: 500;
         }
 
-        .positive {
-            color: var(--green);
+        tr:hover {
+            background: rgba(255, 255, 255, 0.02);
         }
 
-        .negative {
-            color: var(--red);
+        tr:last-child td {
+            border-bottom: none;
         }
 
+        /* Sorting Header */
+        .sortable {
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .sortable:hover {
+            color: var(--text-primary);
+        }
+
+        .sort-icon {
+            font-size: 0.7em;
+            margin-left: 4px;
+            opacity: 0.5;
+        }
+
+        .sortable.active {
+            color: var(--accent);
+        }
+
+        .sortable.active .sort-icon {
+            opacity: 1;
+        }
+
+        /* Tooltips */
+        .has-tooltip {
+            position: relative;
+            border-bottom: 1px dotted var(--text-secondary);
+        }
+
+        .has-tooltip:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 120%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #000;
+            color: #fff;
+            padding: 0.5rem 0.8rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 400;
+            white-space: pre-wrap;
+            width: max-content;
+            max-width: 250px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+            z-index: 10;
+            border: 1px solid var(--border);
+            text-align: center;
+        }
+
+        /* Tags */
         .tag {
             display: inline-block;
-            padding: 0.125rem 0.5rem;
+            padding: 0.2rem 0.6rem;
             border-radius: 4px;
             font-size: 0.75rem;
-            margin: 0.125rem;
+            margin-left: 0.5rem;
+            font-family: 'Noto Sans TC', sans-serif;
+            font-weight: 500;
         }
 
         .tag-bullish {
-            background: rgba(34, 197, 94, 0.2);
-            color: var(--green);
+            background: var(--bullish-bg);
+            color: var(--bullish);
+            border: 1px solid rgba(34, 197, 94, 0.3);
         }
 
         .tag-bearish {
-            background: rgba(239, 68, 68, 0.2);
-            color: var(--red);
+            background: var(--bearish-bg);
+            color: var(--bearish);
+            border: 1px solid rgba(239, 68, 68, 0.3);
         }
 
         .tag-neutral {
-            background: rgba(251, 191, 36, 0.2);
-            color: var(--yellow);
+            background: var(--neutral-bg);
+            color: var(--neutral);
+            border: 1px solid rgba(251, 191, 36, 0.3);
+        }
+
+        /* 5. Quant Zone */
+        .quant-zone {
+            background: linear-gradient(180deg, var(--bg-card) 0%, rgba(30, 41, 59, 0.5) 100%);
+            border: 1px dashed var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            margin-top: 3rem;
+        }
+
+        .btn-group {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            background: var(--bg-header);
+            color: var(--text-primary);
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn:hover {
+            background: var(--border);
+            border-color: var(--text-secondary);
+            transform: translateY(-1px);
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .btn-primary:hover {
+            background: #4f46e5;
+            border-color: #4f46e5;
+        }
+
+        /* 6. Methodology Footer */
+        .footer {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+        }
+
+        .method-box {
+            background: rgba(255, 255, 255, 0.02);
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+        }
+
+        .method-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .method-item h4 {
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
         }
 
         .loading {
             text-align: center;
-            padding: 3rem;
-            color: var(--text-muted);
-        }
-
-        .error {
-            text-align: center;
-            padding: 2rem;
-            color: var(--red);
-        }
-
-        .footer {
-            text-align: center;
-            margin-top: 1rem;
-            color: var(--text-muted);
-            font-size: 0.75rem;
-        }
-
-        /* Download Button */
-        .download-btn {
-            display: inline-block;
-            background: var(--accent);
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            text-decoration: none;
-            font-size: 0.875rem;
-            margin-top: 1rem;
-        }
-
-        .download-btn:hover {
-            opacity: 0.8;
+            padding: 4rem;
+            color: var(--text-secondary);
+            font-size: 1.2rem;
         }
     </style>
 </head>
 
 <body>
     <div id="app" class="container">
-        <h1>🔗 資金流向主控台</h1>
-        <p class="subtitle">Capital Flow Dashboard | 即時數據來自 data.json</p>
+        <!-- Header -->
+        <header style="margin-bottom: 2rem; text-align: center;">
+            <h1
+                style="font-size: 2.25rem; margin-bottom: 0.5rem; background: linear-gradient(135deg, #fff, #94a3b8); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">
+                🔗 全鏈資金流向戰情室</h1>
+            <p style="color: var(--text-secondary); font-family: 'JetBrains Mono', monospace;">CEX & Chain Capital Flow
+                Terminal v3.1</p>
+        </header>
 
         <!-- Loading State -->
         <div v-if="loading" class="loading">
-            ⏳ 載入數據中...
+            <span style="display: inline-block; animation: pulse 1.5s infinite;">📡</span> 正在建立加密數據連線...
         </div>
 
         <!-- Error State -->
-        <div v-else-if="error" class="error">
-            ❌ {{ error }}
+        <div v-else-if="error" class="loading" style="color: var(--bearish);">
+            ❌ 數據載入失敗: {{ error }}
         </div>
 
-        <!-- Data Loaded -->
+        <!-- Main Content -->
         <div v-else>
-            <!-- Market Sentiment -->
-            <div style="text-align: center;">
-                <span class="sentiment-badge" :class="sentimentClass">
-                    {{ data.market_sentiment }}
-                </span>
+            <!-- 2. AI Market Weather -->
+            <div :class="['weather-banner', weatherClass]">
+                <span style="font-size: 1.5rem;">{{ weatherIcon }}</span>
+                <span>{{ weatherText }}</span>
             </div>
 
             <!-- Stats Grid -->
             <div class="stats-grid">
                 <div class="stat-card">
-                    <div class="stat-value">💵 ${{ formatB(data.stablecoin_marketcap) }}B</div>
-                    <div class="stat-label">穩定幣總市值</div>
+                    <div class="stat-value text-neutral">${{ formatB(data.stablecoin_marketcap) }}B</div>
+                    <div class="stat-label">穩定幣總市值 (Market Cap)</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-value"
-                        :class="data.cex_flows?.summary?.total_stablecoin_flow_24h > 0 ? 'green' : 'red'">
+                        :class="data.cex_flows?.summary?.total_stablecoin_flow_24h > 0 ? 'text-green' : 'text-red'">
                         ${{ formatM(data.cex_flows?.summary?.total_stablecoin_flow_24h) }}M
                     </div>
-                    <div class="stat-label">CEX 穩定幣流向 (24H)</div>
+                    <div class="stat-label">CEX 24H 穩定幣淨流向</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-value"
-                        :class="data.cex_flows?.summary?.total_btc_eth_flow_24h > 0 ? 'red' : 'green'">
+                        :class="data.cex_flows?.summary?.total_btc_eth_flow_24h > 0 ? 'text-red' : 'text-green'">
                         ${{ formatM(data.cex_flows?.summary?.total_btc_eth_flow_24h) }}M
                     </div>
-                    <div class="stat-label">CEX BTC/ETH 流向 (24H)</div>
+                    <div class="stat-label">CEX 24H BTC/ETH 淨流向</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-value">⏱️ {{ formatTime(data.execution_time_seconds) }}s</div>
-                    <div class="stat-label">更新時間: {{ data.generated_at }}</div>
+                    <div class="stat-value text-neutral">{{ formatTime(data.execution_time_seconds) }}s</div>
+                    <div class="stat-label">上次更新: {{ formatDate(data.generated_at) }}</div>
                 </div>
             </div>
 
             <!-- Chain Flows Table -->
             <div class="section">
-                <h2 class="section-title">🔗 公鏈資金流向 <span
-                        style="font-size: 0.7rem; color: var(--text-muted);">（點擊欄位排序）</span></h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>公鏈</th>
-                            <th @click="sortBy('tvl_total', 'chain')" style="cursor: pointer;">TVL ↕</th>
-                            <th @click="sortBy('change_24h_pct', 'chain')" style="cursor: pointer;">24H 變動 ↕</th>
-                            <th @click="sortBy('stable_inflow_24h', 'chain')" style="cursor: pointer;">穩定幣流入 ↕</th>
-                            <th>信號</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-for="chain in sortedChains" :key="chain.chain">
-                            <td><strong>{{ chain.chain }}</strong></td>
-                            <td>${{ formatB(chain.tvl_total) }}B</td>
-                            <td :class="chain.change_24h_pct >= 0 ? 'positive' : 'negative'">
-                                {{ chain.change_24h_pct >= 0 ? '+' : '' }}{{ chain.change_24h_pct }}%
-                            </td>
-                            <td :class="chain.stable_inflow_24h >= 0 ? 'positive' : 'negative'">
-                                ${{ formatM(chain.stable_inflow_24h) }}M
-                            </td>
-                            <td>
-                                <span v-for="tag in chain.tags" :key="tag.type" class="tag"
-                                    :class="getTagClass(tag.signal)">
-                                    {{ tag.type }}
-                                </span>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div class="section-header">
+                    <h2>🔗 公鏈資金流向 (Chain Flows)</h2>
+                    <span style="font-size: 0.8rem; color: var(--text-secondary);">顯示前 10 大 TVL 公鏈</span>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>公鏈名稱</th>
+                                <th @click="sortBy('tvl_total', 'chain')" class="sortable"
+                                    :class="{active: chainSortKey === 'tvl_total'}">
+                                    <span class="has-tooltip" data-tooltip="總鎖倉量。代表該鏈內的總資金規模。">TVL</span>
+                                    <span class="sort-icon">↕</span>
+                                </th>
+                                <th @click="sortBy('change_24h_pct', 'chain')" class="sortable"
+                                    :class="{active: chainSortKey === 'change_24h_pct'}">
+                                    24H 變動 <span class="sort-icon">↕</span>
+                                </th>
+                                <th @click="sortBy('stable_inflow_24h', 'chain')" class="sortable"
+                                    :class="{active: chainSortKey === 'stable_inflow_24h'}">
+                                    <span class="has-tooltip" data-tooltip="市場的『乾火藥』。正值代表資金進場準備買幣 (利多)。">穩定幣流入</span>
+                                    <span class="sort-icon">↕</span>
+                                </th>
+                                <th style="text-align: left;">AI 智能標籤</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="chain in sortedChains" :key="chain.chain">
+                                <td>{{ chain.chain }}</td>
+                                <td class="text-neutral">${{ formatB(chain.tvl_total) }}B</td>
+                                <td :class="chain.change_24h_pct >= 0 ? 'text-green' : 'text-red'">
+                                    {{ chain.change_24h_pct >= 0 ? '+' : '' }}{{ chain.change_24h_pct }}%
+                                </td>
+                                <td :class="chain.stable_inflow_24h >= 0 ? 'text-green' : 'text-red'">
+                                    ${{ formatM(chain.stable_inflow_24h) }}M
+                                </td>
+                                <td style="text-align: left;">
+                                    <span v-for="tag in chain.tags" :key="tag.type" class="tag"
+                                        :class="getTagClass(tag.signal)">
+                                        {{ translateTag(tag.type) }}
+                                    </span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             <!-- CEX Flows Table -->
             <div class="section">
-                <h2 class="section-title">🏦 交易所資金流向 <span
-                        style="font-size: 0.7rem; color: var(--text-muted);">（點擊欄位排序）</span></h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>交易所</th>
-                            <th @click="sortBy('total_tvl', 'cex')" style="cursor: pointer;">TVL ↕</th>
-                            <th @click="sortBy('net_flow_24h', 'cex')" style="cursor: pointer;">淨流向 ↕</th>
-                            <th @click="sortBy('stablecoin_flow_24h', 'cex')" style="cursor: pointer;">穩定幣 ↕</th>
-                            <th @click="sortBy('btc_eth_flow_24h', 'cex')" style="cursor: pointer;">BTC/ETH ↕</th>
-                            <th>信號</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-for="cex in sortedCex" :key="cex.exchange">
-                            <td><strong>{{ cex.exchange }}</strong></td>
-                            <td>${{ formatB(cex.total_tvl) }}B</td>
-                            <td :class="cex.net_flow_24h >= 0 ? 'positive' : 'negative'">
-                                ${{ formatM(cex.net_flow_24h) }}M
-                            </td>
-                            <td :class="cex.stablecoin_flow_24h >= 0 ? 'positive' : 'negative'">
-                                ${{ formatM(cex.stablecoin_flow_24h) }}M
-                            </td>
-                            <td :class="cex.btc_eth_flow_24h >= 0 ? 'negative' : 'positive'">
-                                ${{ formatM(cex.btc_eth_flow_24h) }}M
-                            </td>
-                            <td>
-                                <span v-for="tag in cex.tags" :key="tag.type" class="tag"
-                                    :class="getTagClass(tag.signal)">
-                                    {{ tag.type }}
-                                </span>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div class="section-header">
+                    <h2>🏦 交易所資金流向 (CEX Flows)</h2>
+                    <span style="font-size: 0.8rem; color: var(--text-secondary);">監測穩定幣與風險資產的進出</span>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>交易所</th>
+                                <th @click="sortBy('total_tvl', 'cex')" class="sortable"
+                                    :class="{active: cexSortKey === 'total_tvl'}">
+                                    <span class="has-tooltip" data-tooltip="交易所公開錢包資產總值。">TVL</span>
+                                    <span class="sort-icon">↕</span>
+                                </th>
+                                <th @click="sortBy('net_flow_24h', 'cex')" class="sortable"
+                                    :class="{active: cexSortKey === 'net_flow_24h'}">
+                                    淨流向 (Net) <span class="sort-icon">↕</span>
+                                </th>
+                                <th @click="sortBy('stablecoin_flow_24h', 'cex')" class="sortable"
+                                    :class="{active: cexSortKey === 'stablecoin_flow_24h'}">
+                                    <span class="has-tooltip" data-tooltip="正值代表資金進入交易所 (潛在買盤)。">穩定幣</span>
+                                    <span class="sort-icon">↕</span>
+                                </th>
+                                <th @click="sortBy('btc_eth_flow_24h', 'cex')" class="sortable"
+                                    :class="{active: cexSortKey === 'btc_eth_flow_24h'}">
+                                    <span class="has-tooltip" data-tooltip="潛在賣壓。通常代表大戶將幣轉入交易所準備賣出 (利空)。">BTC/ETH</span>
+                                    <span class="sort-icon">↕</span>
+                                </th>
+                                <th style="text-align: left;">AI 智能標籤</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="cex in sortedCex" :key="cex.exchange">
+                                <td>{{ cex.exchange }}</td>
+                                <td class="text-neutral">${{ formatB(cex.total_tvl) }}B</td>
+                                <td :class="cex.net_flow_24h >= 0 ? 'text-green' : 'text-red'">
+                                    ${{ formatM(cex.net_flow_24h) }}M
+                                </td>
+                                <td :class="cex.stablecoin_flow_24h >= 0 ? 'text-green' : 'text-red'">
+                                    ${{ formatM(cex.stablecoin_flow_24h) }}M
+                                </td>
+                                <td :class="cex.btc_eth_flow_24h >= 0 ? 'text-red' : 'text-green'">
+                                    ${{ formatM(cex.btc_eth_flow_24h) }}M
+                                </td>
+                                <td style="text-align: left;">
+                                    <span v-for="tag in cex.tags" :key="tag.type" class="tag"
+                                        :class="getTagClass(tag.signal)">
+                                        {{ translateTag(tag.type) }}
+                                    </span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
-            <!-- Download Links -->
-            <div style="text-align: center;">
-                <a href="./data.json" class="download-btn" download>📥 下載 JSON 快照</a>
-                <a href="./history.csv" class="download-btn" download>📊 下載歷史 CSV</a>
+            <!-- 5. Quant Zone -->
+            <div class="quant-zone">
+                <h3 style="color: var(--text-secondary); font-size: 1rem;">👨‍💻 量化分析專區 (Quant Zone)</h3>
+                <p style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.5rem;">此數據格式專為量化分析模型
+                    (Quantitative Models) 優化，包含完整的資金歸因標籤與歷史流向紀錄。</p>
+                <div class="btn-group">
+                    <a href="./data.json" class="btn btn-primary" download>
+                        <span>📥</span> 匯出原始數據 (JSON) | API 專用
+                    </a>
+                    <a href="./history.csv" class="btn" download>
+                        <span>📊</span> 下載回測數據 (CSV) | 量化專用
+                    </a>
+                </div>
             </div>
-        </div>
 
-        <div class="footer">
-            <div
-                style="max-width: 800px; margin: 0 auto 1rem auto; text-align: left; background: rgba(255,255,255,0.03); padding: 1rem; border-radius: 8px; font-size: 0.75rem; color: #94a3b8;">
-                <strong>� Methodology & Definitions:</strong><br>
-                <ul style="margin-left: 1.2rem; margin-top: 0.5rem;">
-                    <li><strong>Buying Power (購買力):</strong> Defined as Net Inflow of Stablecoins (USDT, USDC, DAI) >
-                        $50M. Indicates potential accumulation.</li>
-                    <li><strong>Dump Risk (拋售風險):</strong> Defined as Net Inflow of Volatile Assets (BTC, ETH) > $100M
-                        to Exchanges. Indicates potential selling pressure.</li>
-                    <li><strong>Data Source:</strong> Aggregated from DefiLlama & Chain RPCs. Adjusted for price
-                        volatility to reflect true token flow.</li>
-                </ul>
+            <!-- 6. Methodology Footer -->
+            <div class="footer">
+                <div class="method-box">
+                    <strong>📖 分析方法論 (Methodology & Definitions)</strong>
+                    <div class="method-grid">
+                        <div class="method-item">
+                            <h4>💪 主力吸籌 (Buying Power)</h4>
+                            <p>定義為穩定幣 (USDT/USDC/DAI) 淨流入單一實體 > $50M USD。這通常代表主力資金已進入市場，正在等待機會買入。</p>
+                        </div>
+                        <div class="method-item">
+                            <h4>⚠️ 倒貨風險 (Dump Risk)</h4>
+                            <p>定義為波動性資產 (BTC/ETH) 淨流入交易所 > $100M USD。這代表大戶將冷錢包資產轉移至交易所，存在潛在拋售壓力。</p>
+                        </div>
+                        <div class="method-item">
+                            <h4>📡 數據來源 (Data Source)</h4>
+                            <p>聚合 DefiLlama Protocol API 與多鏈 RPC 節點數據。我們已算法剔除交易所內部錢包轉帳的雜訊，以反映真實的資金流動。</p>
+                        </div>
+                    </div>
+                </div>
+                <div style="text-align: center;">
+                    <p>Powered by DefiLlama & Chain RPCs | Build v3.1 | Data updates every 30 mins</p>
+                </div>
             </div>
-            <p>Powered by DefiLlama API | 數據每 30 分鐘自動更新</p>
         </div>
     </div>
 
@@ -371,17 +593,29 @@
                     loading: true,
                     error: null,
                     chainSortKey: 'stable_inflow_24h',
-                    chainSortOrder: -1,
+                    chainSortOrder: -1, // -1 for descending
                     cexSortKey: 'stablecoin_flow_24h',
                     cexSortOrder: -1
                 }
             },
             computed: {
-                sentimentClass() {
+                weatherClass() {
                     const sentiment = this.data.market_sentiment || '';
-                    if (sentiment.includes('Bullish')) return 'sentiment-bullish';
-                    if (sentiment.includes('Bearish')) return 'sentiment-bearish';
-                    return 'sentiment-neutral';
+                    if (sentiment.includes('Bullish')) return 'weather-bullish';
+                    if (sentiment.includes('Bearish')) return 'weather-bearish';
+                    return 'weather-neutral';
+                },
+                weatherIcon() {
+                    if (this.weatherClass === 'weather-bullish') return '🌤️';
+                    if (this.weatherClass === 'weather-bearish') return '🌧️';
+                    return '☁️';
+                },
+                weatherText() {
+                    if (this.weatherClass === 'weather-bullish')
+                        return "市場晴朗 (看多) | 資金強力進場，主力正在累積籌碼 (USDT 流入)。";
+                    if (this.weatherClass === 'weather-bearish')
+                        return "市場陰雨 (看空) | 資金正在撤退或轉移至交易所，注意倒貨風險。";
+                    return "市場多雲 (盤整) | 資金流向不明顯，觀望氣氛濃厚。";
                 },
                 sortedChains() {
                     const chains = this.data.chain_flows?.chains || [];
@@ -401,13 +635,27 @@
                 }
             },
             methods: {
+                // 4. Content Localization
+                translateTag(tag) {
+                    const map = {
+                        "Buying Power": "💪 主力吸籌 (購買力)",
+                        "Dump Risk": "⚠️ 倒貨風險 (賣壓)",
+                        "Capital Flight": "💸 資金外逃",
+                        "Accumulation": "📥 累積籌碼",
+                        "Withdrawal": "🔒 提幣囤貨",
+                        "Strong Momentum": "🚀 動能強勁",
+                        "Asset Rotation": "🔄 資產輪動",
+                        "Neutral": "➖ 中性"
+                    };
+                    return map[tag] || tag;
+                },
                 sortBy(key, tableType) {
                     if (tableType === 'chain') {
                         if (this.chainSortKey === key) {
-                            this.chainSortOrder *= -1;
+                            this.chainSortOrder *= -1; // toggle
                         } else {
                             this.chainSortKey = key;
-                            this.chainSortOrder = -1;
+                            this.chainSortOrder = -1; // default desc
                         }
                     } else {
                         if (this.cexSortKey === key) {
@@ -427,6 +675,10 @@
                 formatTime(sec) {
                     return sec ? sec.toFixed(2) : '0.00';
                 },
+                formatDate(str) {
+                    if (!str) return '-';
+                    return new Date(str).toLocaleString('zh-TW', { hour12: false });
+                },
                 getTagClass(signal) {
                     if (signal === 'Bullish') return 'tag-bullish';
                     if (signal === 'Bearish') return 'tag-bearish';
@@ -434,7 +686,8 @@
                 },
                 async fetchData() {
                     try {
-                        const response = await fetch('./data.json');
+                        // Anti-cache param
+                        const response = await fetch(`./data.json?t=${new Date().getTime()}`);
                         if (!response.ok) throw new Error('無法載入 data.json');
                         this.data = await response.json();
                     } catch (e) {
@@ -446,7 +699,7 @@
             },
             mounted() {
                 this.fetchData();
-                // 每 5 分鐘自動刷新
+                // Auto refresh every 5 mins
                 setInterval(() => this.fetchData(), 5 * 60 * 1000);
             }
         }).mount('#app');
