@@ -61,7 +61,7 @@
             margin: 0 auto;
         }
 
-        /* Mobile Responsiveness */
+        /* Mobile Responsiveness - Card View Transformation */
         @media (max-width: 768px) {
             body {
                 padding: 1rem;
@@ -80,21 +80,122 @@
                 gap: 0.75rem;
             }
 
-            /* Make tables scrollable horizontally */
-            .table-container {
-                overflow-x: auto;
-                -webkit-overflow-scrolling: touch;
+            /* HIDE TABLE HEADERS */
+            thead {
+                display: none;
             }
 
-            table {
-                min-width: 600px;
-                /* Force minimum width to ensure columns don't squash */
-            }
-
-            th,
+            /* TRANSFORM TABLE TO CARDS */
+            table,
+            tbody,
+            tr,
             td {
-                padding: 0.75rem 0.5rem;
-                white-space: nowrap;
+                display: block;
+                width: 100%;
+            }
+
+            .table-container {
+                background: transparent;
+                border: none;
+                box-shadow: none;
+                overflow: visible;
+            }
+
+            /* Card Style for Rows */
+            tr {
+                margin-bottom: 1rem;
+                background: var(--bg-card);
+                border: 1px solid var(--border);
+                border-radius: 12px;
+                padding: 1rem;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            }
+
+            /* Cell Styling */
+            td {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                text-align: right;
+                padding: 0.6rem 0;
+                border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
+            }
+
+            td:last-child {
+                border-bottom: none;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+                margin-top: 0.5rem;
+                padding-top: 0.5rem;
+                border-top: 1px solid rgba(255, 255, 255, 0.1);
+            }
+
+            /* Add Labels via pseudo-elements */
+            /* Chain Flow Labels */
+            .section:nth-of-type(1) td:nth-of-type(2)::before {
+                content: "TVL";
+                color: var(--text-secondary);
+            }
+
+            .section:nth-of-type(1) td:nth-of-type(3)::before {
+                content: "24H 變動";
+                color: var(--text-secondary);
+            }
+
+            .section:nth-of-type(1) td:nth-of-type(4)::before {
+                content: "穩定幣流入";
+                color: var(--text-secondary);
+            }
+
+            .section:nth-of-type(1) td:nth-of-type(5)::before {
+                content: "AI 標籤";
+                color: var(--text-secondary);
+                display: none;
+            }
+
+            /* Hide label for tags row */
+
+            /* CEX Flow Labels */
+            .section:nth-of-type(2) td:nth-of-type(2)::before {
+                content: "TVL";
+                color: var(--text-secondary);
+            }
+
+            .section:nth-of-type(2) td:nth-of-type(3)::before {
+                content: "淨流向";
+                color: var(--text-secondary);
+            }
+
+            .section:nth-of-type(2) td:nth-of-type(4)::before {
+                content: "穩定幣";
+                color: var(--text-secondary);
+            }
+
+            .section:nth-of-type(2) td:nth-of-type(5)::before {
+                content: "BTC/ETH";
+                color: var(--text-secondary);
+            }
+
+            .section:nth-of-type(2) td:nth-of-type(6)::before {
+                content: "AI 標籤";
+                color: var(--text-secondary);
+                display: none;
+            }
+
+            /* First Cell (Name) Header Style */
+            td:first-child {
+                justify-content: flex-start;
+                font-size: 1.1rem;
+                font-weight: 700;
+                color: var(--text-primary);
+                border-bottom: 2px solid var(--border);
+                padding-bottom: 0.75rem;
+                margin-bottom: 0.5rem;
+            }
+
+            td:first-child::before {
+                display: none;
             }
 
             .weather-banner {
