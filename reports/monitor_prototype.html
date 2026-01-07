@@ -189,84 +189,82 @@
         /* 4. MOBILE RESPONSIVENESS (Table-to-Card Transformation) */
         @media screen and (max-width: 768px) {
 
-            /* Hide Table Headers */
-            .data-grid thead {
-                display: none;
-            }
-
-            /* Make layout completely block-based */
-            .data-grid,
-            .data-grid tbody,
-            .data-grid tr,
-            .data-grid td {
+            /* ---------------------------------------------------------
+           3. MOBILE RESPONSIVENESS (Card Transformation)
+           --------------------------------------------------------- */
+            /* Force table to block layout using specificity */
+            .market-table,
+            .market-table thead,
+            .market-table tbody,
+            .market-table th,
+            .market-table td,
+            .market-table tr {
                 display: block;
                 width: 100%;
             }
 
-            /* Card Style for Rows */
-            .data-grid tr {
-                margin-bottom: 1.5rem;
-                background: var(--bg-card);
-                border: 1px solid var(--border);
-                border-radius: 12px;
-                padding: 1rem;
-                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-            }
-
-            /* Specific Outlier Card Style */
-            .data-grid tr.row-outlier {
-                border-color: var(--alert-border);
-                animation: pulse-red 2s infinite;
-            }
-
-            .data-grid tr.row-outlier::after {
+            /* Hide Desktop Headers */
+            .market-table thead {
                 display: none;
             }
 
-            /* Remove side bar for cards */
+            /* Card Style for Rows */
+            .market-table tr {
+                margin-bottom: 1.5rem;
+                background-color: var(--bg-card);
+                border: 1px solid var(--border);
+                border-radius: 12px;
+                padding: 1.25rem;
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+            }
 
-            /* Flex layout for Cell Content */
-            .data-grid td {
+            /* Outlier Styling on Cards */
+            .market-table tr.outlier-high-vol {
+                border-color: var(--outlier-red-border);
+                background: linear-gradient(145deg, var(--bg-card), rgba(239, 68, 68, 0.1));
+            }
+
+            /* Cell Flexbox Layout */
+            .market-table td {
                 display: flex;
                 justify-content: space-between;
-                /* Label Left, Value Right */
                 align-items: center;
                 text-align: right;
                 padding: 0.75rem 0;
-                border-bottom: 1px dashed #333;
+                border-bottom: 1px dashed #334155;
             }
 
-            .data-grid td:last-child {
+            .market-table td:last-child {
                 border-bottom: none;
             }
 
-            /* Add Labels via CSS Content (or use data-label attribute) */
-            .data-grid td::before {
+            /* ADVANCED LABELING: content from data-label */
+            .market-table td::before {
                 content: attr(data-label);
                 float: left;
-                font-weight: 600;
+                font-weight: 700;
                 color: var(--text-secondary);
                 text-transform: uppercase;
-                font-size: 0.75rem;
+                font-size: 0.8rem;
                 letter-spacing: 0.5px;
             }
 
-            /* Special handling for the Token Name (First Cell) */
-            .data-grid td:first-child {
-                justify-content: flex-start;
-                font-size: 1.1rem;
-                font-weight: 800;
+            /* Specific styling for Asset Name (First Child) */
+            .market-table td:first-child {
+                font-size: 1.2rem;
+                font-weight: 700;
                 color: var(--text-primary);
-                border-bottom: 1px solid var(--border);
-                padding-bottom: 0.75rem;
+                justify-content: flex-start;
+                border-bottom: 2px solid var(--border);
                 margin-bottom: 0.5rem;
+                padding-bottom: 0.75rem;
             }
 
-            .data-grid td:first-child::before {
+            .market-table td:first-child::before {
                 display: none;
             }
 
-            /* No label for Token Name header */
+            /* Hide "Asset" label */
         }
     </style>
 </head>
@@ -277,84 +275,81 @@
         <h1>⚡ 加密貨幣即時戰情室</h1>
         <div class="subtitle">即時主力資金追蹤 & 異常訊號檢測</div>
 
-        <table class="data-grid">
+        <table class="market-table">
             <thead>
                 <tr>
-                    <th>資產對</th>
-                    <th>最新價格</th>
-                    <th>24H 成交量</th>
-                    <th>未平倉合約 (OI)</th>
-                    <th>交易訊號</th>
+                    <th>Asset (資產)</th>
+                    <th>Price (價格)</th>
+                    <th>1H Flow (1小時)</th>
+                    <th>4H Flow (4小時)</th>
+                    <th>24H Vol (日量)</th>
+                    <th>1W Chg (週變動)</th>
                 </tr>
             </thead>
             <tbody>
                 <!-- Row 1: Whale Activity -->
                 <tr>
-                    <td data-label="資產對">
-                        <div class="token-cell">
-                            <span>BTC/USDT</span>
-                            <span class="badge badge-whale">🐋 巨鯨進場</span>
-                        </div>
+                    <td data-label="Asset (資產)">
+                        <span>BTC/USDT</span>
+                        <span class="badge badge-whale">🐋 Whale Buy</span>
                     </td>
-                    <td data-label="最新價格" class="value">$94,520.50</td>
-                    <td data-label="24H 成交量" class="volume">$32.5B</td>
-                    <td data-label="持倉量 (OI)" class="oi">$12.1B (高水位)</td>
-                    <td data-label="訊號">📈 吸籌中 (Accumulation)</td>
+                    <td data-label="Price (價格)" class="font-mono">$94,520.50</td>
+                    <td data-label="1H Flow (1小時)" class="font-mono" style="color: #22c55e;">+$45M ⚡</td>
+                    <td data-label="4H Flow (4小時)" class="font-mono" style="color: #22c55e;">+$150M 🔥</td>
+                    <td data-label="24H Vol (日量)" class="font-mono">$32.5B</td>
+                    <td data-label="1W Chg (週變動)" class="font-mono" style="color: #22c55e;">+12.5% 📈</td>
                 </tr>
 
-                <!-- Row 2: Outlier (Anomaly) -->
-                <tr class="row-outlier">
-                    <td data-label="資產對">
-                        <div class="token-cell">
-                            <span>SOL/USDT</span>
-                            <span class="badge badge-inst">🏛 機構操盤</span>
-                        </div>
+                <!-- Row 2: Outlier (High Vol Dump) -->
+                <tr class="outlier-high-vol">
+                    <td data-label="Asset (資產)">
+                        <span>SOL/USDT</span>
+                        <span class="badge badge-smart">⚠️ VOL SURGE</span>
                     </td>
-                    <td data-label="最新價格" class="value">$188.45</td>
-                    <td data-label="24H 成交量" class="volume value-high">$4.2B (+650%)</td>
-                    <td data-label="持倉量 (OI)" class="oi">$850M</td>
-                    <td data-label="訊號" class="value-high">⚠️ 爆量異常 (VOL SURGE)</td>
+                    <td data-label="Price (價格)" class="font-mono">$188.45</td>
+                    <td data-label="1H Flow (1小時)" class="font-mono" style="color: #ef4444;">-$25M 📉</td>
+                    <td data-label="4H Flow (4小時)" class="font-mono" style="color: #ef4444;">-$80M 📉</td>
+                    <td data-label="24H Vol (日量)" class="font-mono" style="color: #ef4444;">$4.2B (+650%)</td>
+                    <td data-label="1W Chg (週變動)" class="font-mono" style="color: #ef4444;">-5.2% 🔻</td>
                 </tr>
 
                 <!-- Row 3: Smart Money -->
                 <tr>
-                    <td data-label="資產對">
-                        <div class="token-cell">
-                            <span>ETH/USDT</span>
-                            <span class="badge badge-smart">🧠 聰明錢</span>
-                        </div>
+                    <td data-label="Asset (資產)">
+                        <span>ETH/USDT</span>
+                        <span class="badge badge-smart">🧠 Smart Money</span>
                     </td>
-                    <td data-label="最新價格" class="value">$3,240.10</td>
-                    <td data-label="24H 成交量" class="volume">$15.8B</td>
-                    <td data-label="持倉量 (OI)" class="oi">$9.2B</td>
-                    <td data-label="訊號">➡️ 穩定流入</td>
+                    <td data-label="Price (價格)" class="font-mono">$3,240.10</td>
+                    <td data-label="1H Flow (1小時)" class="font-mono" style="color: #22c55e;">+$12M</td>
+                    <td data-label="4H Flow (4小時)" class="font-mono" style="color: #22c55e;">+$45M</td>
+                    <td data-label="24H Vol (日量)" class="font-mono">$15.8B</td>
+                    <td data-label="1W Chg (週變動)" class="font-mono" style="color: #94a3b8;">+1.2% ➖</td>
                 </tr>
 
                 <!-- Row 4: Normal -->
                 <tr>
-                    <td data-label="資產對">
-                        <div class="token-cell">
-                            <span>XRP/USDT</span>
-                        </div>
+                    <td data-label="Asset (資產)">
+                        <span>XRP/USDT</span>
                     </td>
-                    <td data-label="最新價格" class="value">$2.45</td>
-                    <td data-label="24H 成交量" class="volume">$800M</td>
-                    <td data-label="持倉量 (OI)" class="oi">$250M</td>
-                    <td data-label="訊號">➖ 中性觀望</td>
+                    <td data-label="Price (價格)" class="font-mono">$2.45</td>
+                    <td data-label="1H Flow (1小時)" class="font-mono" style="color: #94a3b8;">-$2M</td>
+                    <td data-label="4H Flow (4小時)" class="font-mono" style="color: #94a3b8;">+$5M</td>
+                    <td data-label="24H Vol (日量)" class="font-mono">$800M</td>
+                    <td data-label="1W Chg (週變動)" class="font-mono" style="color: #94a3b8;">-0.5% ➖</td>
                 </tr>
 
-                <!-- Row 5: Another Whale -->
-                <tr>
-                    <td data-label="資產對">
-                        <div class="token-cell">
-                            <span>DOGE/USDT</span>
-                            <span class="badge badge-whale">🐋 巨鯨進場</span>
-                        </div>
+                <!-- Row 5: Outlier (Pump) -->
+                <tr class="outlier-pump">
+                    <td data-label="Asset (資產)">
+                        <span>DOGE/USDT</span>
+                        <span class="badge badge-whale">🚀 PUMP</span>
                     </td>
-                    <td data-label="最新價格" class="value">$0.142</td>
-                    <td data-label="24H 成交量" class="volume">$1.2B</td>
-                    <td data-label="持倉量 (OI)" class="oi">$400M</td>
-                    <td data-label="訊號">🚀 拉升中 (Pumping)</td>
+                    <td data-label="Price (價格)" class="font-mono">$0.142</td>
+                    <td data-label="1H Flow (1小時)" class="font-mono" style="color: #22c55e;">+$80M ⚡</td>
+                    <td data-label="4H Flow (4小時)" class="font-mono" style="color: #22c55e;">+$200M 🚀</td>
+                    <td data-label="24H Vol (日量)" class="font-mono" style="color: #22c55e;">$1.2B (+120%)</td>
+                    <td data-label="24H Vol (日量)" class="font-mono" style="color: #22c55e;">$1.2B (+120%)</td>
+                    <td data-label="1W Chg (週變動)" class="font-mono" style="color: #22c55e;">+35% 🌕</td>
                 </tr>
             </tbody>
         </table>
@@ -363,3 +358,4 @@
 </body>
 
 </html>
+```
