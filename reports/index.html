@@ -117,8 +117,11 @@
                 justify-content: space-between;
                 align-items: center;
                 text-align: right;
-                padding: 0.6rem 0;
+                padding: 0.75rem 0;
+                /* More padding */
                 border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
+                position: relative;
+                /* For tooltips */
             }
 
             td:last-child {
@@ -127,66 +130,28 @@
                 align-items: flex-start;
                 gap: 0.5rem;
                 margin-top: 0.5rem;
-                padding-top: 0.5rem;
+                padding-top: 1rem;
                 border-top: 1px solid rgba(255, 255, 255, 0.1);
             }
 
-            /* Add Labels via pseudo-elements */
-            /* Chain Flow Labels */
-            .section:nth-of-type(1) td:nth-of-type(2)::before {
-                content: "TVL";
+            /* ROBUST LABEL DISPLAY using data-label attribute */
+            td::before {
+                content: attr(data-label);
+                float: left;
+                font-weight: 500;
                 color: var(--text-secondary);
-            }
-
-            .section:nth-of-type(1) td:nth-of-type(3)::before {
-                content: "24H 變動";
-                color: var(--text-secondary);
-            }
-
-            .section:nth-of-type(1) td:nth-of-type(4)::before {
-                content: "穩定幣流入";
-                color: var(--text-secondary);
-            }
-
-            .section:nth-of-type(1) td:nth-of-type(5)::before {
-                content: "AI 標籤";
-                color: var(--text-secondary);
-                display: none;
-            }
-
-            /* Hide label for tags row */
-
-            /* CEX Flow Labels */
-            .section:nth-of-type(2) td:nth-of-type(2)::before {
-                content: "TVL";
-                color: var(--text-secondary);
-            }
-
-            .section:nth-of-type(2) td:nth-of-type(3)::before {
-                content: "淨流向";
-                color: var(--text-secondary);
-            }
-
-            .section:nth-of-type(2) td:nth-of-type(4)::before {
-                content: "穩定幣";
-                color: var(--text-secondary);
-            }
-
-            .section:nth-of-type(2) td:nth-of-type(5)::before {
-                content: "BTC/ETH";
-                color: var(--text-secondary);
-            }
-
-            .section:nth-of-type(2) td:nth-of-type(6)::before {
-                content: "AI 標籤";
-                color: var(--text-secondary);
-                display: none;
+                text-transform: uppercase;
+                font-size: 0.85rem;
+                letter-spacing: 0.5px;
+                max-width: 60%;
+                /* Prevent overlap */
+                text-align: left;
             }
 
             /* First Cell (Name) Header Style */
             td:first-child {
                 justify-content: flex-start;
-                font-size: 1.1rem;
+                font-size: 1.25rem;
                 font-weight: 700;
                 color: var(--text-primary);
                 border-bottom: 2px solid var(--border);
@@ -197,6 +162,8 @@
             td:first-child::before {
                 display: none;
             }
+
+            /* Hide label for Name row */
 
             .weather-banner {
                 flex-direction: column;
