@@ -212,9 +212,10 @@ def check_and_alert(data: Dict[str, Any]) -> int:
             f"**穩定幣流入: ${total_stablecoin_flow / 1e6:,.1f}M**\n\n"
             f"💡 **重點分析:** {insight}\n\n"
             f"🔗 **相關連結:**\n"
-            f"• [資金流向戰情室 (Interactive)]({DASHBOARD_URL})\n"
-            f"• [完整數據報告 (Full Report)](https://huyuyuan1989-oss.github.io/cexdex/reports/latest.html)\n"
-            f"• [原始數據源 (Raw JSON)](https://huyuyuan1989-oss.github.io/cexdex/reports/data.json)"
+            f"• [💎 加密貨幣即時戰情室 (Live Monitor)](https://huyuyuan1989-oss.github.io/cexdex/reports/monitor.html)\n"
+            f"• [💰 全鏈資金流向總站 (Main Terminal)]({DASHBOARD_URL})\n"
+            f"• [📄 完整數據報告 (Full Report)](https://huyuyuan1989-oss.github.io/cexdex/reports/latest.html)\n"
+            f"• [📊 原始數據源 (Raw JSON)](https://huyuyuan1989-oss.github.io/cexdex/reports/data.json)"
         )
         
         success = send_discord_alert(
@@ -269,9 +270,10 @@ def check_and_alert(data: Dict[str, Any]) -> int:
             f"**BTC/ETH 流入: ${total_btc_eth_flow / 1e6:,.1f}M**\n\n"
             f"💡 **重點分析:** {insight}\n\n"
             f"🔗 **相關連結:**\n"
-            f"• [資金流向戰情室 (Interactive)]({DASHBOARD_URL})\n"
-            f"• [完整數據報告 (Full Report)](https://huyuyuan1989-oss.github.io/cexdex/reports/latest.html)\n"
-            f"• [原始數據源 (Raw JSON)](https://huyuyuan1989-oss.github.io/cexdex/reports/data.json)"
+            f"• [💎 加密貨幣即時戰情室 (Live Monitor)](https://huyuyuan1989-oss.github.io/cexdex/reports/monitor.html)\n"
+            f"• [💰 全鏈資金流向總站 (Main Terminal)]({DASHBOARD_URL})\n"
+            f"• [📄 完整數據報告 (Full Report)](https://huyuyuan1989-oss.github.io/cexdex/reports/latest.html)\n"
+            f"• [📊 原始數據源 (Raw JSON)](https://huyuyuan1989-oss.github.io/cexdex/reports/data.json)"
         )
         
         success = send_discord_alert(
@@ -352,9 +354,10 @@ def send_summary_notification(data: Dict[str, Any]) -> bool:
         message=(
             f"**{datetime.now().strftime('%Y-%m-%d %H:%M')} 執行完成**\n\n"
             f"🔗 **相關連結:**\n"
-            f"• [資金流向戰情室 (Interactive)]({DASHBOARD_URL})\n"
-            f"• [完整數據報告 (Full Report)](https://huyuyuan1989-oss.github.io/cexdex/reports/latest.html)\n"
-            f"• [原始數據源 (Raw JSON)](https://huyuyuan1989-oss.github.io/cexdex/reports/data.json)"
+            f"• [💎 加密貨幣即時戰情室 (Live Monitor)](https://huyuyuan1989-oss.github.io/cexdex/reports/monitor.html)\n"
+            f"• [💰 全鏈資金流向總站 (Main Terminal)]({DASHBOARD_URL})\n"
+            f"• [📄 完整數據報告 (Full Report)](https://huyuyuan1989-oss.github.io/cexdex/reports/latest.html)\n"
+            f"• [📊 原始數據源 (Raw JSON)](https://huyuyuan1989-oss.github.io/cexdex/reports/data.json)"
         ),
         color=color,
         fields=fields
