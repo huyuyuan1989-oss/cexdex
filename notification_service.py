@@ -34,11 +34,33 @@ COLORS = {
     'blue': 0x3498db,    # Info
 }
 
+# 儀表板 URL
+DASHBOARD_URL = "https://huyuyuan1989-oss.github.io/cexdex/reports/latest.html"
+
 # 閾值設定
 THRESHOLDS = {
     'stablecoin_inflow': 100_000_000,  # $100M
     'btc_eth_inflow': 100_000_000,     # $100M
 }
+
+
+def generate_insight(signal_type: str, amount: float) -> str:
+    """
+    生成深度分析洞察文字
+    
+    Args:
+        signal_type: 信號類型 ('Bullish_Stablecoin' 或 'Bearish_Dump')
+        amount: 金額 (USD)
+    
+    Returns:
+        分析洞察文字
+    """
+    if signal_type == 'Bullish_Stablecoin':
+        return "檢測到異常規模的購買力儲備。主力可能正在積累籌碼準備上攻。"
+    elif signal_type == 'Bearish_Dump':
+        return "檢測到大額風險資產充值。可能存在潛在的拋售壓力，建議避險。"
+    else:
+        return "市場資金流向正常，無明顯異動。"
 
 
 def get_webhook_urls() -> List[str]:
@@ -183,10 +205,18 @@ def check_and_alert(data: Dict[str, Any]) -> int:
                 "inline": False
             })
         
+        # 生成深度分析
+        insight = generate_insight('Bullish_Stablecoin', total_stablecoin_flow)
+        
+        description = (
+            f"**穩定幣流入: ${total_stablecoin_flow / 1e6:,.1f}M**\n\n"
+            f"💡 **重點分析:** {insight}\n\n"
+            f"🔗 [點擊查看完整儀表板 >>]({DASHBOARD_URL})"
+        )
+        
         success = send_discord_alert(
             title="🟢 Buying Power Alert",
-            message="**穩定幣大量流入交易所！**\n\n"
-                   "這通常代表投資者正在準備買入，市場買盤充足。",
+            message=description,
             color=COLORS['green'],
             fields=fields
         )
@@ -229,10 +259,18 @@ def check_and_alert(data: Dict[str, Any]) -> int:
                 "inline": False
             })
         
+        # 生成深度分析
+        insight = generate_insight('Bearish_Dump', total_btc_eth_flow)
+        
+        description = (
+            f"**BTC/ETH 流入: ${total_btc_eth_flow / 1e6:,.1f}M**\n\n"
+            f"💡 **重點分析:** {insight}\n\n"
+            f"🔗 [點擊查看完整儀表板 >>]({DASHBOARD_URL})"
+        )
+        
         success = send_discord_alert(
             title="🔴 Dump Risk Alert",
-            message="**BTC/ETH 大量流入交易所！**\n\n"
-                   "這可能代表大戶準備拋售，請注意風險控管。",
+            message=description,
             color=COLORS['red'],
             fields=fields
         )
