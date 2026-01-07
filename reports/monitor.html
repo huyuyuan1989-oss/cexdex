@@ -272,9 +272,53 @@
 <body>
 
     <div class="container">
-        <h1>⚡ 加密貨幣即時戰情室</h1>
-        <div class="subtitle">即時主力資金追蹤 & 異常訊號檢測</div>
+        <!-- 1. Header & Navigation -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <div>
+                <h1>⚡ 加密貨幣即時戰情室</h1>
+                <div class="subtitle">即時主力資金追蹤 & 異常訊號檢測</div>
+            </div>
+            <a href="index.html"
+                style="color: var(--text-accent); text-decoration: none; border: 1px solid var(--text-accent); padding: 0.5rem 1rem; border-radius: 4px; font-size: 0.9rem;">
+                🔙 返回資金流向總站
+            </a>
+        </div>
 
+        <!-- 2. Market Weather / Summary Banner -->
+        <div
+            style="background: linear-gradient(90deg, #1a202c, #2d3748); padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; border-left: 4px solid #22c55e; display: flex; align-items: center; justify-content: space-between;">
+            <div>
+                <span style="font-size: 1.2rem;">🌤️ 市場狀態: <strong style="color: #22c55e;">看多 (Bullish)</strong></span>
+                <span style="color: #94a3b8; font-size: 0.9rem; margin-left: 1rem;">資金持續流入，主力買盤強勁</span>
+            </div>
+            <div style="text-align: right;">
+                <div style="font-size: 0.8rem; color: #94a3b8;">1H 總淨流入</div>
+                <div class="font-mono" style="color: #22c55e; font-size: 1.1rem; font-weight: bold;">+$245M ⚡</div>
+            </div>
+        </div>
+
+        <!-- 3. Key Stats Cards -->
+        <div
+            style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+            <div
+                style="background: var(--bg-card); padding: 1rem; border-radius: 8px; border: 1px solid var(--border);">
+                <div style="color: var(--text-secondary); font-size: 0.8rem; margin-bottom: 0.5rem;">4H 趨勢 (Trend)</div>
+                <div class="font-mono" style="font-size: 1.2rem; color: #22c55e;">+$450M ↗</div>
+            </div>
+            <div
+                style="background: var(--bg-card); padding: 1rem; border-radius: 8px; border: 1px solid var(--border);">
+                <div style="color: var(--text-secondary); font-size: 0.8rem; margin-bottom: 0.5rem;">24H 總量 (Volume)
+                </div>
+                <div class="font-mono" style="font-size: 1.2rem; color: #e0e0e0;">$54.2B</div>
+            </div>
+            <div
+                style="background: var(--bg-card); padding: 1rem; border-radius: 8px; border: 1px solid var(--border);">
+                <div style="color: var(--text-secondary); font-size: 0.8rem; margin-bottom: 0.5rem;">異常訊號 (Alerts)</div>
+                <div class="font-mono" style="font-size: 1.2rem; color: #ef4444;">3 High Risk</div>
+            </div>
+        </div>
+
+        <!-- 4. Data Table -->
         <table class="market-table">
             <thead>
                 <tr>
@@ -290,8 +334,10 @@
                 <!-- Row 1: Whale Activity -->
                 <tr>
                     <td data-label="Asset (資產)">
-                        <span>BTC/USDT</span>
-                        <span class="badge badge-whale">🐋 Whale Buy</span>
+                        <div class="token-cell">
+                            <span>BTC/USDT</span>
+                            <span class="badge badge-whale">🐋 Whale Buy</span>
+                        </div>
                     </td>
                     <td data-label="Price (價格)" class="font-mono">$94,520.50</td>
                     <td data-label="1H Flow (1小時)" class="font-mono" style="color: #22c55e;">+$45M ⚡</td>
@@ -303,8 +349,10 @@
                 <!-- Row 2: Outlier (High Vol Dump) -->
                 <tr class="outlier-high-vol">
                     <td data-label="Asset (資產)">
-                        <span>SOL/USDT</span>
-                        <span class="badge badge-smart">⚠️ VOL SURGE</span>
+                        <div class="token-cell">
+                            <span>SOL/USDT</span>
+                            <span class="badge badge-smart">⚠️ VOL SURGE</span>
+                        </div>
                     </td>
                     <td data-label="Price (價格)" class="font-mono">$188.45</td>
                     <td data-label="1H Flow (1小時)" class="font-mono" style="color: #ef4444;">-$25M 📉</td>
@@ -316,8 +364,10 @@
                 <!-- Row 3: Smart Money -->
                 <tr>
                     <td data-label="Asset (資產)">
-                        <span>ETH/USDT</span>
-                        <span class="badge badge-smart">🧠 Smart Money</span>
+                        <div class="token-cell">
+                            <span>ETH/USDT</span>
+                            <span class="badge badge-smart">🧠 Smart Money</span>
+                        </div>
                     </td>
                     <td data-label="Price (價格)" class="font-mono">$3,240.10</td>
                     <td data-label="1H Flow (1小時)" class="font-mono" style="color: #22c55e;">+$12M</td>
@@ -329,7 +379,9 @@
                 <!-- Row 4: Normal -->
                 <tr>
                     <td data-label="Asset (資產)">
-                        <span>XRP/USDT</span>
+                        <div class="token-cell">
+                            <span>XRP/USDT</span>
+                        </div>
                     </td>
                     <td data-label="Price (價格)" class="font-mono">$2.45</td>
                     <td data-label="1H Flow (1小時)" class="font-mono" style="color: #94a3b8;">-$2M</td>
@@ -341,18 +393,48 @@
                 <!-- Row 5: Outlier (Pump) -->
                 <tr class="outlier-pump">
                     <td data-label="Asset (資產)">
-                        <span>DOGE/USDT</span>
-                        <span class="badge badge-whale">🚀 PUMP</span>
+                        <div class="token-cell">
+                            <span>DOGE/USDT</span>
+                            <span class="badge badge-whale">🚀 PUMP</span>
+                        </div>
                     </td>
                     <td data-label="Price (價格)" class="font-mono">$0.142</td>
                     <td data-label="1H Flow (1小時)" class="font-mono" style="color: #22c55e;">+$80M ⚡</td>
                     <td data-label="4H Flow (4小時)" class="font-mono" style="color: #22c55e;">+$200M 🚀</td>
                     <td data-label="24H Vol (日量)" class="font-mono" style="color: #22c55e;">$1.2B (+120%)</td>
-                    <td data-label="24H Vol (日量)" class="font-mono" style="color: #22c55e;">$1.2B (+120%)</td>
                     <td data-label="1W Chg (週變動)" class="font-mono" style="color: #22c55e;">+35% 🌕</td>
                 </tr>
             </tbody>
         </table>
+
+        <!-- 5. Methodology Footer -->
+        <div
+            style="margin-top: 3rem; padding: 2rem; background: #0f172a; border-radius: 8px; border: 1px solid #1e293b;">
+            <h3 style="color: #94a3b8; font-size: 1rem; margin-bottom: 1rem; text-transform: uppercase;">📊 計算方法說明
+                (Methodology)</h3>
+            <div
+                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; color: #64748b; font-size: 0.9rem;">
+                <div>
+                    <strong style="color: #e2e8f0; display: block; margin-bottom: 0.5rem;">🔥 1H Flow (短線爆發)</strong>
+                    <p>計算過去 60 分鐘內的主動買入淨額。用於識別突發的短線拉升或砸盤行為。</p>
+                </div>
+                <div>
+                    <strong style="color: #e2e8f0; display: block; margin-bottom: 0.5rem;">📈 4H Flow (趨勢確認)</strong>
+                    <p>計算過去 4 小時的資金累積淨額。此週期能過濾掉雜訊，確認資金是否真實持續流入。</p>
+                </div>
+                <div>
+                    <strong style="color: #e2e8f0; display: block; margin-bottom: 0.5rem;">🐋 Smart Money (聰明錢)</strong>
+                    <p>標記單筆大額成交或連續吸籌的行為。當出現 "Whale Buy" 時，代表大戶正在積極建倉。</p>
+                </div>
+                <div>
+                    <strong style="color: #e2e8f0; display: block; margin-bottom: 0.5rem;">⚠️ Vol Surge (異常爆量)</strong>
+                    <p>當 24H 交易量突然暴增超過歷史平均 500% 時觸發，通常是變盤的前兆。</p>
+                </div>
+            </div>
+            <div style="margin-top: 1.5rem; text-align: center; color: #475569; font-size: 0.8rem;">
+                數據每 30 秒自動更新 | 來源: 交易所 API 聚合 (Binance, OKX, Bybit)
+            </div>
+        </div>
     </div>
 
 </body>

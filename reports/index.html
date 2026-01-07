@@ -725,37 +725,44 @@
                                 <table class="market-table">
                                     <thead>
                                         <tr>
-                                            <th>Asset (資產)</th>
-                                            <th>TVL (鎖倉)</th>
+                                            <th>Exchange (交易所)</th>
+                                            <th>Total Net Flow (總淨流向)</th>
                                             <th>1H Flow (1小時)</th>
                                             <th>4H Flow (4小時)</th>
-                                            <th>24H Chg (日變動)</th>
-                                            <th>1W Chg (週變動)</th>
+                                            <th>Stablecoins (穩定幣)</th>
+                                            <th>BTC/ETH (風險資產)</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr v-for="chain in chainFlows.chains" :key="chain.name"
-                                            :class="getRowClass(chain)">
-                                            <td data-label="Asset (資產)">
+                                        <tr v-for="cex in sortedCex" :key="cex.exchange">
+                                            <td data-label="Exchange (交易所)">
                                                 <div class="token-cell">
-                                                    <span>{{ chain.name }}</span>
-                                                    <span v-if="chain.tags && chain.tags.length"
-                                                        class="badge badge-whale">{{ chain.tags[0] }}</span>
+                                                    <span>{{ cex.exchange }}</span>
+                                                    <span v-if="cex.tags && cex.tags.length" class="badge badge-whale"
+                                                        :class="getTagClass(cex.tags[0].signal)">{{
+                                                        translateTag(cex.tags[0].type) }}</span>
                                                 </div>
                                             </td>
-                                            <td data-label="TVL (鎖倉)" class="font-mono">{{ formatMoney(chain.tvl) }}
+                                            <td data-label="Total Net (總淨流)" class="font-mono"
+                                                :class="cex.net_flow_24h >= 0 ? 'text-green' : 'text-red'">
+                                                ${{ formatM(cex.net_flow_24h) }}M
                                             </td>
                                             <!-- Placeholder data for new columns until backend is ready -->
                                             <td data-label="1H Flow (1小時)" class="font-mono text-gray">--</td>
                                             <td data-label="4H Flow (4小時)" class="font-mono text-gray">--</td>
-                                            <td data-label="24H Chg (日變動)" class="font-mono"
-                                                :class="getValueClass(chain.change_24h)">
-                                                {{ formatPercent(chain.change_24h) }}
+
+                                            <td data-label="Stablecoins (穩定幣)" class="font-mono"
+                                                :class="cex.stablecoin_flow_24h >= 0 ? 'text-green' : 'text-red'">
+                                                ${{ formatM(cex.stablecoin_flow_24h) }}M
                                             </td>
-                                            <td data-label="1W Chg (週變動)" class="font-mono text-gray">--</td>
+                                            <td data-label="BTC/ETH (風險資產)" class="font-mono"
+                                                :class="cex.btc_eth_flow_24h >= 0 ? 'text-red' : 'text-green'">
+                                                ${{ formatM(cex.btc_eth_flow_24h) }}M
+                                            </td>
                                         </tr>
                                     </tbody>
-                                </table>ody>
+                                </table>
+                    </table>ody>
                     </table>
                 </div>
             </div>
