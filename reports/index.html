@@ -182,6 +182,87 @@
             }
         }
 
+        /* 4. MOBILE RESPONSIVENESS (Card Transformation) */
+        @media screen and (max-width: 768px) {
+
+            /* Force table to block layout using specificity */
+            .market-table,
+            .market-table thead,
+            .market-table tbody,
+            .market-table th,
+            .market-table td,
+            .market-table tr {
+                display: block;
+                width: 100%;
+            }
+
+            /* Hide Desktop Headers */
+            .market-table thead {
+                display: none;
+            }
+
+            /* Card Style for Rows */
+            .market-table tr {
+                margin-bottom: 1.5rem;
+                background-color: var(--bg-card);
+                border: 1px solid var(--border);
+                border-radius: 12px;
+                padding: 1.25rem;
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+            }
+
+            /* Outlier Styling on Cards */
+            .market-table tr.outlier-high-vol {
+                border-color: var(--outlier-red-border);
+                background: linear-gradient(145deg, var(--bg-card), rgba(239, 68, 68, 0.1));
+            }
+
+            /* Cell Flexbox Layout */
+            .market-table td {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                text-align: right;
+                padding: 0.75rem 0;
+                border-bottom: 1px dashed #334155;
+            }
+
+            .market-table td:last-child {
+                border-bottom: none;
+                flex-direction: row;
+                /* Keep Signal horizontal on mobile */
+                margin-top: 0;
+            }
+
+            /* ADVANCED LABELING: content from data-label */
+            .market-table td::before {
+                content: attr(data-label);
+                float: left;
+                font-weight: 700;
+                color: var(--text-secondary);
+                text-transform: uppercase;
+                font-size: 0.8rem;
+                letter-spacing: 0.5px;
+            }
+
+            /* Specific styling for Asset Name (First Child) */
+            .market-table td:first-child {
+                font-size: 1.2rem;
+                font-weight: 700;
+                color: var(--text-primary);
+                justify-content: flex-start;
+                border-bottom: 2px solid var(--border);
+                margin-bottom: 0.5rem;
+                padding-bottom: 0.75rem;
+            }
+
+            .market-table td:first-child::before {
+                display: none;
+            }
+
+            /* Hide "Asset" label */
+        }
+
         /* Typography */
         h1,
         h2,
