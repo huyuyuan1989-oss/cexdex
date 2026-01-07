@@ -1,0 +1,364 @@
+"""
+🔔 Notification Service - Discord 通知模組 v1.0
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+功能特色：
+- Discord Webhook 通知 (Embed 格式)
+- 支援多個 Webhook 同時發送
+- 自動判斷 Bullish/Bearish 並使用對應顏色
+- 基於資金流向觸發警報
+
+依賴：requests (標準 HTTP 請求)
+"""
+
+import os
+import logging
+import requests
+from datetime import datetime
+from typing import Dict, List, Any, Optional
+
+logger = logging.getLogger(__name__)
+
+# ================= Discord Webhook 設定 =================
+
+# 預設 Webhook URLs (可透過環境變數覆蓋)
+DEFAULT_WEBHOOKS = [
+    "https://discord.com/api/webhooks/1457246054394363990/6vOf6A1Tg6ndqE-NNvfwEPgJM6NQgZCcmwUY5zYn1enVdBI1kMj140KT3Iq4DUD7_u4N",
+    "https://discord.com/api/webhooks/1458033972650180640/uEoOBJBrcHtKeVY8OsyY8Qhnzicxjioz_1h9LDKQ0D0y4qX4QVp-OclnaBcPUez9lHrb"
+]
+
+# 顏色定義
+COLORS = {
+    'green': 0x00ff00,   # Bullish
+    'red': 0xff0000,     # Bearish
+    'yellow': 0xffff00,  # Neutral
+    'blue': 0x3498db,    # Info
+}
+
+# 閾值設定
+THRESHOLDS = {
+    'stablecoin_inflow': 100_000_000,  # $100M
+    'btc_eth_inflow': 100_000_000,     # $100M
+}
+
+
+def get_webhook_urls() -> List[str]:
+    """
+    獲取 Discord Webhook URLs
+    
+    優先使用環境變數，否則使用預設值
+    """
+    env_webhooks = os.getenv('DISCORD_WEBHOOK_URLS')
+    if env_webhooks:
+        return [url.strip() for url in env_webhooks.split(',') if url.strip()]
+    
+    single_webhook = os.getenv('DISCORD_WEBHOOK_URL')
+    if single_webhook:
+        return [single_webhook] + DEFAULT_WEBHOOKS[1:]  # 第一個用環境變數，第二個用預設
+    
+    return DEFAULT_WEBHOOKS
+
+
+def send_discord_alert(
+    title: str,
+    message: str,
+    color: int,
+    fields: Optional[List[Dict[str, Any]]] = None,
+    footer: Optional[str] = None
+) -> bool:
+    """
+    發送 Discord Embed 警報到所有 Webhooks
+    
+    Args:
+        title: Embed 標題
+        message: Embed 描述
+        color: Embed 顏色 (十六進制整數)
+        fields: Embed 欄位列表 [{name, value, inline}, ...]
+        footer: 頁腳文字
+    
+    Returns:
+        True 如果至少一個 Webhook 發送成功
+    """
+    webhooks = get_webhook_urls()
+    
+    if not webhooks:
+        logger.warning("⚠️ 未設定 Discord Webhook URL")
+        return False
+    
+    # 構建 Embed
+    embed = {
+        "title": title,
+        "description": message,
+        "color": color,
+        "timestamp": datetime.utcnow().isoformat()
+    }
+    
+    if fields:
+        embed["fields"] = fields
+    
+    if footer:
+        embed["footer"] = {"text": footer}
+    else:
+        embed["footer"] = {"text": "資金流向監控系統 | Capital Flow Monitor"}
+    
+    payload = {
+        "embeds": [embed]
+    }
+    
+    success_count = 0
+    
+    for webhook_url in webhooks:
+        try:
+            response = requests.post(
+                webhook_url,
+                json=payload,
+                headers={"Content-Type": "application/json"},
+                timeout=10
+            )
+            
+            if response.status_code == 204:
+                success_count += 1
+                logger.info(f"✅ Discord 通知已發送 (Webhook {webhooks.index(webhook_url) + 1})")
+            else:
+                logger.warning(f"⚠️ Discord 回應 {response.status_code}: {response.text[:100]}")
+                
+        except requests.RequestException as e:
+            logger.error(f"❌ Discord 發送失敗: {e}")
+    
+    return success_count > 0
+
+
+def check_and_alert(data: Dict[str, Any]) -> int:
+    """
+    檢查數據並發送相應警報
+    
+    Args:
+        data: 來自 main.py 的快照數據 (包含 cex_flows)
+    
+    Returns:
+        發送的警報數量
+    """
+    alerts_sent = 0
+    
+    cex_data = data.get('cex_flows', {})
+    summary = cex_data.get('summary', {})
+    exchanges = cex_data.get('exchanges', [])
+    
+    total_stablecoin_flow = summary.get('total_stablecoin_flow_24h', 0)
+    total_btc_eth_flow = summary.get('total_btc_eth_flow_24h', 0)
+    
+    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    
+    # 1. 穩定幣大量流入 -> Buying Power Alert
+    if total_stablecoin_flow > THRESHOLDS['stablecoin_inflow']:
+        fields = [
+            {
+                "name": "💰 Amount",
+                "value": f"${total_stablecoin_flow / 1e6:,.1f}M",
+                "inline": True
+            },
+            {
+                "name": "📍 Source",
+                "value": "All CEX Combined",
+                "inline": True
+            },
+            {
+                "name": "⏰ Time",
+                "value": timestamp,
+                "inline": True
+            }
+        ]
+        
+        # 添加前 3 大交易所明細
+        top_exchanges = []
+        for ex in exchanges[:5]:
+            if ex.get('stablecoin_flow_24h', 0) > 0:
+                top_exchanges.append(
+                    f"• {ex['exchange']}: ${ex['stablecoin_flow_24h']/1e6:+.1f}M"
+                )
+        
+        if top_exchanges:
+            fields.append({
+                "name": "🏦 Top Exchanges",
+                "value": "\n".join(top_exchanges[:3]),
+                "inline": False
+            })
+        
+        success = send_discord_alert(
+            title="🟢 Buying Power Alert",
+            message="**穩定幣大量流入交易所！**\n\n"
+                   "這通常代表投資者正在準備買入，市場買盤充足。",
+            color=COLORS['green'],
+            fields=fields
+        )
+        
+        if success:
+            alerts_sent += 1
+    
+    # 2. BTC/ETH 大量流入 -> Dump Risk Alert
+    if total_btc_eth_flow > THRESHOLDS['btc_eth_inflow']:
+        fields = [
+            {
+                "name": "💰 Amount",
+                "value": f"${total_btc_eth_flow / 1e6:,.1f}M",
+                "inline": True
+            },
+            {
+                "name": "📍 Source",
+                "value": "All CEX Combined",
+                "inline": True
+            },
+            {
+                "name": "⏰ Time",
+                "value": timestamp,
+                "inline": True
+            }
+        ]
+        
+        # 添加前 3 大交易所明細
+        top_exchanges = []
+        for ex in exchanges[:5]:
+            if ex.get('btc_eth_flow_24h', 0) > 0:
+                top_exchanges.append(
+                    f"• {ex['exchange']}: ${ex['btc_eth_flow_24h']/1e6:+.1f}M"
+                )
+        
+        if top_exchanges:
+            fields.append({
+                "name": "🏦 Top Exchanges",
+                "value": "\n".join(top_exchanges[:3]),
+                "inline": False
+            })
+        
+        success = send_discord_alert(
+            title="🔴 Dump Risk Alert",
+            message="**BTC/ETH 大量流入交易所！**\n\n"
+                   "這可能代表大戶準備拋售，請注意風險控管。",
+            color=COLORS['red'],
+            fields=fields
+        )
+        
+        if success:
+            alerts_sent += 1
+    
+    # 3. 如果沒有觸發警報，記錄日誌
+    if alerts_sent == 0:
+        logger.info(f"📊 資金流向正常：穩定幣 ${total_stablecoin_flow/1e6:+.1f}M, "
+                   f"BTC/ETH ${total_btc_eth_flow/1e6:+.1f}M (閾值 $100M)")
+    
+    return alerts_sent
+
+
+def send_summary_notification(data: Dict[str, Any]) -> bool:
+    """
+    發送每日/每次執行摘要通知
+    
+    Args:
+        data: 來自 main.py 的快照數據
+    """
+    sentiment = data.get('market_sentiment', 'Unknown')
+    stablecoin_cap = data.get('stablecoin_marketcap', 0)
+    
+    chain_summary = data.get('chain_flows', {}).get('summary', {})
+    cex_summary = data.get('cex_flows', {}).get('summary', {})
+    
+    # 根據情緒選擇顏色
+    if 'Bullish' in sentiment:
+        color = COLORS['green']
+    elif 'Bearish' in sentiment:
+        color = COLORS['red']
+    else:
+        color = COLORS['yellow']
+    
+    fields = [
+        {
+            "name": "📊 市場情緒",
+            "value": sentiment,
+            "inline": True
+        },
+        {
+            "name": "💵 穩定幣總市值",
+            "value": f"${stablecoin_cap / 1e9:.1f}B",
+            "inline": True
+        },
+        {
+            "name": "🔗 公鏈信號",
+            "value": f"📈 {chain_summary.get('bullish_signals', 0)} 看漲 | "
+                    f"📉 {chain_summary.get('bearish_signals', 0)} 看跌",
+            "inline": True
+        },
+        {
+            "name": "🏦 CEX 淨流向 (24H)",
+            "value": f"${cex_summary.get('total_net_flow_24h', 0) / 1e6:+.1f}M",
+            "inline": True
+        },
+        {
+            "name": "💰 穩定幣流向",
+            "value": f"${cex_summary.get('total_stablecoin_flow_24h', 0) / 1e6:+.1f}M",
+            "inline": True
+        },
+        {
+            "name": "🪙 BTC/ETH 流向",
+            "value": f"${cex_summary.get('total_btc_eth_flow_24h', 0) / 1e6:+.1f}M",
+            "inline": True
+        }
+    ]
+    
+    return send_discord_alert(
+        title="📡 資金流向監控報告",
+        message=f"**{datetime.now().strftime('%Y-%m-%d %H:%M')} 執行完成**",
+        color=color,
+        fields=fields
+    )
+
+
+# ================= 測試入口 =================
+
+def test():
+    """測試 Discord 通知發送"""
+    print("=" * 60)
+    print("🧪 Discord 通知服務測試")
+    print("=" * 60)
+    
+    # 測試 1: 發送簡單 Embed
+    print("\n[1/2] 測試發送 Embed...")
+    success = send_discord_alert(
+        title="🧪 測試通知",
+        message="這是一條測試訊息，確認 Discord Webhook 正常運作。",
+        color=COLORS['blue'],
+        fields=[
+            {"name": "模組", "value": "notification_service.py", "inline": True},
+            {"name": "狀態", "value": "✅ 正常", "inline": True}
+        ]
+    )
+    print(f"   {'✅ 發送成功' if success else '❌ 發送失敗'}")
+    
+    # 測試 2: 模擬 check_and_alert
+    print("\n[2/2] 測試警報邏輯 (模擬數據)...")
+    mock_data = {
+        'market_sentiment': 'Bullish',
+        'stablecoin_marketcap': 300_000_000_000,
+        'chain_flows': {'summary': {'bullish_signals': 5, 'bearish_signals': 1}},
+        'cex_flows': {
+            'summary': {
+                'total_stablecoin_flow_24h': 150_000_000,  # $150M - 觸發
+                'total_btc_eth_flow_24h': 50_000_000,      # $50M - 不觸發
+                'total_net_flow_24h': 200_000_000
+            },
+            'exchanges': [
+                {'exchange': 'binance-cex', 'stablecoin_flow_24h': 100_000_000, 'btc_eth_flow_24h': 30_000_000},
+                {'exchange': 'okx', 'stablecoin_flow_24h': 50_000_000, 'btc_eth_flow_24h': 20_000_000}
+            ]
+        }
+    }
+    
+    alerts = check_and_alert(mock_data)
+    print(f"   發送了 {alerts} 個警報")
+    
+    print("\n" + "=" * 60)
+    print("🎉 測試完成")
+    print("=" * 60)
+
+
+if __name__ == '__main__':
+    logging.basicConfig(level=logging.INFO)
+    test()

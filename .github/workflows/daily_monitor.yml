@@ -33,16 +33,12 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run Monitor Script
+      - name: Run Main Pipeline
         env:
-          # 將 Discord Webhook 設定在 GitHub Secrets 中，變數名稱為 DISCORD_WEBHOOK
-          # 如果沒有設定，請修改 full_chain_monitor.py 中的預設值
-          DISCORD_WEBHOOK_URL_ENV: ${{ secrets.DISCORD_WEBHOOK }}
+          # Discord Webhook URL (設定在 GitHub Secrets 中)
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
         run: |
-          # 執行腳本 (請確保腳本內的 SCHEDULE_INTERVAL = 0，設為單次執行模式)
-          # 無論是透過 sed 修改還是直接執行
-          sed -i 's/SCHEDULE_INTERVAL = 1800/SCHEDULE_INTERVAL = 0/' full_chain_monitor.py
-          python full_chain_monitor.py
+          python main.py
 
       - name: Commit and Push Report & DB
         run: |
