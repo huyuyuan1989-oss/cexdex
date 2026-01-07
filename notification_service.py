@@ -211,7 +211,7 @@ def check_and_alert(data: Dict[str, Any]) -> int:
         description = (
             f"**穩定幣流入: ${total_stablecoin_flow / 1e6:,.1f}M**\n\n"
             f"💡 **重點分析:** {insight}\n\n"
-            f"🔗 [點擊查看完整儀表板 >>]({DASHBOARD_URL})"
+            f"🔗 [點擊查看完整戰情室 >>]({DASHBOARD_URL})"
         )
         
         success = send_discord_alert(
@@ -265,7 +265,7 @@ def check_and_alert(data: Dict[str, Any]) -> int:
         description = (
             f"**BTC/ETH 流入: ${total_btc_eth_flow / 1e6:,.1f}M**\n\n"
             f"💡 **重點分析:** {insight}\n\n"
-            f"🔗 [點擊查看完整儀表板 >>]({DASHBOARD_URL})"
+            f"🔗 [點擊查看完整戰情室 >>]({DASHBOARD_URL})"
         )
         
         success = send_discord_alert(
