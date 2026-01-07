@@ -211,7 +211,10 @@ def check_and_alert(data: Dict[str, Any]) -> int:
         description = (
             f"**穩定幣流入: ${total_stablecoin_flow / 1e6:,.1f}M**\n\n"
             f"💡 **重點分析:** {insight}\n\n"
-            f"🔗 [點擊查看完整戰情室 >>]({DASHBOARD_URL})"
+            f"🔗 **相關連結:**\n"
+            f"• [資金流向戰情室 (Interactive)]({DASHBOARD_URL})\n"
+            f"• [完整數據報告 (Full Report)](https://huyuyuan1989-oss.github.io/cexdex/reports/latest.html)\n"
+            f"• [原始數據源 (Raw JSON)](https://huyuyuan1989-oss.github.io/cexdex/reports/data.json)"
         )
         
         success = send_discord_alert(
@@ -265,7 +268,10 @@ def check_and_alert(data: Dict[str, Any]) -> int:
         description = (
             f"**BTC/ETH 流入: ${total_btc_eth_flow / 1e6:,.1f}M**\n\n"
             f"💡 **重點分析:** {insight}\n\n"
-            f"🔗 [點擊查看完整戰情室 >>]({DASHBOARD_URL})"
+            f"🔗 **相關連結:**\n"
+            f"• [資金流向戰情室 (Interactive)]({DASHBOARD_URL})\n"
+            f"• [完整數據報告 (Full Report)](https://huyuyuan1989-oss.github.io/cexdex/reports/latest.html)\n"
+            f"• [原始數據源 (Raw JSON)](https://huyuyuan1989-oss.github.io/cexdex/reports/data.json)"
         )
         
         success = send_discord_alert(
