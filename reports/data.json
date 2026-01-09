@@ -1,91 +1,99 @@
 {
   "meta": {
-    "timestamp": "2026-01-09T05:20:13.184113Z",
-    "generated_at": "2026-01-09 05:20:13",
+    "timestamp": "2026-01-09T05:42:15.701627Z",
+    "generated_at": "2026-01-09 05:42:15",
     "data_quality": 100,
     "version": "2.0",
-    "execution_time_seconds": 7.847638
+    "execution_time_seconds": 16.650422
   },
   "market_overview": {
     "sentiment": {
-      "score": 40,
-      "label": "Strong Bullish",
+      "score": 37.0,
+      "label": "Bullish 🟢",
       "factors": [
         {
-          "name": "Chain Stablecoin Outflow",
-          "weight": 0.3,
-          "impact": -30,
-          "reason": "穩定幣流出 $1638.9M (資金撤離)"
+          "name": "主力動向 (Smart Money)",
+          "score": 100,
+          "weight": "40%",
+          "value": "$+662.3M"
         },
         {
-          "name": "CEX BTC/ETH Outflow",
-          "weight": 0.3,
-          "impact": 30,
-          "reason": "BTC/ETH 流出交易所 $931.9M (囤貨信號)"
+          "name": "合約結構 (Derivatives)",
+          "score": 10,
+          "weight": "30%",
+          "value": "Funding 0.0033%"
         },
         {
-          "name": "Signal Balance",
-          "weight": 0.2,
-          "impact": 20,
-          "reason": "6 看多信號 vs 0 看空信號"
+          "name": "公鏈生態 (On-chain)",
+          "score": -50,
+          "weight": "20%",
+          "value": "$+0.0M"
         },
         {
-          "name": "CEX Stablecoin Inflow",
-          "weight": 0.2,
-          "impact": 20,
-          "reason": "穩定幣流入交易所 $600.6M (備戰買入)"
+          "name": "市場情緒 (Sentiment)",
+          "score": 40,
+          "weight": "10%",
+          "value": "F&G 27"
         }
       ]
     },
-    "stablecoin_marketcap": 307034003883.7778,
+    "stablecoin_marketcap": 307452904571.2562,
     "derivatives": {
-      "funding_rates": {},
-      "open_interest": {
-        "BTC": 0.0,
-        "ETH": 0.0
+      "funding_rates": {
+        "BTC": 3.33148233183e-05,
+        "ETH": 6.47920628644e-05
       },
-      "timestamp": "2026-01-09T05:20:13.176235Z"
+      "open_interest": {
+        "BTC": 26342.280200000125,
+        "ETH": 600078.1630000029
+      },
+      "timestamp": "2026-01-09T05:42:15.314654Z"
+    },
+    "fear_greed": {
+      "value": 27,
+      "value_classification": "Fear",
+      "timestamp": "1767916800"
     },
     "smart_money": {
-      "stable_flow_24h": 670396219.2125074
+      "stable_flow_24h": 662300044.0083371
     },
     "total_tvl": {
-      "cex": 304486389935.0325,
-      "dex": 101943925664,
-      "total": 406430315599.0325
+      "cex": 304449702273.593,
+      "dex": 102031867240,
+      "total": 406481569513.593
     },
     "total_flow_24h": {
-      "cex": -542449015.4225224,
-      "dex": -2045367234.0,
-      "total": -2587816249.4225225
+      "cex": -579136676.8619243,
+      "dex": -1957434696.0,
+      "total": -2536571372.861924
     }
   },
   "timeframes": {
     "4h": {
       "cex": {
-        "net_flow": -135612253.8556306,
-        "stablecoin_flow": 150150536.80784687,
-        "btc_eth_flow": -232977819.65312135
+        "net_flow": -144784169.21548107,
+        "stablecoin_flow": 150818205.78596437,
+        "btc_eth_flow": -244555892.84920156
       },
       "dex": {
-        "net_flow": -511341808.5,
-        "stablecoin_flow": -409726225.67499995,
-        "native_flow": -101615582.82499996
+        "net_flow": -489358674.0,
+        "stablecoin_flow": -392306998.8250001,
+        "native_flow": -97051675.17500001
       },
-      "narrative": "【CEX】穩定幣流入 $150M，交易所買盤備戰中 | BTC/ETH 流出交易所 $233M (囤貨信號) | 【DEX】穩定幣流出鏈上 $410M，資金撤離 DeFi"
+      "narrative": "【CEX】穩定幣流入 $151M，交易所買盤備戰中 | BTC/ETH 流出交易所 $245M (囤貨信號) | 【DEX】穩定幣流出鏈上 $392M，資金撤離 DeFi"
     },
     "24h": {
       "cex": {
-        "net_flow": -542449015.4225224,
-        "stablecoin_flow": 600602147.2313875,
-        "btc_eth_flow": -931911278.6124854
+        "net_flow": -579136676.8619243,
+        "stablecoin_flow": 603272823.1438575,
+        "btc_eth_flow": -978223571.3968062
       },
       "dex": {
-        "net_flow": -2045367234.0,
-        "stablecoin_flow": -1638904902.6999998,
-        "native_flow": -406462331.29999983
+        "net_flow": -1957434696.0,
+        "stablecoin_flow": -1569227995.3000004,
+        "native_flow": -388206700.70000005
       },
-      "narrative": "🟢 CEX 穩定幣大量流入 $601M，市場積極備戰買入 | 💎 BTC/ETH 大量流出交易所 $932M，長期囤貨信號 | 📉 鏈上 TVL 減少 $2045M，資金撤離 DeFi | 📊 綜合：買盤積極備戰 (穩定幣入+BTC/ETH出)"
+      "narrative": "🟢 CEX 穩定幣大量流入 $603M，市場積極備戰買入 | 💎 BTC/ETH 大量流出交易所 $978M，長期囤貨信號 | 📉 鏈上 TVL 減少 $1957M，資金撤離 DeFi | 📊 綜合：買盤積極備戰 (穩定幣入+BTC/ETH出)"
     },
     "7d": {
       "cex": {
@@ -93,39 +101,39 @@
         "change_pct": 0
       },
       "dex": {
-        "net_flow": 2074005535.0,
-        "stablecoin_flow": 1653047259.5000002,
-        "change_pct": 1.9955555555555557
+        "net_flow": 2161947111.0,
+        "stablecoin_flow": 1722731397.3000002,
+        "change_pct": 2.107777777777778
       },
-      "narrative": "🚀 本週鏈上 TVL 大幅增長 $2.07B (+2.0%)",
+      "narrative": "🚀 本週鏈上 TVL 大幅增長 $2.16B (+2.1%)",
       "wow_comparison": {
         "available": true,
-        "cex_flow_change_pct": -38.7,
-        "dex_flow_change_pct": -4.0,
+        "cex_flow_change_pct": -48.1,
+        "dex_flow_change_pct": 0.5,
         "last_week_date": "2026-01-09",
-        "narrative": "CEX 資金流入較上週減少 39%"
+        "narrative": "CEX 資金流入較上週減少 48%"
       }
     }
   },
   "cex_analysis": {
     "summary": {
-      "total_tvl": 304486389935.0325,
-      "net_flow_24h": -542449015.4225224,
-      "stablecoin_flow_24h": 600602147.2313875,
-      "btc_eth_flow_24h": -931911278.6124854,
+      "total_tvl": 304449702273.593,
+      "net_flow_24h": -579136676.8619243,
+      "stablecoin_flow_24h": 603272823.1438575,
+      "btc_eth_flow_24h": -978223571.3968062,
       "dominant_action": "積極買入準備",
-      "action_narrative": "交易所穩定幣流入 $601M 同時 BTC/ETH 流出 $932M，資金正積極準備買入"
+      "action_narrative": "交易所穩定幣流入 $603M 同時 BTC/ETH 流出 $978M，資金正積極準備買入"
     },
     "exchanges": [
       {
         "exchange": "binance-cex",
         "total_tvl": 172076278922.8988,
         "net_flow_24h": 207248763.461792,
-        "stablecoin_flow_24h": 567063329.1617972,
+        "stablecoin_flow_24h": 567063329.161797,
         "btc_eth_flow_24h": -483752715.2185238,
-        "other_flow_24h": 123914151.98009337,
+        "other_flow_24h": 123914151.98009339,
         "net_flow_4h": 51812190.865448,
-        "stablecoin_flow_4h": 141765832.2904493,
+        "stablecoin_flow_4h": 141765832.29044926,
         "btc_eth_flow_4h": -120938178.80463095,
         "stablecoin_pct": 27.200568702892863,
         "asset_breakdown": [
@@ -209,11 +217,11 @@
         "exchange": "okx",
         "total_tvl": 22801639421.812595,
         "net_flow_24h": -225551796.7410965,
-        "stablecoin_flow_24h": 97302686.21068992,
+        "stablecoin_flow_24h": 97302686.21068993,
         "btc_eth_flow_24h": -299879553.4824717,
         "other_flow_24h": -22609334.8325,
         "net_flow_4h": -56387949.185274124,
-        "stablecoin_flow_4h": 24325671.55267248,
+        "stablecoin_flow_4h": 24325671.552672483,
         "btc_eth_flow_4h": -74969888.37061793,
         "stablecoin_pct": 32.146112374328176,
         "asset_breakdown": [
@@ -295,82 +303,76 @@
       },
       {
         "exchange": "bitfinex",
-        "total_tvl": 20508081845.026215,
-        "net_flow_24h": 17889144.84899521,
-        "stablecoin_flow_24h": 77432694.27496997,
-        "btc_eth_flow_24h": -13590766.585519671,
-        "other_flow_24h": -45693548.89843002,
-        "net_flow_4h": 4472286.212248802,
-        "stablecoin_flow_4h": 19358173.56874249,
-        "btc_eth_flow_4h": -3397691.646379918,
-        "stablecoin_pct": 2.653388563781668,
+        "total_tvl": 20494146876.250988,
+        "net_flow_24h": 3954176.0737686157,
+        "stablecoin_flow_24h": 77271952.88117002,
+        "btc_eth_flow_24h": -35132542.07735944,
+        "other_flow_24h": -38067199.743530594,
+        "net_flow_4h": 988544.0184421539,
+        "stablecoin_flow_4h": 19317988.220292505,
+        "btc_eth_flow_4h": -8783135.51933986,
+        "stablecoin_pct": 2.654401192376708,
         "asset_breakdown": [
           {
             "symbol": "USDT",
-            "flow": 79665520.08507997,
+            "flow": 79271591.16390002,
             "category": "stablecoin",
-            "current_value": 524703504.75854
+            "current_value": 524309575.83736
           },
           {
             "symbol": "LEO",
-            "flow": -47244337.365530014,
+            "flow": -39333397.35261059,
             "category": "other",
-            "current_value": 5965180681.76811
-          },
-          {
-            "symbol": "WETH",
-            "flow": -13446284.080119967,
-            "category": "btc_eth",
-            "current_value": 964686242.28128
-          },
-          {
-            "symbol": "USDC",
-            "flow": -2232825.810110001,
-            "category": "stablecoin",
-            "current_value": 16232649.68783
-          },
-          {
-            "symbol": "SOL",
-            "flow": 2228349.9675899893,
-            "category": "other",
-            "current_value": 77464904.07642
-          },
-          {
-            "symbol": "LINK",
-            "flow": -192765.03240999952,
-            "category": "other",
-            "current_value": 12390789.6932
-          },
-          {
-            "symbol": "EURT",
-            "flow": -187960.39262,
-            "category": "other",
-            "current_value": 306940.28204
-          },
-          {
-            "symbol": "WBT",
-            "flow": -161184.1001900006,
-            "category": "other",
-            "current_value": 16308643.62884
+            "current_value": 5973091621.78103
           },
           {
             "symbol": "BTC",
-            "flow": -144482.50539970398,
+            "flow": -24425488.917049408,
             "category": "btc_eth",
-            "current_value": 12876926122.92651
+            "current_value": 12852645116.51486
+          },
+          {
+            "symbol": "WETH",
+            "flow": -10707053.16031003,
+            "category": "btc_eth",
+            "current_value": 967425473.20109
+          },
+          {
+            "symbol": "USDC",
+            "flow": -1999638.28273,
+            "category": "stablecoin",
+            "current_value": 16465837.21521
+          },
+          {
+            "symbol": "SOL",
+            "flow": 1914686.763439998,
+            "category": "other",
+            "current_value": 77151240.87227
+          },
+          {
+            "symbol": "LINK",
+            "flow": -235285.16367999837,
+            "category": "other",
+            "current_value": 12348269.56193
           },
           {
             "symbol": "TRON",
-            "flow": -135651.97526999936,
+            "flow": -231421.0987999998,
             "category": "other",
-            "current_value": 14657255.09588
+            "current_value": 14561485.97235
+          },
+          {
+            "symbol": "WBT",
+            "flow": -181782.89188,
+            "category": "other",
+            "current_value": 16288044.83715
           }
         ],
         "tags": [
           {
             "type": "Accumulation",
             "signal": "Bullish",
-            "reason": "Stablecoin inflow $77.4M - potential buying power"
+            "reason": "Stablecoin inflow $77.3M - potential buying power"
           }
         ],
         "confidence_score": 100,
@@ -378,75 +380,75 @@
       },
       {
         "exchange": "bybit",
-        "total_tvl": 18898019336.404293,
-        "net_flow_24h": -252606482.31739044,
-        "stablecoin_flow_24h": -71402490.43494962,
-        "btc_eth_flow_24h": -35750979.02281931,
-        "other_flow_24h": -144394315.70069012,
-        "net_flow_4h": -63151620.57934761,
-        "stablecoin_flow_4h": -17850622.608737405,
-        "btc_eth_flow_4h": -8937744.755704828,
-        "stablecoin_pct": 33.17509716374858,
+        "total_tvl": 18890757141.27843,
+        "net_flow_24h": -259868677.44325256,
+        "stablecoin_flow_24h": -79337924.24531984,
+        "btc_eth_flow_24h": -41511428.46505974,
+        "other_flow_24h": -138003044.99514,
+        "net_flow_4h": -64967169.36081314,
+        "stablecoin_flow_4h": -19834481.06132996,
+        "btc_eth_flow_4h": -10377857.116264936,
+        "stablecoin_pct": 33.145803554841436,
         "asset_breakdown": [
           {
             "symbol": "MNT",
-            "flow": -109652504.65657997,
+            "flow": -108148268.63932991,
             "category": "other",
-            "current_value": 2676852056.46412
+            "current_value": 2678356292.48137
           },
           {
             "symbol": "USDT",
-            "flow": -68841833.93931961,
+            "flow": -71016928.12205982,
             "category": "stablecoin",
-            "current_value": 5324044726.02081
+            "current_value": 5321869631.83807
           },
           {
             "symbol": "USDC",
-            "flow": -25066598.713999987,
+            "flow": -30564991.37892002,
             "category": "stablecoin",
-            "current_value": 376901680.92374
+            "current_value": 371403288.25882
           },
           {
             "symbol": "AVALANCHEUSDC",
-            "flow": 21745199.29794,
+            "flow": 21707185.97490999,
             "category": "stablecoin",
-            "current_value": 93163447.53797
+            "current_value": 93125434.21494
           },
           {
-            "symbol": "WETH",
-            "flow": -17407995.60690999,
+            "symbol": "BTC",
+            "flow": -16080063.348179817,
             "category": "btc_eth",
-            "current_value": 1390159000.41041
+            "current_value": 5598498742.62459
           },
           {
             "symbol": "XRP",
-            "flow": -16449290.69096005,
+            "flow": -15113907.58486998,
             "category": "other",
-            "current_value": 549228365.20232
+            "current_value": 550563748.30841
+          },
+          {
+            "symbol": "WETH",
+            "flow": -12801512.02557993,
+            "category": "btc_eth",
+            "current_value": 1394765483.99174
           },
           {
             "symbol": "ETH",
-            "flow": -10555378.770779997,
+            "flow": -10525799.035169989,
             "category": "btc_eth",
-            "current_value": 137746638.82263
-          },
-          {
-            "symbol": "PEPE",
-            "flow": -6782076.136350006,
-            "category": "other",
-            "current_value": 81553923.02676
+            "current_value": 137776218.55824
           },
           {
             "symbol": "SOL",
-            "flow": 5785779.37401998,
+            "flow": 6757211.700129986,
             "category": "other",
-            "current_value": 386994299.43893
+            "current_value": 387965731.76504
           },
           {
-            "symbol": "DOGE",
-            "flow": -5463309.512659997,
+            "symbol": "PEPE",
+            "flow": -5898751.288709998,
             "category": "other",
-            "current_value": 186715778.94556
+            "current_value": 82437247.8744
           }
         ],
         "tags": [
@@ -458,7 +460,7 @@
           {
             "type": "Net Outflow",
             "signal": "Neutral",
-            "reason": "Net outflow $252.6M"
+            "reason": "Net outflow $259.9M"
           }
         ],
         "confidence_score": 100,
@@ -466,58 +468,58 @@
       },
       {
         "exchange": "robinhood",
-        "total_tvl": 17011652905.51064,
-        "net_flow_24h": -62636949.15886116,
+        "total_tvl": 17007028725.10334,
+        "net_flow_24h": -67261129.5661602,
         "stablecoin_flow_24h": 0,
-        "btc_eth_flow_24h": -54517982.80713034,
-        "other_flow_24h": -8119065.386179991,
-        "net_flow_4h": -15659237.28971529,
+        "btc_eth_flow_24h": -61905144.76448107,
+        "other_flow_24h": -5356101.652839996,
+        "net_flow_4h": -16815282.39154005,
         "stablecoin_flow_4h": 0.0,
-        "btc_eth_flow_4h": -13629495.701782584,
-        "stablecoin_pct": 8.454677596520285e-05,
+        "btc_eth_flow_4h": -15476286.191120267,
+        "stablecoin_pct": 8.457132814016932e-05,
         "asset_breakdown": [
           {
             "symbol": "WETH",
-            "flow": -60364674.994840145,
+            "flow": -50008173.90173006,
             "category": "btc_eth",
-            "current_value": 3655858090.39632
+            "current_value": 3666214591.48943
           },
           {
             "symbol": "BTC",
-            "flow": 5846692.187709808,
+            "flow": -11896970.862751007,
             "category": "btc_eth",
-            "current_value": 12804617100.1716
+            "current_value": 12786873437.12114
           },
           {
             "symbol": "PEPE",
-            "flow": -3100366.5286799967,
+            "flow": -2477025.87906,
             "category": "other",
-            "current_value": 39248112.89439
+            "current_value": 39871453.54401
           },
           {
             "symbol": "SHIB",
-            "flow": -3076455.647459984,
+            "flow": -1252794.8140299916,
             "category": "other",
-            "current_value": 342177672.58997
+            "current_value": 344001333.4234
           },
           {
             "symbol": "LINK",
-            "flow": -1281314.055310011,
+            "flow": -1211346.93987,
             "category": "other",
-            "current_value": 111917292.2338
+            "current_value": 111987259.34924
           },
           {
             "symbol": "AVAX",
-            "flow": -660929.1547299996,
+            "flow": -414934.0198800042,
             "category": "other",
-            "current_value": 57818273.29201
+            "current_value": 58064268.42686
           }
         ],
         "tags": [
           {
             "type": "Net Outflow",
             "signal": "Neutral",
-            "reason": "Net outflow $62.6M"
+            "reason": "Net outflow $67.3M"
           }
         ],
         "confidence_score": 100,
@@ -525,69 +527,69 @@
       },
       {
         "exchange": "gemini",
-        "total_tvl": 7547250797.52536,
-        "net_flow_24h": -24107310.86820984,
+        "total_tvl": 7540055233.47065,
+        "net_flow_24h": -31302874.922920227,
         "stablecoin_flow_24h": 0,
-        "btc_eth_flow_24h": -22620766.495230436,
-        "other_flow_24h": -1313347.5717999917,
-        "net_flow_4h": -6026827.71705246,
+        "btc_eth_flow_24h": -28766019.336820126,
+        "other_flow_24h": -2435865.503179985,
+        "net_flow_4h": -7825718.730730057,
         "stablecoin_flow_4h": 0.0,
-        "btc_eth_flow_4h": -5655191.623807609,
-        "stablecoin_pct": 0.42415255669052687,
+        "btc_eth_flow_4h": -7191504.834205031,
+        "stablecoin_pct": 0.42449659404056134,
         "asset_breakdown": [
           {
             "symbol": "WETH",
-            "flow": -31302288.97325015,
+            "flow": -26677154.59454012,
             "category": "btc_eth",
-            "current_value": 1632737204.08738
+            "current_value": 1637362338.46609
           },
           {
             "symbol": "BTC",
-            "flow": 8681522.478019714,
+            "flow": -2088864.7422800064,
             "category": "btc_eth",
-            "current_value": 5735048581.96268
+            "current_value": 5724278194.74238
           },
           {
             "symbol": "PEPE",
-            "flow": -1512015.071849998,
+            "flow": -1292017.9102999978,
             "category": "other",
-            "current_value": 19140878.24427
-          },
-          {
-            "symbol": "WFTM",
-            "flow": 966745.8196799997,
-            "category": "other",
-            "current_value": 4097030.4088
+            "current_value": 19360875.40582
           },
           {
             "symbol": "LINK",
-            "flow": -812008.8853099942,
+            "flow": -1055396.232039988,
             "category": "other",
-            "current_value": 70925496.6311
+            "current_value": 70682109.28437
           },
           {
             "symbol": "QNT",
-            "flow": 564623.4050500002,
+            "flow": 579255.7478,
             "category": "other",
-            "current_value": 3797102.73382
+            "current_value": 3811735.07657
           },
           {
             "symbol": "UNI",
-            "flow": -260516.7561099995,
+            "flow": -253714.07180999964,
             "category": "other",
-            "current_value": 6435359.00999
+            "current_value": 6442161.69429
           },
           {
             "symbol": "CRV",
-            "flow": -153384.60702,
+            "flow": -163952.43814000022,
             "category": "other",
-            "current_value": 4297742.90839
+            "current_value": 4287175.07727
+          },
+          {
+            "symbol": "WFTM",
+            "flow": -143823.88652000017,
+            "category": "other",
+            "current_value": 2986460.7026
           },
           {
             "symbol": "AAVE",
-            "flow": -106791.47623999976,
+            "flow": -106216.71216999926,
             "category": "other",
-            "current_value": 11833070.86555
+            "current_value": 11833645.62962
           }
         ],
         "tags": [],
@@ -596,82 +598,82 @@
       },
       {
         "exchange": "bitget",
-        "total_tvl": 7289638406.090563,
-        "net_flow_24h": 71497154.12965775,
-        "stablecoin_flow_24h": -34489386.737809986,
-        "btc_eth_flow_24h": 86072027.4888601,
-        "other_flow_24h": 20823473.92911,
-        "net_flow_4h": 17874288.532414436,
-        "stablecoin_flow_4h": -8622346.684452496,
-        "btc_eth_flow_4h": 21518006.872215025,
-        "stablecoin_pct": 14.55388311543391,
+        "total_tvl": 7298987149.78352,
+        "net_flow_24h": 80845897.82261467,
+        "stablecoin_flow_24h": -30254572.72597995,
+        "btc_eth_flow_24h": 94677207.37850986,
+        "other_flow_24h": 17147804.12015,
+        "net_flow_4h": 20211474.455653667,
+        "stablecoin_flow_4h": -7563643.181494988,
+        "btc_eth_flow_4h": 23669301.844627466,
+        "stablecoin_pct": 14.593203443376272,
         "asset_breakdown": [
           {
             "symbol": "BTC",
-            "flow": 50865237.28869009,
+            "flow": 52671115.65826988,
             "category": "btc_eth",
-            "current_value": 3121633882.64992
+            "current_value": 3123439761.0195
           },
           {
             "symbol": "WETH",
-            "flow": 34189406.50589001,
+            "flow": 40821598.55018997,
             "category": "btc_eth",
-            "current_value": 812755312.24432
+            "current_value": 819387504.28862
           },
           {
             "symbol": "USDT",
-            "flow": -26386823.45433998,
+            "flow": -25870544.24609995,
             "category": "stablecoin",
-            "current_value": 877079796.60104
+            "current_value": 877596075.80928
           },
           {
             "symbol": "BTCB",
-            "flow": 13748925.774719998,
+            "flow": 12826025.240679998,
             "category": "other",
-            "current_value": 30723775.67402
-          },
-          {
-            "symbol": "MYX",
-            "flow": 11669334.505180001,
-            "category": "other",
-            "current_value": 526590115.59878
+            "current_value": 29800875.13998
           },
           {
             "symbol": "USDC",
-            "flow": -10236256.309130013,
+            "flow": -6402591.558990002,
             "category": "stablecoin",
-            "current_value": 92247850.14953
+            "current_value": 96081514.89967
           },
           {
             "symbol": "SOL",
-            "flow": 4142530.88113001,
+            "flow": 5173892.246149987,
             "category": "other",
-            "current_value": 187337566.57978
+            "current_value": 188368927.9448
+          },
+          {
+            "symbol": "MYX",
+            "flow": 3992516.342140019,
+            "category": "other",
+            "current_value": 518913297.43574
           },
           {
             "symbol": "XRP",
-            "flow": -3299071.7854500115,
+            "flow": -2815545.3708299994,
             "category": "other",
-            "current_value": 252127824.72033
-          },
-          {
-            "symbol": "BGB",
-            "flow": -2883427.0421299934,
-            "category": "other",
-            "current_value": 885746730.17227
+            "current_value": 252611351.13495
           },
           {
             "symbol": "ETH",
-            "flow": 2531180.9304800034,
+            "flow": 2698084.997720003,
             "category": "btc_eth",
-            "current_value": 35414634.45795
+            "current_value": 35581538.52519
+          },
+          {
+            "symbol": "BGB",
+            "flow": -2003401.8603399992,
+            "category": "other",
+            "current_value": 886626755.35406
           }
         ],
         "tags": [
           {
             "type": "Net Inflow",
             "signal": "Neutral",
-            "reason": "Net inflow $71.5M"
+            "reason": "Net inflow $80.8M"
           }
         ],
         "confidence_score": 100,
@@ -683,7 +685,7 @@
         "net_flow_24h": -109973951.99904537,
         "stablecoin_flow_24h": -18476518.83985988,
         "btc_eth_flow_24h": -24721817.92284002,
-        "other_flow_24h": -64054987.68313985,
+        "other_flow_24h": -64054987.68313982,
         "net_flow_4h": -27493487.999761343,
         "stablecoin_flow_4h": -4619129.70996497,
         "btc_eth_flow_4h": -6180454.480710005,
@@ -767,45 +769,39 @@
       },
       {
         "exchange": "htx",
-        "total_tvl": 6236876182.737749,
-        "net_flow_24h": 3844534.643808365,
-        "stablecoin_flow_24h": 35574847.280260086,
-        "btc_eth_flow_24h": -3342265.5700900005,
-        "other_flow_24h": -27875139.45872985,
-        "net_flow_4h": 961133.6609520912,
-        "stablecoin_flow_4h": 8893711.820065022,
-        "btc_eth_flow_4h": -835566.3925225001,
-        "stablecoin_pct": 23.37283647322016,
+        "total_tvl": 6228845893.827828,
+        "net_flow_24h": -4185754.2661123276,
+        "stablecoin_flow_24h": 33959862.88810999,
+        "btc_eth_flow_24h": -3872723.198879909,
+        "other_flow_24h": -33891332.59321998,
+        "net_flow_4h": -1046438.5665280819,
+        "stablecoin_flow_4h": 8489965.722027497,
+        "btc_eth_flow_4h": -968180.7997199772,
+        "stablecoin_pct": 23.376819119669147,
         "asset_breakdown": [
           {
             "symbol": "USDT",
-            "flow": 1038157057.9261801,
+            "flow": 1035785046.19438,
             "category": "stablecoin",
-            "current_value": 1107944300.56237
+            "current_value": 1105572288.83057
           },
           {
             "symbol": "AETHUSDT",
-            "flow": -999065835.2021501,
+            "flow": -999115077.8367001,
             "category": "stablecoin",
-            "current_value": 294603666.36973
+            "current_value": 294554423.73518
           },
           {
             "symbol": "TRON",
-            "flow": -30109324.27729988,
+            "flow": -36588297.69907999,
             "category": "other",
-            "current_value": 2740411485.01999
+            "current_value": 2733932511.59821
           },
           {
             "symbol": "LTC",
-            "flow": 7007161.21401,
+            "flow": 7036244.56087,
             "category": "other",
-            "current_value": 7007161.21401
-          },
-          {
-            "symbol": "STETH",
-            "flow": -4525150.7916199565,
-            "category": "btc_eth",
-            "current_value": 311263774.00458
+            "current_value": 7036244.56087
           },
           {
             "symbol": "STUSDT",
@@ -814,28 +810,34 @@
             "current_value": 34523893.96329
           },
           {
-            "symbol": "WETH",
-            "flow": 3097879.475349998,
+            "symbol": "STETH",
+            "flow": -4232247.481439948,
             "category": "btc_eth",
-            "current_value": 18509328.01363
+            "current_value": 311556677.31476
           },
           {
             "symbol": "BTC",
-            "flow": -2734110.5955400467,
+            "flow": -3748255.359349966,
             "category": "btc_eth",
-            "current_value": 848006738.89464
+            "current_value": 846992594.13083
           },
           {
             "symbol": "USDC",
-            "flow": 2223121.0437399987,
+            "flow": 3299531.3717400003,
             "category": "stablecoin",
-            "current_value": 9124572.56984
+            "current_value": 10200982.89784
           },
           {
-            "symbol": "USDT0",
-            "flow": -1369740.7175700003,
-            "category": "stablecoin",
-            "current_value": 3292436.91668
+            "symbol": "WETH",
+            "flow": 2859990.6316899974,
+            "category": "btc_eth",
+            "current_value": 18271439.16997
+          },
+          {
+            "symbol": "WBTC",
+            "flow": 1351839.054430008,
+            "category": "btc_eth",
+            "current_value": 88334283.69107
           }
         ],
         "tags": [],
@@ -921,51 +923,51 @@
       },
       {
         "exchange": "deribit",
-        "total_tvl": 4160153874.13042,
-        "net_flow_24h": -10037039.71445036,
-        "stablecoin_flow_24h": 3977903.716080006,
-        "btc_eth_flow_24h": -14104882.675990097,
-        "other_flow_24h": 144190.47432000004,
-        "net_flow_4h": -2509259.92861259,
-        "stablecoin_flow_4h": 994475.9290200016,
-        "btc_eth_flow_4h": -3526220.6689975243,
-        "stablecoin_pct": 7.557647611535039,
+        "total_tvl": 4156421070.1410303,
+        "net_flow_24h": -13769843.703840256,
+        "stablecoin_flow_24h": 4048515.197649993,
+        "btc_eth_flow_24h": -17926782.136030167,
+        "other_flow_24h": 168874.9113499988,
+        "net_flow_4h": -3442460.925960064,
+        "stablecoin_flow_4h": 1012128.7994124983,
+        "btc_eth_flow_4h": -4481695.534007542,
+        "stablecoin_pct": 7.565976278357661,
         "asset_breakdown": [
           {
             "symbol": "WETH",
-            "flow": -14443138.217689991,
+            "flow": -12514407.092499971,
             "category": "btc_eth",
-            "current_value": 679249173.60659
+            "current_value": 681177904.73178
           },
           {
             "symbol": "USDC",
-            "flow": 5887069.567990005,
+            "flow": 5864480.761889994,
             "category": "stablecoin",
-            "current_value": 277455658.09165
-          },
-          {
-            "symbol": "USDT",
-            "flow": -1909165.8519099988,
-            "category": "stablecoin",
-            "current_value": 27011545.07028
+            "current_value": 277433069.28555
           },
           {
             "symbol": "BTC",
-            "flow": 1355790.9893898964,
+            "flow": -4431167.695370197,
             "category": "btc_eth",
-            "current_value": 3084448300.05729
+            "current_value": 3078661341.37253
+          },
+          {
+            "symbol": "USDT",
+            "flow": -1815965.5642400011,
+            "category": "stablecoin",
+            "current_value": 27104745.35795
           },
           {
             "symbol": "STETH",
-            "flow": -1017535.4476900026,
+            "flow": -981207.3481599987,
             "category": "btc_eth",
-            "current_value": 54158308.2728
+            "current_value": 54194636.37233
           },
           {
             "symbol": "SOL",
-            "flow": 144190.47432000004,
+            "flow": 168874.9113499988,
             "category": "other",
-            "current_value": 10739832.5336
+            "current_value": 10764516.97063
           }
         ],
         "tags": [],
@@ -978,7 +980,7 @@
         "net_flow_24h": -41086824.05821943,
         "stablecoin_flow_24h": -26182097.18729002,
         "btc_eth_flow_24h": -5668958.578469945,
-        "other_flow_24h": -8931143.41431004,
+        "other_flow_24h": -8931143.414310042,
         "net_flow_4h": -10271706.014554858,
         "stablecoin_flow_4h": -6545524.296822505,
         "btc_eth_flow_4h": -1417239.6446174863,
@@ -1051,75 +1053,75 @@
       },
       {
         "exchange": "crypto-com",
-        "total_tvl": 3077385440.55351,
-        "net_flow_24h": -32754875.081120014,
-        "stablecoin_flow_24h": -14627145.824719995,
-        "btc_eth_flow_24h": -12244561.98127997,
-        "other_flow_24h": -5410826.147459998,
-        "net_flow_4h": -8188718.770280004,
-        "stablecoin_flow_4h": -3656786.456179999,
-        "btc_eth_flow_4h": -3061140.4953199923,
-        "stablecoin_pct": 8.610735740357851,
+        "total_tvl": 3075483342.23016,
+        "net_flow_24h": -34656973.40446997,
+        "stablecoin_flow_24h": -11993056.071280003,
+        "btc_eth_flow_24h": -17203453.386240065,
+        "other_flow_24h": -5014921.020020001,
+        "net_flow_4h": -8664243.351117492,
+        "stablecoin_flow_4h": -2998264.0178200006,
+        "btc_eth_flow_4h": -4300863.346560016,
+        "stablecoin_pct": 8.701610625514238,
         "asset_breakdown": [
           {
             "symbol": "BTC",
-            "flow": -19265483.73536992,
+            "flow": -23743484.330790043,
             "category": "btc_eth",
-            "current_value": 2076314471.30954
+            "current_value": 2071836470.71412
           },
           {
             "symbol": "USDC",
-            "flow": -14854428.190629989,
+            "flow": -12938382.881109998,
             "category": "stablecoin",
-            "current_value": 128642342.91319
+            "current_value": 130558388.22271
           },
           {
             "symbol": "WETH",
-            "flow": 7020921.7540899515,
+            "flow": 6540030.944549978,
             "category": "btc_eth",
-            "current_value": 402299789.99985
+            "current_value": 401818899.19031
           },
           {
             "symbol": "CRO",
-            "flow": -2839133.8331499994,
+            "flow": -2688319.845899999,
             "category": "other",
-            "current_value": 147400784.11487
+            "current_value": 147551598.10212
           },
           {
             "symbol": "PEPE",
-            "flow": -1659761.170930002,
+            "flow": -1444283.2227700017,
             "category": "other",
-            "current_value": 20156739.16232
-          },
-          {
-            "symbol": "SHIB",
-            "flow": -377558.78109999746,
-            "category": "other",
-            "current_value": 52028925.70689
+            "current_value": 20372217.11048
           },
           {
             "symbol": "USDT",
-            "flow": 227282.36590999365,
+            "flow": 945326.809829995,
             "category": "stablecoin",
-            "current_value": 131816549.15301
+            "current_value": 132534593.59693
+          },
+          {
+            "symbol": "LINK",
+            "flow": -266966.31089000404,
+            "category": "other",
+            "current_value": 49761275.18244
           },
           {
             "symbol": "UNI",
-            "flow": -207315.8541799998,
+            "flow": -221780.68736999948,
             "category": "other",
-            "current_value": 4764343.80511
+            "current_value": 4749878.97192
+          },
+          {
+            "symbol": "SHIB",
+            "flow": -145832.45670999587,
+            "category": "other",
+            "current_value": 52260652.03128
           },
           {
             "symbol": "QNT",
-            "flow": -206551.6363699995,
+            "flow": -138260.01459000073,
             "category": "other",
-            "current_value": 15539507.71749
-          },
-          {
-            "symbol": "FLOKI",
-            "flow": -120504.87172999978,
-            "category": "other",
-            "current_value": 4346516.61868
+            "current_value": 15607799.33927
           }
         ],
         "tags": [
@@ -1205,57 +1207,63 @@
       },
       {
         "exchange": "hashkey-exchange",
-        "total_tvl": 1720501257.57065,
-        "net_flow_24h": -7419266.695519924,
-        "stablecoin_flow_24h": -4580735.148990012,
-        "btc_eth_flow_24h": -2636767.906510055,
-        "other_flow_24h": -13631.874409995973,
-        "net_flow_4h": -1854816.673879981,
-        "stablecoin_flow_4h": -1145183.787247503,
-        "btc_eth_flow_4h": -659191.9766275138,
-        "stablecoin_pct": 4.311951395739889,
+        "total_tvl": 1724819465.0999699,
+        "net_flow_24h": -3101059.166200161,
+        "stablecoin_flow_24h": 862392.5847399908,
+        "btc_eth_flow_24h": -3736075.1792899966,
+        "other_flow_24h": -189020.27851999737,
+        "net_flow_4h": -775264.7915500402,
+        "stablecoin_flow_4h": 215598.1461849977,
+        "btc_eth_flow_4h": -934018.7948224992,
+        "stablecoin_pct": 4.616732784660722,
         "asset_breakdown": [
           {
             "symbol": "WETH",
-            "flow": -7184489.713200033,
+            "flow": -6017402.263400018,
             "category": "btc_eth",
-            "current_value": 513815037.75433
-          },
-          {
-            "symbol": "USDT",
-            "flow": -5304929.106070012,
-            "category": "stablecoin",
-            "current_value": 71568319.49575
+            "current_value": 514982125.20413
           },
           {
             "symbol": "BTC",
-            "flow": 4547721.806689978,
+            "flow": 2281327.0841100216,
             "category": "btc_eth",
-            "current_value": 1041892388.24577
+            "current_value": 1039625993.52319
           },
           {
             "symbol": "SOL",
-            "flow": 918937.4619000033,
+            "flow": 915840.0029700026,
             "category": "other",
-            "current_value": 44118690.87098
+            "current_value": 44115593.41205
           },
           {
             "symbol": "USDC",
-            "flow": 724193.9570800003,
+            "flow": 723922.8690799999,
             "category": "stablecoin",
-            "current_value": 2618778.02333
+            "current_value": 2618506.93533
           },
           {
             "symbol": "UNI",
-            "flow": -560550.4182599988,
+            "flow": -608943.2304400001,
             "category": "other",
-            "current_value": 15510328.86109
+            "current_value": 15461936.04891
           },
           {
             "symbol": "DOGE",
-            "flow": -372018.91805000044,
+            "flow": -382547.9780000001,
             "category": "other",
-            "current_value": 14912682.532
+            "current_value": 14902153.47205
+          },
+          {
+            "symbol": "USDT",
+            "flow": 138469.7156599909,
+            "category": "stablecoin",
+            "current_value": 77011718.31748
+          },
+          {
+            "symbol": "LINK",
+            "flow": -113369.07304999977,
+            "category": "other",
+            "current_value": 7903947.28732
           }
         ],
         "tags": [],
@@ -1341,33 +1349,33 @@
       },
       {
         "exchange": "bitmex",
-        "total_tvl": 1516138246.77303,
-        "net_flow_24h": -1959107.0001897812,
-        "stablecoin_flow_24h": -132662.53884001076,
-        "btc_eth_flow_24h": -1748290.297000005,
+        "total_tvl": 1512465733.6971102,
+        "net_flow_24h": -5631620.076109648,
+        "stablecoin_flow_24h": -133470.01061999798,
+        "btc_eth_flow_24h": -5420567.471379892,
         "other_flow_24h": 0,
-        "net_flow_4h": -489776.7500474453,
-        "stablecoin_flow_4h": -33165.63471000269,
-        "btc_eth_flow_4h": -437072.5742500012,
-        "stablecoin_pct": 6.393215324885257,
+        "net_flow_4h": -1407905.019027412,
+        "stablecoin_flow_4h": -33367.502654999495,
+        "btc_eth_flow_4h": -1355141.867844973,
+        "stablecoin_pct": 6.408627460199444,
         "asset_breakdown": [
           {
             "symbol": "BTC",
-            "flow": -1630956.2161200047,
+            "flow": -5318300.181099892,
             "category": "btc_eth",
-            "current_value": 1406229566.7975
+            "current_value": 1402542222.83252
           },
           {
             "symbol": "USDT",
-            "flow": -132662.53884001076,
+            "flow": -133470.01061999798,
             "category": "stablecoin",
-            "current_value": 94030073.0947
+            "current_value": 94029265.62292
           },
           {
             "symbol": "WETH",
-            "flow": -117334.08088000026,
+            "flow": -102267.2902800003,
             "category": "btc_eth",
-            "current_value": 6110386.84602
+            "current_value": 6125453.63662
           }
         ],
         "tags": [],
@@ -1380,7 +1388,7 @@
         "net_flow_24h": -7980167.011490583,
         "stablecoin_flow_24h": 1216860.076829997,
         "btc_eth_flow_24h": -4950289.637270033,
-        "other_flow_24h": -4023587.404239994,
+        "other_flow_24h": -4023587.4042399945,
         "net_flow_4h": -1995041.7528726459,
         "stablecoin_flow_4h": 304215.0192074992,
         "btc_eth_flow_4h": -1237572.4093175083,
@@ -1573,28 +1581,28 @@
   },
   "dex_analysis": {
     "summary": {
-      "total_tvl": 101943925664,
-      "net_flow_24h": -2045367234.0,
-      "stablecoin_flow_24h": -1638904902.6999998,
-      "native_flow_24h": -406462331.29999983,
+      "total_tvl": 102031867240,
+      "net_flow_24h": -1957434696.0,
+      "stablecoin_flow_24h": -1569227995.3000004,
+      "native_flow_24h": -388206700.70000005,
       "dominant_action": "DeFi 資金撤離",
-      "action_narrative": "穩定幣從鏈上流出 $1639M，資金撤離 DeFi"
+      "action_narrative": "穩定幣從鏈上流出 $1569M，資金撤離 DeFi"
     },
     "chains": [
       {
         "chain": "ethereum",
-        "tvl_total": 71218359992,
-        "tvl_stable": 56974687993.600006,
-        "tvl_volatile": 14243671998.399998,
-        "stable_inflow_24h": -1566526006.4,
-        "native_inflow_24h": -391631501.5999999,
-        "change_24h_pct": -2.68,
-        "stable_inflow_4h": -391631501.6,
-        "native_inflow_4h": -97907875.39999998,
-        "change_4h_pct": -0.67,
-        "stable_inflow_7d": 1374070784.8000002,
-        "native_inflow_7d": 343517696.1999999,
-        "change_7d_pct": 2.47,
+        "tvl_total": 71272560472,
+        "tvl_stable": 57018048377.600006,
+        "tvl_volatile": 14254512094.399998,
+        "stable_inflow_24h": -1523168816.0,
+        "native_inflow_24h": -380792203.99999994,
+        "change_24h_pct": -2.6,
+        "stable_inflow_4h": -380792204.0,
+        "native_inflow_4h": -95198050.99999999,
+        "change_4h_pct": -0.65,
+        "stable_inflow_7d": 1417431168.8000002,
+        "native_inflow_7d": 354357792.1999999,
+        "change_7d_pct": 2.55,
         "tags": [
           {
             "type": "Stable",
@@ -1608,18 +1616,18 @@
       },
       {
         "chain": "solana",
-        "tvl_total": 8905851920,
-        "tvl_stable": 7124681536.0,
-        "tvl_volatile": 1781170383.9999995,
-        "stable_inflow_24h": 56030987.2,
-        "native_inflow_24h": 14007746.799999997,
-        "change_24h_pct": 0.79,
-        "stable_inflow_4h": 14007746.8,
-        "native_inflow_4h": 3501936.6999999993,
-        "change_4h_pct": 0.2,
-        "stable_inflow_7d": -225379363.20000002,
-        "native_inflow_7d": -56344840.79999999,
-        "change_7d_pct": -3.07,
+        "tvl_total": 8936624507,
+        "tvl_stable": 7149299605.6,
+        "tvl_volatile": 1787324901.3999996,
+        "stable_inflow_24h": 80648344.80000001,
+        "native_inflow_24h": 20162086.199999996,
+        "change_24h_pct": 1.14,
+        "stable_inflow_4h": 20162086.200000003,
+        "native_inflow_4h": 5040521.549999999,
+        "change_4h_pct": 0.28,
+        "stable_inflow_7d": -200761293.60000002,
+        "native_inflow_7d": -50190323.39999999,
+        "change_7d_pct": -2.73,
         "tags": [
           {
             "type": "Stable",
@@ -1633,18 +1641,18 @@
       },
       {
         "chain": "bsc",
-        "tvl_total": 6782881005,
-        "tvl_stable": 5426304804.0,
-        "tvl_volatile": 1356576200.9999998,
-        "stable_inflow_24h": -26407153.6,
-        "native_inflow_24h": -6601788.3999999985,
-        "change_24h_pct": -0.48,
-        "stable_inflow_4h": -6601788.4,
-        "native_inflow_4h": -1650447.0999999996,
-        "change_4h_pct": -0.12,
-        "stable_inflow_7d": 117796724.0,
-        "native_inflow_7d": 29449180.999999993,
-        "change_7d_pct": 2.22,
+        "tvl_total": 6789057817,
+        "tvl_stable": 5431246253.6,
+        "tvl_volatile": 1357811563.3999996,
+        "stable_inflow_24h": -21465818.400000002,
+        "native_inflow_24h": -5366454.599999999,
+        "change_24h_pct": -0.39,
+        "stable_inflow_4h": -5366454.600000001,
+        "native_inflow_4h": -1341613.6499999997,
+        "change_4h_pct": -0.1,
+        "stable_inflow_7d": 122738173.60000001,
+        "native_inflow_7d": 30684543.399999995,
+        "change_7d_pct": 2.31,
         "tags": [
           {
             "type": "Stable",
@@ -1658,18 +1666,18 @@
       },
       {
         "chain": "arbitrum",
-        "tvl_total": 3019514254,
-        "tvl_stable": 2415611403.2000003,
-        "tvl_volatile": 603902850.7999998,
-        "stable_inflow_24h": -22559418.400000002,
-        "native_inflow_24h": -5639854.599999999,
-        "change_24h_pct": -0.93,
-        "stable_inflow_4h": -5639854.600000001,
-        "native_inflow_4h": -1409963.6499999997,
-        "change_4h_pct": -0.23,
-        "stable_inflow_7d": 61814106.400000006,
-        "native_inflow_7d": 15453526.599999996,
-        "change_7d_pct": 2.63,
+        "tvl_total": 3021267590,
+        "tvl_stable": 2417014072.0,
+        "tvl_volatile": 604253517.9999999,
+        "stable_inflow_24h": -21159364.0,
+        "native_inflow_24h": -5289840.999999999,
+        "change_24h_pct": -0.87,
+        "stable_inflow_4h": -5289841.0,
+        "native_inflow_4h": -1322460.2499999998,
+        "change_4h_pct": -0.22,
+        "stable_inflow_7d": 63216775.2,
+        "native_inflow_7d": 15804193.799999997,
+        "change_7d_pct": 2.69,
         "tags": [
           {
             "type": "Stable",
@@ -1683,18 +1691,18 @@
       },
       {
         "chain": "base",
-        "tvl_total": 4711175400,
-        "tvl_stable": 3768940320.0,
-        "tvl_volatile": 942235079.9999998,
-        "stable_inflow_24h": -36622304.800000004,
-        "native_inflow_24h": -9155576.199999997,
-        "change_24h_pct": -0.96,
-        "stable_inflow_4h": -9155576.200000001,
-        "native_inflow_4h": -2288894.0499999993,
-        "change_4h_pct": -0.24,
-        "stable_inflow_7d": 175151225.60000002,
-        "native_inflow_7d": 43787806.39999999,
-        "change_7d_pct": 4.87,
+        "tvl_total": 4708926633,
+        "tvl_stable": 3767141306.4,
+        "tvl_volatile": 941785326.5999998,
+        "stable_inflow_24h": -38421424.0,
+        "native_inflow_24h": -9605355.999999998,
+        "change_24h_pct": -1.01,
+        "stable_inflow_4h": -9605356.0,
+        "native_inflow_4h": -2401338.9999999995,
+        "change_4h_pct": -0.25,
+        "stable_inflow_7d": 173352212.0,
+        "native_inflow_7d": 43338052.99999999,
+        "change_7d_pct": 4.82,
         "tags": [
           {
             "type": "Stable",
@@ -1708,18 +1716,18 @@
       },
       {
         "chain": "polygon",
-        "tvl_total": 1075543384,
-        "tvl_stable": 860434707.2,
-        "tvl_volatile": 215108676.79999995,
-        "stable_inflow_24h": -2660596.8000000003,
-        "native_inflow_24h": -665149.1999999998,
-        "change_24h_pct": -0.31,
-        "stable_inflow_4h": -665149.2000000001,
-        "native_inflow_4h": -166287.29999999996,
-        "change_4h_pct": -0.08,
-        "stable_inflow_7d": -5201348.0,
-        "native_inflow_7d": -1300336.9999999998,
-        "change_7d_pct": -0.6,
+        "tvl_total": 1076385681,
+        "tvl_stable": 861108544.8000001,
+        "tvl_volatile": 215277136.19999996,
+        "stable_inflow_24h": -1986916.0,
+        "native_inflow_24h": -496728.9999999999,
+        "change_24h_pct": -0.23,
+        "stable_inflow_4h": -496729.0,
+        "native_inflow_4h": -124182.24999999997,
+        "change_4h_pct": -0.06,
+        "stable_inflow_7d": -4527510.4,
+        "native_inflow_7d": -1131877.5999999999,
+        "change_7d_pct": -0.52,
         "tags": [
           {
             "type": "Stable",
@@ -1733,18 +1741,18 @@
       },
       {
         "chain": "avalanche",
-        "tvl_total": 1308340573,
-        "tvl_stable": 1046672458.4000001,
-        "tvl_volatile": 261668114.59999993,
-        "stable_inflow_24h": -10043253.6,
-        "native_inflow_24h": -2510813.3999999994,
-        "change_24h_pct": -0.95,
-        "stable_inflow_4h": -2510813.4,
-        "native_inflow_4h": -627703.3499999999,
-        "change_4h_pct": -0.24,
-        "stable_inflow_7d": 14437560.8,
-        "native_inflow_7d": 3609390.1999999993,
-        "change_7d_pct": 1.4,
+        "tvl_total": 1309327434,
+        "tvl_stable": 1047461947.2,
+        "tvl_volatile": 261865486.79999995,
+        "stable_inflow_24h": -9254098.4,
+        "native_inflow_24h": -2313524.5999999996,
+        "change_24h_pct": -0.88,
+        "stable_inflow_4h": -2313524.6,
+        "native_inflow_4h": -578381.1499999999,
+        "change_4h_pct": -0.22,
+        "stable_inflow_7d": 15227049.600000001,
+        "native_inflow_7d": 3806762.399999999,
+        "change_7d_pct": 1.48,
         "tags": [
           {
             "type": "Stable",
@@ -1758,18 +1766,18 @@
       },
       {
         "chain": "optimism",
-        "tvl_total": 305234032,
-        "tvl_stable": 91570209.6,
-        "tvl_volatile": 213663822.39999998,
-        "stable_inflow_24h": 1566669.3,
-        "native_inflow_24h": 3655561.6999999997,
-        "change_24h_pct": 1.74,
-        "stable_inflow_4h": 391667.325,
-        "native_inflow_4h": 913890.4249999999,
-        "change_4h_pct": 0.43,
-        "stable_inflow_7d": 3694301.1,
-        "native_inflow_7d": 8620035.9,
-        "change_7d_pct": 4.2,
+        "tvl_total": 306572278,
+        "tvl_stable": 91971683.39999999,
+        "tvl_volatile": 214600594.6,
+        "stable_inflow_24h": 1968143.0999999999,
+        "native_inflow_24h": 4592333.899999999,
+        "change_24h_pct": 2.19,
+        "stable_inflow_4h": 492035.77499999997,
+        "native_inflow_4h": 1148083.4749999999,
+        "change_4h_pct": 0.55,
+        "stable_inflow_7d": 4095774.9,
+        "native_inflow_7d": 9556808.1,
+        "change_7d_pct": 4.66,
         "tags": [
           {
             "type": "Stable",
@@ -1783,18 +1791,18 @@
       },
       {
         "chain": "tron",
-        "tvl_total": 4617025104,
-        "tvl_stable": 3693620083.2000003,
-        "tvl_volatile": 923405020.7999998,
-        "stable_inflow_24h": -31683825.6,
-        "native_inflow_24h": -7920956.3999999985,
-        "change_24h_pct": -0.85,
-        "stable_inflow_4h": -7920956.4,
-        "native_inflow_4h": -1980239.0999999996,
-        "change_4h_pct": -0.21,
-        "stable_inflow_7d": 136663268.0,
-        "native_inflow_7d": 34165816.99999999,
-        "change_7d_pct": 3.84,
+        "tvl_total": 4611144828,
+        "tvl_stable": 3688915862.4,
+        "tvl_volatile": 922228965.5999998,
+        "stable_inflow_24h": -36388046.4,
+        "native_inflow_24h": -9097011.599999998,
+        "change_24h_pct": -0.98,
+        "stable_inflow_4h": -9097011.6,
+        "native_inflow_4h": -2274252.8999999994,
+        "change_4h_pct": -0.24,
+        "stable_inflow_7d": 131959047.2,
+        "native_inflow_7d": 32989761.799999993,
+        "change_7d_pct": 3.71,
         "tags": [
           {
             "type": "Stable",
@@ -1812,18 +1820,18 @@
     "chains": [
       {
         "chain": "ethereum",
-        "tvl_total": 71218359992,
-        "tvl_stable": 56974687993.600006,
-        "tvl_volatile": 14243671998.399998,
-        "stable_inflow_24h": -1566526006.4,
-        "native_inflow_24h": -391631501.5999999,
-        "change_24h_pct": -2.68,
-        "stable_inflow_4h": -391631501.6,
-        "native_inflow_4h": -97907875.39999998,
-        "change_4h_pct": -0.67,
-        "stable_inflow_7d": 1374070784.8000002,
-        "native_inflow_7d": 343517696.1999999,
-        "change_7d_pct": 2.47,
+        "tvl_total": 71272560472,
+        "tvl_stable": 57018048377.600006,
+        "tvl_volatile": 14254512094.399998,
+        "stable_inflow_24h": -1523168816.0,
+        "native_inflow_24h": -380792203.99999994,
+        "change_24h_pct": -2.6,
+        "stable_inflow_4h": -380792204.0,
+        "native_inflow_4h": -95198050.99999999,
+        "change_4h_pct": -0.65,
+        "stable_inflow_7d": 1417431168.8000002,
+        "native_inflow_7d": 354357792.1999999,
+        "change_7d_pct": 2.55,
         "tags": [
           {
             "type": "Stable",
@@ -1837,18 +1845,18 @@
       },
       {
         "chain": "solana",
-        "tvl_total": 8905851920,
-        "tvl_stable": 7124681536.0,
-        "tvl_volatile": 1781170383.9999995,
-        "stable_inflow_24h": 56030987.2,
-        "native_inflow_24h": 14007746.799999997,
-        "change_24h_pct": 0.79,
-        "stable_inflow_4h": 14007746.8,
-        "native_inflow_4h": 3501936.6999999993,
-        "change_4h_pct": 0.2,
-        "stable_inflow_7d": -225379363.20000002,
-        "native_inflow_7d": -56344840.79999999,
-        "change_7d_pct": -3.07,
+        "tvl_total": 8936624507,
+        "tvl_stable": 7149299605.6,
+        "tvl_volatile": 1787324901.3999996,
+        "stable_inflow_24h": 80648344.80000001,
+        "native_inflow_24h": 20162086.199999996,
+        "change_24h_pct": 1.14,
+        "stable_inflow_4h": 20162086.200000003,
+        "native_inflow_4h": 5040521.549999999,
+        "change_4h_pct": 0.28,
+        "stable_inflow_7d": -200761293.60000002,
+        "native_inflow_7d": -50190323.39999999,
+        "change_7d_pct": -2.73,
         "tags": [
           {
             "type": "Stable",
@@ -1862,18 +1870,18 @@
       },
       {
         "chain": "bsc",
-        "tvl_total": 6782881005,
-        "tvl_stable": 5426304804.0,
-        "tvl_volatile": 1356576200.9999998,
-        "stable_inflow_24h": -26407153.6,
-        "native_inflow_24h": -6601788.3999999985,
-        "change_24h_pct": -0.48,
-        "stable_inflow_4h": -6601788.4,
-        "native_inflow_4h": -1650447.0999999996,
-        "change_4h_pct": -0.12,
-        "stable_inflow_7d": 117796724.0,
-        "native_inflow_7d": 29449180.999999993,
-        "change_7d_pct": 2.22,
+        "tvl_total": 6789057817,
+        "tvl_stable": 5431246253.6,
+        "tvl_volatile": 1357811563.3999996,
+        "stable_inflow_24h": -21465818.400000002,
+        "native_inflow_24h": -5366454.599999999,
+        "change_24h_pct": -0.39,
+        "stable_inflow_4h": -5366454.600000001,
+        "native_inflow_4h": -1341613.6499999997,
+        "change_4h_pct": -0.1,
+        "stable_inflow_7d": 122738173.60000001,
+        "native_inflow_7d": 30684543.399999995,
+        "change_7d_pct": 2.31,
         "tags": [
           {
             "type": "Stable",
@@ -1887,18 +1895,18 @@
       },
       {
         "chain": "arbitrum",
-        "tvl_total": 3019514254,
-        "tvl_stable": 2415611403.2000003,
-        "tvl_volatile": 603902850.7999998,
-        "stable_inflow_24h": -22559418.400000002,
-        "native_inflow_24h": -5639854.599999999,
-        "change_24h_pct": -0.93,
-        "stable_inflow_4h": -5639854.600000001,
-        "native_inflow_4h": -1409963.6499999997,
-        "change_4h_pct": -0.23,
-        "stable_inflow_7d": 61814106.400000006,
-        "native_inflow_7d": 15453526.599999996,
-        "change_7d_pct": 2.63,
+        "tvl_total": 3021267590,
+        "tvl_stable": 2417014072.0,
+        "tvl_volatile": 604253517.9999999,
+        "stable_inflow_24h": -21159364.0,
+        "native_inflow_24h": -5289840.999999999,
+        "change_24h_pct": -0.87,
+        "stable_inflow_4h": -5289841.0,
+        "native_inflow_4h": -1322460.2499999998,
+        "change_4h_pct": -0.22,
+        "stable_inflow_7d": 63216775.2,
+        "native_inflow_7d": 15804193.799999997,
+        "change_7d_pct": 2.69,
         "tags": [
           {
             "type": "Stable",
@@ -1912,18 +1920,18 @@
       },
       {
         "chain": "base",
-        "tvl_total": 4711175400,
-        "tvl_stable": 3768940320.0,
-        "tvl_volatile": 942235079.9999998,
-        "stable_inflow_24h": -36622304.800000004,
-        "native_inflow_24h": -9155576.199999997,
-        "change_24h_pct": -0.96,
-        "stable_inflow_4h": -9155576.200000001,
-        "native_inflow_4h": -2288894.0499999993,
-        "change_4h_pct": -0.24,
-        "stable_inflow_7d": 175151225.60000002,
-        "native_inflow_7d": 43787806.39999999,
-        "change_7d_pct": 4.87,
+        "tvl_total": 4708926633,
+        "tvl_stable": 3767141306.4,
+        "tvl_volatile": 941785326.5999998,
+        "stable_inflow_24h": -38421424.0,
+        "native_inflow_24h": -9605355.999999998,
+        "change_24h_pct": -1.01,
+        "stable_inflow_4h": -9605356.0,
+        "native_inflow_4h": -2401338.9999999995,
+        "change_4h_pct": -0.25,
+        "stable_inflow_7d": 173352212.0,
+        "native_inflow_7d": 43338052.99999999,
+        "change_7d_pct": 4.82,
         "tags": [
           {
             "type": "Stable",
@@ -1937,18 +1945,18 @@
       },
       {
         "chain": "polygon",
-        "tvl_total": 1075543384,
-        "tvl_stable": 860434707.2,
-        "tvl_volatile": 215108676.79999995,
-        "stable_inflow_24h": -2660596.8000000003,
-        "native_inflow_24h": -665149.1999999998,
-        "change_24h_pct": -0.31,
-        "stable_inflow_4h": -665149.2000000001,
-        "native_inflow_4h": -166287.29999999996,
-        "change_4h_pct": -0.08,
-        "stable_inflow_7d": -5201348.0,
-        "native_inflow_7d": -1300336.9999999998,
-        "change_7d_pct": -0.6,
+        "tvl_total": 1076385681,
+        "tvl_stable": 861108544.8000001,
+        "tvl_volatile": 215277136.19999996,
+        "stable_inflow_24h": -1986916.0,
+        "native_inflow_24h": -496728.9999999999,
+        "change_24h_pct": -0.23,
+        "stable_inflow_4h": -496729.0,
+        "native_inflow_4h": -124182.24999999997,
+        "change_4h_pct": -0.06,
+        "stable_inflow_7d": -4527510.4,
+        "native_inflow_7d": -1131877.5999999999,
+        "change_7d_pct": -0.52,
         "tags": [
           {
             "type": "Stable",
@@ -1962,18 +1970,18 @@
       },
       {
         "chain": "avalanche",
-        "tvl_total": 1308340573,
-        "tvl_stable": 1046672458.4000001,
-        "tvl_volatile": 261668114.59999993,
-        "stable_inflow_24h": -10043253.6,
-        "native_inflow_24h": -2510813.3999999994,
-        "change_24h_pct": -0.95,
-        "stable_inflow_4h": -2510813.4,
-        "native_inflow_4h": -627703.3499999999,
-        "change_4h_pct": -0.24,
-        "stable_inflow_7d": 14437560.8,
-        "native_inflow_7d": 3609390.1999999993,
-        "change_7d_pct": 1.4,
+        "tvl_total": 1309327434,
+        "tvl_stable": 1047461947.2,
+        "tvl_volatile": 261865486.79999995,
+        "stable_inflow_24h": -9254098.4,
+        "native_inflow_24h": -2313524.5999999996,
+        "change_24h_pct": -0.88,
+        "stable_inflow_4h": -2313524.6,
+        "native_inflow_4h": -578381.1499999999,
+        "change_4h_pct": -0.22,
+        "stable_inflow_7d": 15227049.600000001,
+        "native_inflow_7d": 3806762.399999999,
+        "change_7d_pct": 1.48,
         "tags": [
           {
             "type": "Stable",
@@ -1987,18 +1995,18 @@
       },
       {
         "chain": "optimism",
-        "tvl_total": 305234032,
-        "tvl_stable": 91570209.6,
-        "tvl_volatile": 213663822.39999998,
-        "stable_inflow_24h": 1566669.3,
-        "native_inflow_24h": 3655561.6999999997,
-        "change_24h_pct": 1.74,
-        "stable_inflow_4h": 391667.325,
-        "native_inflow_4h": 913890.4249999999,
-        "change_4h_pct": 0.43,
-        "stable_inflow_7d": 3694301.1,
-        "native_inflow_7d": 8620035.9,
-        "change_7d_pct": 4.2,
+        "tvl_total": 306572278,
+        "tvl_stable": 91971683.39999999,
+        "tvl_volatile": 214600594.6,
+        "stable_inflow_24h": 1968143.0999999999,
+        "native_inflow_24h": 4592333.899999999,
+        "change_24h_pct": 2.19,
+        "stable_inflow_4h": 492035.77499999997,
+        "native_inflow_4h": 1148083.4749999999,
+        "change_4h_pct": 0.55,
+        "stable_inflow_7d": 4095774.9,
+        "native_inflow_7d": 9556808.1,
+        "change_7d_pct": 4.66,
         "tags": [
           {
             "type": "Stable",
@@ -2012,18 +2020,18 @@
       },
       {
         "chain": "tron",
-        "tvl_total": 4617025104,
-        "tvl_stable": 3693620083.2000003,
-        "tvl_volatile": 923405020.7999998,
-        "stable_inflow_24h": -31683825.6,
-        "native_inflow_24h": -7920956.3999999985,
-        "change_24h_pct": -0.85,
-        "stable_inflow_4h": -7920956.4,
-        "native_inflow_4h": -1980239.0999999996,
-        "change_4h_pct": -0.21,
-        "stable_inflow_7d": 136663268.0,
-        "native_inflow_7d": 34165816.99999999,
-        "change_7d_pct": 3.84,
+        "tvl_total": 4611144828,
+        "tvl_stable": 3688915862.4,
+        "tvl_volatile": 922228965.5999998,
+        "stable_inflow_24h": -36388046.4,
+        "native_inflow_24h": -9097011.599999998,
+        "change_24h_pct": -0.98,
+        "stable_inflow_4h": -9097011.6,
+        "native_inflow_4h": -2274252.8999999994,
+        "change_4h_pct": -0.24,
+        "stable_inflow_7d": 131959047.2,
+        "native_inflow_7d": 32989761.799999993,
+        "change_7d_pct": 3.71,
         "tags": [
           {
             "type": "Stable",
@@ -2037,8 +2045,8 @@
       }
     ],
     "summary": {
-      "total_stable_inflow_24h": -1638904902.6999998,
-      "total_native_inflow_24h": -406462331.29999983,
+      "total_stable_inflow_24h": -1569227995.3000004,
+      "total_native_inflow_24h": -388206700.70000005,
       "bullish_signals": 0,
       "bearish_signals": 0,
       "market_sentiment": "Neutral"
@@ -2050,11 +2058,11 @@
         "exchange": "binance-cex",
         "total_tvl": 172076278922.8988,
         "net_flow_24h": 207248763.461792,
-        "stablecoin_flow_24h": 567063329.1617972,
+        "stablecoin_flow_24h": 567063329.161797,
         "btc_eth_flow_24h": -483752715.2185238,
-        "other_flow_24h": 123914151.98009337,
+        "other_flow_24h": 123914151.98009339,
         "net_flow_4h": 51812190.865448,
-        "stablecoin_flow_4h": 141765832.2904493,
+        "stablecoin_flow_4h": 141765832.29044926,
         "btc_eth_flow_4h": -120938178.80463095,
         "stablecoin_pct": 27.200568702892863,
         "asset_breakdown": [
@@ -2138,11 +2146,11 @@
         "exchange": "okx",
         "total_tvl": 22801639421.812595,
         "net_flow_24h": -225551796.7410965,
-        "stablecoin_flow_24h": 97302686.21068992,
+        "stablecoin_flow_24h": 97302686.21068993,
         "btc_eth_flow_24h": -299879553.4824717,
         "other_flow_24h": -22609334.8325,
         "net_flow_4h": -56387949.185274124,
-        "stablecoin_flow_4h": 24325671.55267248,
+        "stablecoin_flow_4h": 24325671.552672483,
         "btc_eth_flow_4h": -74969888.37061793,
         "stablecoin_pct": 32.146112374328176,
         "asset_breakdown": [
@@ -2224,82 +2232,76 @@
       },
       {
         "exchange": "bitfinex",
-        "total_tvl": 20508081845.026215,
-        "net_flow_24h": 17889144.84899521,
-        "stablecoin_flow_24h": 77432694.27496997,
-        "btc_eth_flow_24h": -13590766.585519671,
-        "other_flow_24h": -45693548.89843002,
-        "net_flow_4h": 4472286.212248802,
-        "stablecoin_flow_4h": 19358173.56874249,
-        "btc_eth_flow_4h": -3397691.646379918,
-        "stablecoin_pct": 2.653388563781668,
+        "total_tvl": 20494146876.250988,
+        "net_flow_24h": 3954176.0737686157,
+        "stablecoin_flow_24h": 77271952.88117002,
+        "btc_eth_flow_24h": -35132542.07735944,
+        "other_flow_24h": -38067199.743530594,
+        "net_flow_4h": 988544.0184421539,
+        "stablecoin_flow_4h": 19317988.220292505,
+        "btc_eth_flow_4h": -8783135.51933986,
+        "stablecoin_pct": 2.654401192376708,
         "asset_breakdown": [
           {
             "symbol": "USDT",
-            "flow": 79665520.08507997,
+            "flow": 79271591.16390002,
             "category": "stablecoin",
-            "current_value": 524703504.75854
+            "current_value": 524309575.83736
           },
           {
             "symbol": "LEO",
-            "flow": -47244337.365530014,
+            "flow": -39333397.35261059,
             "category": "other",
-            "current_value": 5965180681.76811
-          },
-          {
-            "symbol": "WETH",
-            "flow": -13446284.080119967,
-            "category": "btc_eth",
-            "current_value": 964686242.28128
-          },
-          {
-            "symbol": "USDC",
-            "flow": -2232825.810110001,
-            "category": "stablecoin",
-            "current_value": 16232649.68783
-          },
-          {
-            "symbol": "SOL",
-            "flow": 2228349.9675899893,
-            "category": "other",
-            "current_value": 77464904.07642
-          },
-          {
-            "symbol": "LINK",
-            "flow": -192765.03240999952,
-            "category": "other",
-            "current_value": 12390789.6932
-          },
-          {
-            "symbol": "EURT",
-            "flow": -187960.39262,
-            "category": "other",
-            "current_value": 306940.28204
-          },
-          {
-            "symbol": "WBT",
-            "flow": -161184.1001900006,
-            "category": "other",
-            "current_value": 16308643.62884
+            "current_value": 5973091621.78103
           },
           {
             "symbol": "BTC",
-            "flow": -144482.50539970398,
+            "flow": -24425488.917049408,
             "category": "btc_eth",
-            "current_value": 12876926122.92651
+            "current_value": 12852645116.51486
+          },
+          {
+            "symbol": "WETH",
+            "flow": -10707053.16031003,
+            "category": "btc_eth",
+            "current_value": 967425473.20109
+          },
+          {
+            "symbol": "USDC",
+            "flow": -1999638.28273,
+            "category": "stablecoin",
+            "current_value": 16465837.21521
+          },
+          {
+            "symbol": "SOL",
+            "flow": 1914686.763439998,
+            "category": "other",
+            "current_value": 77151240.87227
+          },
+          {
+            "symbol": "LINK",
+            "flow": -235285.16367999837,
+            "category": "other",
+            "current_value": 12348269.56193
           },
           {
             "symbol": "TRON",
-            "flow": -135651.97526999936,
+            "flow": -231421.0987999998,
             "category": "other",
-            "current_value": 14657255.09588
+            "current_value": 14561485.97235
+          },
+          {
+            "symbol": "WBT",
+            "flow": -181782.89188,
+            "category": "other",
+            "current_value": 16288044.83715
           }
         ],
         "tags": [
           {
             "type": "Accumulation",
             "signal": "Bullish",
-            "reason": "Stablecoin inflow $77.4M - potential buying power"
+            "reason": "Stablecoin inflow $77.3M - potential buying power"
           }
         ],
         "confidence_score": 100,
@@ -2307,75 +2309,75 @@
       },
       {
         "exchange": "bybit",
-        "total_tvl": 18898019336.404293,
-        "net_flow_24h": -252606482.31739044,
-        "stablecoin_flow_24h": -71402490.43494962,
-        "btc_eth_flow_24h": -35750979.02281931,
-        "other_flow_24h": -144394315.70069012,
-        "net_flow_4h": -63151620.57934761,
-        "stablecoin_flow_4h": -17850622.608737405,
-        "btc_eth_flow_4h": -8937744.755704828,
-        "stablecoin_pct": 33.17509716374858,
+        "total_tvl": 18890757141.27843,
+        "net_flow_24h": -259868677.44325256,
+        "stablecoin_flow_24h": -79337924.24531984,
+        "btc_eth_flow_24h": -41511428.46505974,
+        "other_flow_24h": -138003044.99514,
+        "net_flow_4h": -64967169.36081314,
+        "stablecoin_flow_4h": -19834481.06132996,
+        "btc_eth_flow_4h": -10377857.116264936,
+        "stablecoin_pct": 33.145803554841436,
         "asset_breakdown": [
           {
             "symbol": "MNT",
-            "flow": -109652504.65657997,
+            "flow": -108148268.63932991,
             "category": "other",
-            "current_value": 2676852056.46412
+            "current_value": 2678356292.48137
           },
           {
             "symbol": "USDT",
-            "flow": -68841833.93931961,
+            "flow": -71016928.12205982,
             "category": "stablecoin",
-            "current_value": 5324044726.02081
+            "current_value": 5321869631.83807
           },
           {
             "symbol": "USDC",
-            "flow": -25066598.713999987,
+            "flow": -30564991.37892002,
             "category": "stablecoin",
-            "current_value": 376901680.92374
+            "current_value": 371403288.25882
           },
           {
             "symbol": "AVALANCHEUSDC",
-            "flow": 21745199.29794,
+            "flow": 21707185.97490999,
             "category": "stablecoin",
-            "current_value": 93163447.53797
+            "current_value": 93125434.21494
           },
           {
-            "symbol": "WETH",
-            "flow": -17407995.60690999,
+            "symbol": "BTC",
+            "flow": -16080063.348179817,
             "category": "btc_eth",
-            "current_value": 1390159000.41041
+            "current_value": 5598498742.62459
           },
           {
             "symbol": "XRP",
-            "flow": -16449290.69096005,
+            "flow": -15113907.58486998,
             "category": "other",
-            "current_value": 549228365.20232
+            "current_value": 550563748.30841
+          },
+          {
+            "symbol": "WETH",
+            "flow": -12801512.02557993,
+            "category": "btc_eth",
+            "current_value": 1394765483.99174
           },
           {
             "symbol": "ETH",
-            "flow": -10555378.770779997,
+            "flow": -10525799.035169989,
             "category": "btc_eth",
-            "current_value": 137746638.82263
-          },
-          {
-            "symbol": "PEPE",
-            "flow": -6782076.136350006,
-            "category": "other",
-            "current_value": 81553923.02676
+            "current_value": 137776218.55824
           },
           {
             "symbol": "SOL",
-            "flow": 5785779.37401998,
+            "flow": 6757211.700129986,
             "category": "other",
-            "current_value": 386994299.43893
+            "current_value": 387965731.76504
           },
           {
-            "symbol": "DOGE",
-            "flow": -5463309.512659997,
+            "symbol": "PEPE",
+            "flow": -5898751.288709998,
             "category": "other",
-            "current_value": 186715778.94556
+            "current_value": 82437247.8744
           }
         ],
         "tags": [
@@ -2387,7 +2389,7 @@
           {
             "type": "Net Outflow",
             "signal": "Neutral",
-            "reason": "Net outflow $252.6M"
+            "reason": "Net outflow $259.9M"
           }
         ],
         "confidence_score": 100,
@@ -2395,58 +2397,58 @@
       },
       {
         "exchange": "robinhood",
-        "total_tvl": 17011652905.51064,
-        "net_flow_24h": -62636949.15886116,
+        "total_tvl": 17007028725.10334,
+        "net_flow_24h": -67261129.5661602,
         "stablecoin_flow_24h": 0,
-        "btc_eth_flow_24h": -54517982.80713034,
-        "other_flow_24h": -8119065.386179991,
-        "net_flow_4h": -15659237.28971529,
+        "btc_eth_flow_24h": -61905144.76448107,
+        "other_flow_24h": -5356101.652839996,
+        "net_flow_4h": -16815282.39154005,
         "stablecoin_flow_4h": 0.0,
-        "btc_eth_flow_4h": -13629495.701782584,
-        "stablecoin_pct": 8.454677596520285e-05,
+        "btc_eth_flow_4h": -15476286.191120267,
+        "stablecoin_pct": 8.457132814016932e-05,
         "asset_breakdown": [
           {
             "symbol": "WETH",
-            "flow": -60364674.994840145,
+            "flow": -50008173.90173006,
             "category": "btc_eth",
-            "current_value": 3655858090.39632
+            "current_value": 3666214591.48943
           },
           {
             "symbol": "BTC",
-            "flow": 5846692.187709808,
+            "flow": -11896970.862751007,
             "category": "btc_eth",
-            "current_value": 12804617100.1716
+            "current_value": 12786873437.12114
           },
           {
             "symbol": "PEPE",
-            "flow": -3100366.5286799967,
+            "flow": -2477025.87906,
             "category": "other",
-            "current_value": 39248112.89439
+            "current_value": 39871453.54401
           },
           {
             "symbol": "SHIB",
-            "flow": -3076455.647459984,
+            "flow": -1252794.8140299916,
             "category": "other",
-            "current_value": 342177672.58997
+            "current_value": 344001333.4234
           },
           {
             "symbol": "LINK",
-            "flow": -1281314.055310011,
+            "flow": -1211346.93987,
             "category": "other",
-            "current_value": 111917292.2338
+            "current_value": 111987259.34924
           },
           {
             "symbol": "AVAX",
-            "flow": -660929.1547299996,
+            "flow": -414934.0198800042,
             "category": "other",
-            "current_value": 57818273.29201
+            "current_value": 58064268.42686
           }
         ],
         "tags": [
           {
             "type": "Net Outflow",
             "signal": "Neutral",
-            "reason": "Net outflow $62.6M"
+            "reason": "Net outflow $67.3M"
           }
         ],
         "confidence_score": 100,
@@ -2454,69 +2456,69 @@
       },
       {
         "exchange": "gemini",
-        "total_tvl": 7547250797.52536,
-        "net_flow_24h": -24107310.86820984,
+        "total_tvl": 7540055233.47065,
+        "net_flow_24h": -31302874.922920227,
         "stablecoin_flow_24h": 0,
-        "btc_eth_flow_24h": -22620766.495230436,
-        "other_flow_24h": -1313347.5717999917,
-        "net_flow_4h": -6026827.71705246,
+        "btc_eth_flow_24h": -28766019.336820126,
+        "other_flow_24h": -2435865.503179985,
+        "net_flow_4h": -7825718.730730057,
         "stablecoin_flow_4h": 0.0,
-        "btc_eth_flow_4h": -5655191.623807609,
-        "stablecoin_pct": 0.42415255669052687,
+        "btc_eth_flow_4h": -7191504.834205031,
+        "stablecoin_pct": 0.42449659404056134,
         "asset_breakdown": [
           {
             "symbol": "WETH",
-            "flow": -31302288.97325015,
+            "flow": -26677154.59454012,
             "category": "btc_eth",
-            "current_value": 1632737204.08738
+            "current_value": 1637362338.46609
           },
           {
             "symbol": "BTC",
-            "flow": 8681522.478019714,
+            "flow": -2088864.7422800064,
             "category": "btc_eth",
-            "current_value": 5735048581.96268
+            "current_value": 5724278194.74238
           },
           {
             "symbol": "PEPE",
-            "flow": -1512015.071849998,
+            "flow": -1292017.9102999978,
             "category": "other",
-            "current_value": 19140878.24427
-          },
-          {
-            "symbol": "WFTM",
-            "flow": 966745.8196799997,
-            "category": "other",
-            "current_value": 4097030.4088
+            "current_value": 19360875.40582
           },
           {
             "symbol": "LINK",
-            "flow": -812008.8853099942,
+            "flow": -1055396.232039988,
             "category": "other",
-            "current_value": 70925496.6311
+            "current_value": 70682109.28437
           },
           {
             "symbol": "QNT",
-            "flow": 564623.4050500002,
+            "flow": 579255.7478,
             "category": "other",
-            "current_value": 3797102.73382
+            "current_value": 3811735.07657
           },
           {
             "symbol": "UNI",
-            "flow": -260516.7561099995,
+            "flow": -253714.07180999964,
             "category": "other",
-            "current_value": 6435359.00999
+            "current_value": 6442161.69429
           },
           {
             "symbol": "CRV",
-            "flow": -153384.60702,
+            "flow": -163952.43814000022,
             "category": "other",
-            "current_value": 4297742.90839
+            "current_value": 4287175.07727
+          },
+          {
+            "symbol": "WFTM",
+            "flow": -143823.88652000017,
+            "category": "other",
+            "current_value": 2986460.7026
           },
           {
             "symbol": "AAVE",
-            "flow": -106791.47623999976,
+            "flow": -106216.71216999926,
             "category": "other",
-            "current_value": 11833070.86555
+            "current_value": 11833645.62962
           }
         ],
         "tags": [],
@@ -2525,82 +2527,82 @@
       },
       {
         "exchange": "bitget",
-        "total_tvl": 7289638406.090563,
-        "net_flow_24h": 71497154.12965775,
-        "stablecoin_flow_24h": -34489386.737809986,
-        "btc_eth_flow_24h": 86072027.4888601,
-        "other_flow_24h": 20823473.92911,
-        "net_flow_4h": 17874288.532414436,
-        "stablecoin_flow_4h": -8622346.684452496,
-        "btc_eth_flow_4h": 21518006.872215025,
-        "stablecoin_pct": 14.55388311543391,
+        "total_tvl": 7298987149.78352,
+        "net_flow_24h": 80845897.82261467,
+        "stablecoin_flow_24h": -30254572.72597995,
+        "btc_eth_flow_24h": 94677207.37850986,
+        "other_flow_24h": 17147804.12015,
+        "net_flow_4h": 20211474.455653667,
+        "stablecoin_flow_4h": -7563643.181494988,
+        "btc_eth_flow_4h": 23669301.844627466,
+        "stablecoin_pct": 14.593203443376272,
         "asset_breakdown": [
           {
             "symbol": "BTC",
-            "flow": 50865237.28869009,
+            "flow": 52671115.65826988,
             "category": "btc_eth",
-            "current_value": 3121633882.64992
+            "current_value": 3123439761.0195
           },
           {
             "symbol": "WETH",
-            "flow": 34189406.50589001,
+            "flow": 40821598.55018997,
             "category": "btc_eth",
-            "current_value": 812755312.24432
+            "current_value": 819387504.28862
           },
           {
             "symbol": "USDT",
-            "flow": -26386823.45433998,
+            "flow": -25870544.24609995,
             "category": "stablecoin",
-            "current_value": 877079796.60104
+            "current_value": 877596075.80928
           },
           {
             "symbol": "BTCB",
-            "flow": 13748925.774719998,
+            "flow": 12826025.240679998,
             "category": "other",
-            "current_value": 30723775.67402
-          },
-          {
-            "symbol": "MYX",
-            "flow": 11669334.505180001,
-            "category": "other",
-            "current_value": 526590115.59878
+            "current_value": 29800875.13998
           },
           {
             "symbol": "USDC",
-            "flow": -10236256.309130013,
+            "flow": -6402591.558990002,
             "category": "stablecoin",
-            "current_value": 92247850.14953
+            "current_value": 96081514.89967
           },
           {
             "symbol": "SOL",
-            "flow": 4142530.88113001,
+            "flow": 5173892.246149987,
             "category": "other",
-            "current_value": 187337566.57978
+            "current_value": 188368927.9448
+          },
+          {
+            "symbol": "MYX",
+            "flow": 3992516.342140019,
+            "category": "other",
+            "current_value": 518913297.43574
           },
           {
             "symbol": "XRP",
-            "flow": -3299071.7854500115,
+            "flow": -2815545.3708299994,
             "category": "other",
-            "current_value": 252127824.72033
-          },
-          {
-            "symbol": "BGB",
-            "flow": -2883427.0421299934,
-            "category": "other",
-            "current_value": 885746730.17227
+            "current_value": 252611351.13495
           },
           {
             "symbol": "ETH",
-            "flow": 2531180.9304800034,
+            "flow": 2698084.997720003,
             "category": "btc_eth",
-            "current_value": 35414634.45795
+            "current_value": 35581538.52519
+          },
+          {
+            "symbol": "BGB",
+            "flow": -2003401.8603399992,
+            "category": "other",
+            "current_value": 886626755.35406
           }
         ],
         "tags": [
           {
             "type": "Net Inflow",
             "signal": "Neutral",
-            "reason": "Net inflow $71.5M"
+            "reason": "Net inflow $80.8M"
           }
         ],
         "confidence_score": 100,
@@ -2612,7 +2614,7 @@
         "net_flow_24h": -109973951.99904537,
         "stablecoin_flow_24h": -18476518.83985988,
         "btc_eth_flow_24h": -24721817.92284002,
-        "other_flow_24h": -64054987.68313985,
+        "other_flow_24h": -64054987.68313982,
         "net_flow_4h": -27493487.999761343,
         "stablecoin_flow_4h": -4619129.70996497,
         "btc_eth_flow_4h": -6180454.480710005,
@@ -2696,45 +2698,39 @@
       },
       {
         "exchange": "htx",
-        "total_tvl": 6236876182.737749,
-        "net_flow_24h": 3844534.643808365,
-        "stablecoin_flow_24h": 35574847.280260086,
-        "btc_eth_flow_24h": -3342265.5700900005,
-        "other_flow_24h": -27875139.45872985,
-        "net_flow_4h": 961133.6609520912,
-        "stablecoin_flow_4h": 8893711.820065022,
-        "btc_eth_flow_4h": -835566.3925225001,
-        "stablecoin_pct": 23.37283647322016,
+        "total_tvl": 6228845893.827828,
+        "net_flow_24h": -4185754.2661123276,
+        "stablecoin_flow_24h": 33959862.88810999,
+        "btc_eth_flow_24h": -3872723.198879909,
+        "other_flow_24h": -33891332.59321998,
+        "net_flow_4h": -1046438.5665280819,
+        "stablecoin_flow_4h": 8489965.722027497,
+        "btc_eth_flow_4h": -968180.7997199772,
+        "stablecoin_pct": 23.376819119669147,
         "asset_breakdown": [
           {
             "symbol": "USDT",
-            "flow": 1038157057.9261801,
+            "flow": 1035785046.19438,
             "category": "stablecoin",
-            "current_value": 1107944300.56237
+            "current_value": 1105572288.83057
           },
           {
             "symbol": "AETHUSDT",
-            "flow": -999065835.2021501,
+            "flow": -999115077.8367001,
             "category": "stablecoin",
-            "current_value": 294603666.36973
+            "current_value": 294554423.73518
           },
           {
             "symbol": "TRON",
-            "flow": -30109324.27729988,
+            "flow": -36588297.69907999,
             "category": "other",
-            "current_value": 2740411485.01999
+            "current_value": 2733932511.59821
           },
           {
             "symbol": "LTC",
-            "flow": 7007161.21401,
+            "flow": 7036244.56087,
             "category": "other",
-            "current_value": 7007161.21401
-          },
-          {
-            "symbol": "STETH",
-            "flow": -4525150.7916199565,
-            "category": "btc_eth",
-            "current_value": 311263774.00458
+            "current_value": 7036244.56087
           },
           {
             "symbol": "STUSDT",
@@ -2743,28 +2739,34 @@
             "current_value": 34523893.96329
           },
           {
-            "symbol": "WETH",
-            "flow": 3097879.475349998,
+            "symbol": "STETH",
+            "flow": -4232247.481439948,
             "category": "btc_eth",
-            "current_value": 18509328.01363
+            "current_value": 311556677.31476
           },
           {
             "symbol": "BTC",
-            "flow": -2734110.5955400467,
+            "flow": -3748255.359349966,
             "category": "btc_eth",
-            "current_value": 848006738.89464
+            "current_value": 846992594.13083
           },
           {
             "symbol": "USDC",
-            "flow": 2223121.0437399987,
+            "flow": 3299531.3717400003,
             "category": "stablecoin",
-            "current_value": 9124572.56984
+            "current_value": 10200982.89784
           },
           {
-            "symbol": "USDT0",
-            "flow": -1369740.7175700003,
-            "category": "stablecoin",
-            "current_value": 3292436.91668
+            "symbol": "WETH",
+            "flow": 2859990.6316899974,
+            "category": "btc_eth",
+            "current_value": 18271439.16997
+          },
+          {
+            "symbol": "WBTC",
+            "flow": 1351839.054430008,
+            "category": "btc_eth",
+            "current_value": 88334283.69107
           }
         ],
         "tags": [],
@@ -2850,51 +2852,51 @@
       },
       {
         "exchange": "deribit",
-        "total_tvl": 4160153874.13042,
-        "net_flow_24h": -10037039.71445036,
-        "stablecoin_flow_24h": 3977903.716080006,
-        "btc_eth_flow_24h": -14104882.675990097,
-        "other_flow_24h": 144190.47432000004,
-        "net_flow_4h": -2509259.92861259,
-        "stablecoin_flow_4h": 994475.9290200016,
-        "btc_eth_flow_4h": -3526220.6689975243,
-        "stablecoin_pct": 7.557647611535039,
+        "total_tvl": 4156421070.1410303,
+        "net_flow_24h": -13769843.703840256,
+        "stablecoin_flow_24h": 4048515.197649993,
+        "btc_eth_flow_24h": -17926782.136030167,
+        "other_flow_24h": 168874.9113499988,
+        "net_flow_4h": -3442460.925960064,
+        "stablecoin_flow_4h": 1012128.7994124983,
+        "btc_eth_flow_4h": -4481695.534007542,
+        "stablecoin_pct": 7.565976278357661,
         "asset_breakdown": [
           {
             "symbol": "WETH",
-            "flow": -14443138.217689991,
+            "flow": -12514407.092499971,
             "category": "btc_eth",
-            "current_value": 679249173.60659
+            "current_value": 681177904.73178
           },
           {
             "symbol": "USDC",
-            "flow": 5887069.567990005,
+            "flow": 5864480.761889994,
             "category": "stablecoin",
-            "current_value": 277455658.09165
-          },
-          {
-            "symbol": "USDT",
-            "flow": -1909165.8519099988,
-            "category": "stablecoin",
-            "current_value": 27011545.07028
+            "current_value": 277433069.28555
           },
           {
             "symbol": "BTC",
-            "flow": 1355790.9893898964,
+            "flow": -4431167.695370197,
             "category": "btc_eth",
-            "current_value": 3084448300.05729
+            "current_value": 3078661341.37253
+          },
+          {
+            "symbol": "USDT",
+            "flow": -1815965.5642400011,
+            "category": "stablecoin",
+            "current_value": 27104745.35795
           },
           {
             "symbol": "STETH",
-            "flow": -1017535.4476900026,
+            "flow": -981207.3481599987,
             "category": "btc_eth",
-            "current_value": 54158308.2728
+            "current_value": 54194636.37233
           },
           {
             "symbol": "SOL",
-            "flow": 144190.47432000004,
+            "flow": 168874.9113499988,
             "category": "other",
-            "current_value": 10739832.5336
+            "current_value": 10764516.97063
           }
         ],
         "tags": [],
@@ -2907,7 +2909,7 @@
         "net_flow_24h": -41086824.05821943,
         "stablecoin_flow_24h": -26182097.18729002,
         "btc_eth_flow_24h": -5668958.578469945,
-        "other_flow_24h": -8931143.41431004,
+        "other_flow_24h": -8931143.414310042,
         "net_flow_4h": -10271706.014554858,
         "stablecoin_flow_4h": -6545524.296822505,
         "btc_eth_flow_4h": -1417239.6446174863,
@@ -2980,75 +2982,75 @@
       },
       {
         "exchange": "crypto-com",
-        "total_tvl": 3077385440.55351,
-        "net_flow_24h": -32754875.081120014,
-        "stablecoin_flow_24h": -14627145.824719995,
-        "btc_eth_flow_24h": -12244561.98127997,
-        "other_flow_24h": -5410826.147459998,
-        "net_flow_4h": -8188718.770280004,
-        "stablecoin_flow_4h": -3656786.456179999,
-        "btc_eth_flow_4h": -3061140.4953199923,
-        "stablecoin_pct": 8.610735740357851,
+        "total_tvl": 3075483342.23016,
+        "net_flow_24h": -34656973.40446997,
+        "stablecoin_flow_24h": -11993056.071280003,
+        "btc_eth_flow_24h": -17203453.386240065,
+        "other_flow_24h": -5014921.020020001,
+        "net_flow_4h": -8664243.351117492,
+        "stablecoin_flow_4h": -2998264.0178200006,
+        "btc_eth_flow_4h": -4300863.346560016,
+        "stablecoin_pct": 8.701610625514238,
         "asset_breakdown": [
           {
             "symbol": "BTC",
-            "flow": -19265483.73536992,
+            "flow": -23743484.330790043,
             "category": "btc_eth",
-            "current_value": 2076314471.30954
+            "current_value": 2071836470.71412
           },
           {
             "symbol": "USDC",
-            "flow": -14854428.190629989,
+            "flow": -12938382.881109998,
             "category": "stablecoin",
-            "current_value": 128642342.91319
+            "current_value": 130558388.22271
           },
           {
             "symbol": "WETH",
-            "flow": 7020921.7540899515,
+            "flow": 6540030.944549978,
             "category": "btc_eth",
-            "current_value": 402299789.99985
+            "current_value": 401818899.19031
           },
           {
             "symbol": "CRO",
-            "flow": -2839133.8331499994,
+            "flow": -2688319.845899999,
             "category": "other",
-            "current_value": 147400784.11487
+            "current_value": 147551598.10212
           },
           {
             "symbol": "PEPE",
-            "flow": -1659761.170930002,
+            "flow": -1444283.2227700017,
             "category": "other",
-            "current_value": 20156739.16232
-          },
-          {
-            "symbol": "SHIB",
-            "flow": -377558.78109999746,
-            "category": "other",
-            "current_value": 52028925.70689
+            "current_value": 20372217.11048
           },
           {
             "symbol": "USDT",
-            "flow": 227282.36590999365,
+            "flow": 945326.809829995,
             "category": "stablecoin",
-            "current_value": 131816549.15301
+            "current_value": 132534593.59693
+          },
+          {
+            "symbol": "LINK",
+            "flow": -266966.31089000404,
+            "category": "other",
+            "current_value": 49761275.18244
           },
           {
             "symbol": "UNI",
-            "flow": -207315.8541799998,
+            "flow": -221780.68736999948,
             "category": "other",
-            "current_value": 4764343.80511
+            "current_value": 4749878.97192
+          },
+          {
+            "symbol": "SHIB",
+            "flow": -145832.45670999587,
+            "category": "other",
+            "current_value": 52260652.03128
           },
           {
             "symbol": "QNT",
-            "flow": -206551.6363699995,
+            "flow": -138260.01459000073,
             "category": "other",
-            "current_value": 15539507.71749
-          },
-          {
-            "symbol": "FLOKI",
-            "flow": -120504.87172999978,
-            "category": "other",
-            "current_value": 4346516.61868
+            "current_value": 15607799.33927
           }
         ],
         "tags": [
@@ -3134,57 +3136,63 @@
       },
       {
         "exchange": "hashkey-exchange",
-        "total_tvl": 1720501257.57065,
-        "net_flow_24h": -7419266.695519924,
-        "stablecoin_flow_24h": -4580735.148990012,
-        "btc_eth_flow_24h": -2636767.906510055,
-        "other_flow_24h": -13631.874409995973,
-        "net_flow_4h": -1854816.673879981,
-        "stablecoin_flow_4h": -1145183.787247503,
-        "btc_eth_flow_4h": -659191.9766275138,
-        "stablecoin_pct": 4.311951395739889,
+        "total_tvl": 1724819465.0999699,
+        "net_flow_24h": -3101059.166200161,
+        "stablecoin_flow_24h": 862392.5847399908,
+        "btc_eth_flow_24h": -3736075.1792899966,
+        "other_flow_24h": -189020.27851999737,
+        "net_flow_4h": -775264.7915500402,
+        "stablecoin_flow_4h": 215598.1461849977,
+        "btc_eth_flow_4h": -934018.7948224992,
+        "stablecoin_pct": 4.616732784660722,
         "asset_breakdown": [
           {
             "symbol": "WETH",
-            "flow": -7184489.713200033,
+            "flow": -6017402.263400018,
             "category": "btc_eth",
-            "current_value": 513815037.75433
-          },
-          {
-            "symbol": "USDT",
-            "flow": -5304929.106070012,
-            "category": "stablecoin",
-            "current_value": 71568319.49575
+            "current_value": 514982125.20413
           },
           {
             "symbol": "BTC",
-            "flow": 4547721.806689978,
+            "flow": 2281327.0841100216,
             "category": "btc_eth",
-            "current_value": 1041892388.24577
+            "current_value": 1039625993.52319
           },
           {
             "symbol": "SOL",
-            "flow": 918937.4619000033,
+            "flow": 915840.0029700026,
             "category": "other",
-            "current_value": 44118690.87098
+            "current_value": 44115593.41205
           },
           {
             "symbol": "USDC",
-            "flow": 724193.9570800003,
+            "flow": 723922.8690799999,
             "category": "stablecoin",
-            "current_value": 2618778.02333
+            "current_value": 2618506.93533
           },
           {
             "symbol": "UNI",
-            "flow": -560550.4182599988,
+            "flow": -608943.2304400001,
             "category": "other",
-            "current_value": 15510328.86109
+            "current_value": 15461936.04891
           },
           {
             "symbol": "DOGE",
-            "flow": -372018.91805000044,
+            "flow": -382547.9780000001,
             "category": "other",
-            "current_value": 14912682.532
+            "current_value": 14902153.47205
+          },
+          {
+            "symbol": "USDT",
+            "flow": 138469.7156599909,
+            "category": "stablecoin",
+            "current_value": 77011718.31748
+          },
+          {
+            "symbol": "LINK",
+            "flow": -113369.07304999977,
+            "category": "other",
+            "current_value": 7903947.28732
           }
         ],
         "tags": [],
@@ -3270,33 +3278,33 @@
       },
       {
         "exchange": "bitmex",
-        "total_tvl": 1516138246.77303,
-        "net_flow_24h": -1959107.0001897812,
-        "stablecoin_flow_24h": -132662.53884001076,
-        "btc_eth_flow_24h": -1748290.297000005,
+        "total_tvl": 1512465733.6971102,
+        "net_flow_24h": -5631620.076109648,
+        "stablecoin_flow_24h": -133470.01061999798,
+        "btc_eth_flow_24h": -5420567.471379892,
         "other_flow_24h": 0,
-        "net_flow_4h": -489776.7500474453,
-        "stablecoin_flow_4h": -33165.63471000269,
-        "btc_eth_flow_4h": -437072.5742500012,
-        "stablecoin_pct": 6.393215324885257,
+        "net_flow_4h": -1407905.019027412,
+        "stablecoin_flow_4h": -33367.502654999495,
+        "btc_eth_flow_4h": -1355141.867844973,
+        "stablecoin_pct": 6.408627460199444,
         "asset_breakdown": [
           {
             "symbol": "BTC",
-            "flow": -1630956.2161200047,
+            "flow": -5318300.181099892,
             "category": "btc_eth",
-            "current_value": 1406229566.7975
+            "current_value": 1402542222.83252
           },
           {
             "symbol": "USDT",
-            "flow": -132662.53884001076,
+            "flow": -133470.01061999798,
             "category": "stablecoin",
-            "current_value": 94030073.0947
+            "current_value": 94029265.62292
           },
           {
             "symbol": "WETH",
-            "flow": -117334.08088000026,
+            "flow": -102267.2902800003,
             "category": "btc_eth",
-            "current_value": 6110386.84602
+            "current_value": 6125453.63662
           }
         ],
         "tags": [],
@@ -3309,7 +3317,7 @@
         "net_flow_24h": -7980167.011490583,
         "stablecoin_flow_24h": 1216860.076829997,
         "btc_eth_flow_24h": -4950289.637270033,
-        "other_flow_24h": -4023587.404239994,
+        "other_flow_24h": -4023587.4042399945,
         "net_flow_4h": -1995041.7528726459,
         "stablecoin_flow_4h": 304215.0192074992,
         "btc_eth_flow_4h": -1237572.4093175083,
@@ -3500,11 +3508,11 @@
       }
     ],
     "summary": {
-      "total_stablecoin_flow_24h": 600602147.2313875,
-      "total_btc_eth_flow_24h": -931911278.6124854,
-      "total_net_flow_24h": -542449015.4225224,
-      "smart_money_stable_flow": 670396219.2125074,
-      "smart_money_dominance": 1.1162068305996766,
+      "total_stablecoin_flow_24h": 603272823.1438575,
+      "total_btc_eth_flow_24h": -978223571.3968062,
+      "total_net_flow_24h": -579136676.8619243,
+      "smart_money_stable_flow": 662300044.0083371,
+      "smart_money_dominance": 1.0978449858836157,
       "bullish_signals": 6,
       "bearish_signals": 0,
       "market_sentiment": "Bullish"
