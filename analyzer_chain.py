@@ -309,23 +309,24 @@ class ChainAnalyzer:
                     'confidence': confidence
                 })
         
-        elif stable_inflow_24h < -significant_threshold and native_inflow_24h < -significant_threshold:
-            # 雙重流出 = 資金外逃
-            confidence = min(100, int((abs(stable_inflow_24h) + abs(native_inflow_24h)) / significant_threshold * 15))
-            
-            if change_7d_pct < 0:
+        elif stable_inflow_24h < -significant_threshold:
+            # Check for severity (Dual outflow vs Simple)
+            if native_inflow_24h < -significant_threshold:
+                # Dual Outflow = Capital Flight
+                confidence = min(100, int((abs(stable_inflow_24h) + abs(native_inflow_24h)) / significant_threshold * 15))
                 tags.append({
                     'type': 'Capital Flight',
                     'signal': 'Bearish',
-                    'reason': f'雙重流出警告，週跌幅 {change_7d_pct:.1f}%',
+                    'reason': f'雙重流出警告 (Stable: -${abs(stable_inflow_24h)/1e6:.1f}M)',
                     'confidence': min(100, confidence + 20)
                 })
             else:
+                # Simple Outflow
                 tags.append({
-                    'type': 'Short-term Outflow',
+                    'type': 'Stablecoin Outflow',
                     'signal': 'Bearish',
-                    'reason': f'24H 資金流出，但週趨勢仍正 (+{change_7d_pct:.1f}%)',
-                    'confidence': max(30, confidence - 20)
+                    'reason': f'穩定幣流出 ${abs(stable_inflow_24h)/1e6:.1f}M',
+                    'confidence': 60
                 })
         
         # === 趨勢一致性檢查 ===
