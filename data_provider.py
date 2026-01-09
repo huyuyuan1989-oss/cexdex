@@ -299,11 +299,10 @@ class DataProvider:
                     elif s == 'ETHUSDT': rates['ETH'] = float(item.get('lastFundingRate', 0))
                 if rates['BTC'] != 0: return rates
         except Exception as e:
-            logger.warning(f"Binance Funding Rate failed, trying Bybit... ({e})")
+            logger.debug(f"Binance Funding Rate failed, trying Bybit... ({e})")
 
         # 2. Try Bybit (Fallback)
         try:
-            # Bybit V5 Tickers
             for symbol in ['BTCUSDT', 'ETHUSDT']:
                 url = f"{self.BYBIT_BASE}/v5/market/tickers?category=linear&symbol={symbol}"
                 data = await self.fetch_with_retry(url)
@@ -311,6 +310,19 @@ class DataProvider:
                     item = data['result']['list'][0]
                     key = 'BTC' if 'BTC' in symbol else 'ETH'
                     rates[key] = float(item.get('fundingRate', 0))
+            if rates['BTC'] != 0: return rates
+        except Exception as e:
+            logger.debug(f"Bybit Funding Rate failed, trying OKX... ({e})")
+
+        # 3. Try OKX (Fallback 2)
+        try:
+            # OKX: BTC-USDT-SWAP, ETH-USDT-SWAP
+            # https://www.okx.com/api/v5/public/funding-rate?instId=BTC-USDT-SWAP
+            for coin in ['BTC', 'ETH']:
+                url = f"https://www.okx.com/api/v5/public/funding-rate?instId={coin}-USDT-SWAP"
+                data = await self.fetch_with_retry(url)
+                if data and data.get('code') == '0':
+                    rates[coin] = float(data['data'][0].get('fundingRate', 0))
             return rates
         except Exception as e:
             logger.error(f"All Funding Rate sources failed: {e}")
@@ -318,7 +330,7 @@ class DataProvider:
 
     async def get_open_interest(self, symbol: str) -> float:
         """
-        獲取合約未平倉量 (Fallback: Binance -> Bybit)
+        獲取合約未平倉量 (Fallback: Binance -> Bybit -> OKX)
         """
         # 1. Try Binance
         try:
@@ -327,21 +339,34 @@ class DataProvider:
             data = await self.fetch_with_retry(url, params={'symbol': symbol})
             if data: return float(data.get('openInterest', 0))
         except Exception as e:
-            logger.warning(f"Binance OI failed for {symbol}, trying Bybit... ({e})")
+            logger.debug(f"Binance OI failed for {symbol}, trying Bybit... ({e})")
             
         # 2. Try Bybit (Fallback)
         try:
-            # Bybit V5 Open Interest
-            # Bybit unit is usually size (coins) for linear? Need to confirm. 
-            # API returns 'openInterest'.
             url = f"{self.BYBIT_BASE}/v5/market/open-interest?category=linear&symbol={symbol}&intervalTime=5min&limit=1"
             data = await self.fetch_with_retry(url)
             if data and data.get('retCode') == 0 and data['result']['list']:
                 return float(data['result']['list'][0].get('openInterest', 0))
         except Exception as e:
+            logger.debug(f"Bybit OI failed for {symbol}, trying OKX... ({e})")
+            
+        # 3. Try OKX (Fallback 2)
+        try:
+            # Symbol mapping: BTCUSDT -> BTC-USDT-SWAP
+            okx_symbol = symbol.replace('USDT', '-USDT-SWAP')
+            url = f"https://www.okx.com/api/v5/public/open-interest?instId={okx_symbol}"
+            data = await self.fetch_with_retry(url)
+            if data and data.get('code') == '0':
+                # OKX returns OI in Contracts (usually 1 BTC or 0.01 BTC? No, SWAP is 1 contract = 0.01 BTC or similar?)
+                # Wait, OKX linear swap contract value is usually 1 BTC? No, often 0.01 or 0.001.
+                # Actually OKX returns `oi` (in contracts) and `oiCcy` (in coins).
+                # We need COINS. `oiCcy` is "Open interest in currency".
+                return float(data['data'][0].get('oiCcy', 0))
+        except Exception as e:
             logger.error(f"All OI sources failed for {symbol}: {e}")
             
         return 0.0
+
 
     async def get_derivatives_data(self) -> Dict[str, Any]:
         """

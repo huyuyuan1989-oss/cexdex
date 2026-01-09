@@ -65,7 +65,8 @@ class ReportGenerator:
         cex_data: Dict,
         sentiment_details: Dict,
         stablecoin_marketcap: float,
-        derivs_data: Dict[str, Any] = None  # New Argument
+        derivs_data: Dict[str, Any] = None,
+        fng_data: Dict[str, Any] = None
     ) -> Dict[str, Any]:
         """
         生成統一格式報告
@@ -97,6 +98,7 @@ class ReportGenerator:
                 "sentiment": sentiment_details,
                 "stablecoin_marketcap": stablecoin_marketcap,
                 "derivatives": derivs_data or {},
+                "fear_greed": fng_data or {},
                 "smart_money": {
                     "stable_flow_24h": cex_summary.get('smart_money_stable_flow', 0)
                 },
