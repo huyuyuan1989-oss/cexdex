@@ -319,21 +319,15 @@ class CEXAnalyzer:
         slugs: Optional[List[str]] = None
     ) -> Dict[str, Any]:
         """
-        批量分析多個交易所
-        
-        Args:
-            slugs: 交易所 slug 列表 (預設使用 DEFAULT_EXCHANGES)
-        
-        Returns:
-            {
-                "exchanges": [{...}, {...}],
-                "summary": {...}
-            }
+        批量分析多個交易所 (V2: Integrated Smart Money Filter)
         """
+        # Tier 1 Whitelist (Institutional Grade)
+        TIER_1_EXCHANGES = {'binance-cex', 'coinbase', 'kraken', 'okx', 'bybit', 'bitfinex'}
+        
         if slugs is None:
             # 從 protocols API 獲取 CEX 列表
             cex_list = await self.provider.get_cex_protocols(min_tvl=100_000_000)
-            slugs = [c['slug'] for c in cex_list[:10]]  # Top 10
+            slugs = [c['slug'] for c in cex_list[:20]]  # Analyze Top 20 to catch more signals
         
         tasks = [self.analyze_exchange(slug) for slug in slugs]
         results = await asyncio.gather(*tasks)
@@ -341,10 +335,14 @@ class CEXAnalyzer:
         # 過濾有效結果
         valid_results = [r for r in results if not r.get('error')]
         
-        # 生成摘要
+        # 1. 基礎摘要 (All Exchanges)
         total_stablecoin_flow = sum(r.get('stablecoin_flow_24h', 0) for r in valid_results)
         total_btc_eth_flow = sum(r.get('btc_eth_flow_24h', 0) for r in valid_results)
         total_net_flow = sum(r.get('net_flow_24h', 0) for r in valid_results)
+        
+        # 2. Smart Money Filtering (Tier 1 Only)
+        tier1_results = [r for r in valid_results if r['exchange'] in TIER_1_EXCHANGES]
+        smart_money_flow = sum(r.get('stablecoin_flow_24h', 0) for r in tier1_results)
         
         bullish_count = sum(1 for r in valid_results 
                           for t in r.get('tags', []) 
@@ -359,6 +357,10 @@ class CEXAnalyzer:
                 'total_stablecoin_flow_24h': total_stablecoin_flow,
                 'total_btc_eth_flow_24h': total_btc_eth_flow,
                 'total_net_flow_24h': total_net_flow,
+                # New Smart Money Metrics
+                'smart_money_stable_flow': smart_money_flow,
+                'smart_money_dominance': smart_money_flow / total_stablecoin_flow if total_stablecoin_flow != 0 else 0,
+                
                 'bullish_signals': bullish_count,
                 'bearish_signals': bearish_count,
                 'market_sentiment': 'Bullish' if bullish_count > bearish_count else 

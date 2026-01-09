@@ -96,7 +96,10 @@ class ReportGenerator:
             "market_overview": {
                 "sentiment": sentiment_details,
                 "stablecoin_marketcap": stablecoin_marketcap,
-                "derivatives": derivs_data or {},  # New Field
+                "derivatives": derivs_data or {},
+                "smart_money": {
+                    "stable_flow_24h": cex_summary.get('smart_money_stable_flow', 0)
+                },
                 "total_tvl": {
                     "cex": cex_summary['total_tvl'],
                     "dex": dex_summary['total_tvl'],
@@ -198,7 +201,8 @@ class ReportGenerator:
             'stablecoin_flow_4h': sum(e.get('stablecoin_flow_4h', 0) for e in valid_exchanges),
             'btc_eth_flow_24h': sum(e.get('btc_eth_flow_24h', 0) for e in valid_exchanges),
             'btc_eth_flow_4h': sum(e.get('btc_eth_flow_4h', 0) for e in valid_exchanges),
-            'exchange_count': len(valid_exchanges)
+            'exchange_count': len(valid_exchanges),
+            'smart_money_stable_flow': cex_data.get('summary', {}).get('smart_money_stable_flow', 0)
         }
     
     def _calculate_dex_summary(self, chain_data: Dict) -> Dict:

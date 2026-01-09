@@ -733,6 +733,16 @@
                             </div>
                         </div>
                     </div>
+                    <!-- Smart Money (New) -->
+                    <div
+                        style="background: var(--bg-card); padding: 1rem; border-radius: 8px; border: 1px solid var(--border);">
+                        <div style="color: var(--text-secondary); font-size: 0.8rem; margin-bottom: 0.5rem;">主力動向
+                            (Whale)</div>
+                        <div class="font-mono" style="font-size: 1.2rem;"
+                            :class="(data.market_overview?.smart_money?.stable_flow_24h || 0) > 0 ? 'text-green' : 'text-red'">
+                            {{ formatM(data.market_overview?.smart_money?.stable_flow_24h) }}M
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Simple Monitor Table -->
