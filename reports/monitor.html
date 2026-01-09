@@ -432,12 +432,144 @@
                 </div>
             </div>
             <div style="margin-top: 1.5rem; text-align: center; color: #475569; font-size: 0.8rem;">
-                數據每 30 秒自動更新 | 來源: 交易所 API 聚合 (Binance, OKX, Bybit)
+                數據每 30 秒自動更新 | 來源: DefiLlama API | <span id="last-update">載入中...</span>
             </div>
         </div>
     </div>
 
+    <script>
+        // 動態數據加載
+        const DATA_URL = 'data.json';
+
+        async function loadData() {
+            try {
+                const response = await fetch(DATA_URL + '?t=' + Date.now()); // 防止緩存
+                const data = await response.json();
+                updateUI(data);
+                document.getElementById('last-update').textContent =
+                    '上次更新: ' + (data.meta?.generated_at || data.generated_at || 'N/A');
+            } catch (error) {
+                console.error('數據載入失敗:', error);
+                document.getElementById('last-update').textContent = '數據載入失敗';
+            }
+        }
+
+        function updateUI(data) {
+            // 更新市場情緒 Banner
+            const sentiment = data.market_overview?.sentiment?.label || data.market_sentiment || 'Neutral';
+            const sentimentBanner = document.querySelector('.container > div:nth-child(2)');
+            if (sentimentBanner) {
+                const isBullish = sentiment.includes('Bullish');
+                const color = isBullish ? '#22c55e' : (sentiment.includes('Bearish') ? '#ef4444' : '#94a3b8');
+                sentimentBanner.querySelector('strong').textContent = sentiment;
+                sentimentBanner.querySelector('strong').style.color = color;
+                sentimentBanner.style.borderLeftColor = color;
+            }
+
+            // 更新 Key Stats Cards
+            const timeframes = data.timeframes || {};
+            const tf4h = timeframes['4h'] || {};
+            const tf24h = timeframes['24h'] || {};
+
+            const statsCards = document.querySelectorAll('.container > div:nth-child(3) > div');
+            if (statsCards[0]) {
+                const cexFlow4h = tf4h.cex?.net_flow || 0;
+                statsCards[0].querySelector('.font-mono').textContent = formatFlow(cexFlow4h) + ' ↗';
+                statsCards[0].querySelector('.font-mono').style.color = cexFlow4h >= 0 ? '#22c55e' : '#ef4444';
+            }
+            if (statsCards[1]) {
+                const totalTvl = data.market_overview?.total_tvl?.total || 0;
+                statsCards[1].querySelector('.font-mono').textContent = '$' + (totalTvl / 1e9).toFixed(1) + 'B';
+            }
+
+            // 更新 CEX 表格
+            updateCEXTable(data);
+        }
+
+        function updateCEXTable(data) {
+            const exchanges = data.cex_analysis?.exchanges || data.cex_flows?.exchanges || [];
+            const tbody = document.querySelector('.market-table tbody');
+            if (!tbody || exchanges.length === 0) return;
+
+            // 清空現有行並用 CEX 數據填充
+            tbody.innerHTML = '';
+
+            // 取前 5 個交易所
+            const topExchanges = exchanges.slice(0, 5);
+
+            topExchanges.forEach((ex, index) => {
+                const row = createExchangeRow(ex, index);
+                tbody.appendChild(row);
+            });
+        }
+
+        function createExchangeRow(ex, index) {
+            const tr = document.createElement('tr');
+
+            // 判斷信號標籤
+            let badge = '';
+            const tags = ex.tags || [];
+            if (tags.some(t => t.type === 'Accumulation')) {
+                badge = '<span class="badge badge-whale">💰 Accumulation</span>';
+            } else if (tags.some(t => t.type === 'Potential Dump Risk')) {
+                badge = '<span class="badge badge-smart">⚠️ Dump Risk</span>';
+                tr.className = 'outlier-high-vol';
+            } else if (tags.some(t => t.type === 'Withdrawal')) {
+                badge = '<span class="badge badge-whale">📤 Withdrawal</span>';
+            }
+
+            const name = ex.exchange?.replace('-cex', '').toUpperCase() || `Exchange ${index + 1}`;
+            const stableFlow = ex.stablecoin_flow_24h || 0;
+            const btcEthFlow = ex.btc_eth_flow_24h || 0;
+            const netFlow = ex.net_flow_24h || 0;
+            const netFlow4h = ex.net_flow_4h || 0;
+            const tvl = ex.total_tvl || 0;
+
+            tr.innerHTML = `
+                <td data-label="Exchange">
+                    <div class="token-cell">
+                        <span>${name}</span>
+                        ${badge}
+                    </div>
+                </td>
+                <td data-label="TVL" class="font-mono">$${(tvl / 1e9).toFixed(1)}B</td>
+                <td data-label="Stable 24H" class="font-mono" style="color: ${stableFlow >= 0 ? '#22c55e' : '#ef4444'};">
+                    ${formatFlow(stableFlow)}
+                </td>
+                <td data-label="BTC/ETH 24H" class="font-mono" style="color: ${btcEthFlow >= 0 ? '#22c55e' : '#ef4444'};">
+                    ${formatFlow(btcEthFlow)}
+                </td>
+                <td data-label="Net 24H" class="font-mono" style="color: ${netFlow >= 0 ? '#22c55e' : '#ef4444'};">
+                    ${formatFlow(netFlow)}
+                </td>
+                <td data-label="Net 4H" class="font-mono" style="color: ${netFlow4h >= 0 ? '#22c55e' : '#ef4444'};">
+                    ${formatFlow(netFlow4h)}
+                </td>
+            `;
+
+            return tr;
+        }
+
+        function formatFlow(value) {
+            const absValue = Math.abs(value);
+            const sign = value >= 0 ? '+' : '-';
+            if (absValue >= 1e9) {
+                return `${sign}$${(absValue / 1e9).toFixed(1)}B`;
+            } else if (absValue >= 1e6) {
+                return `${sign}$${(absValue / 1e6).toFixed(0)}M`;
+            } else if (absValue >= 1e3) {
+                return `${sign}$${(absValue / 1e3).toFixed(0)}K`;
+            }
+            return `${sign}$${absValue.toFixed(0)}`;
+        }
+
+        // 初始加載
+        loadData();
+
+        // 每 30 秒自動更新
+        setInterval(loadData, 30000);
+    </script>
+
 </body>
 
 </html>
-```
