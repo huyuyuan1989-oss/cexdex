@@ -81,10 +81,15 @@ async def run_pipeline() -> Dict[str, Any]:
     # 4. 聚合數據
     timestamp = datetime.now(timezone.utc).isoformat()
     
+    # 計算加權情緒分數
+    sentiment_details = _calculate_sentiment_score(chain_data, cex_data)
+    
     snapshot = {
         'timestamp': timestamp,
         'generated_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-        'market_sentiment': _determine_overall_sentiment(chain_data, cex_data),
+        'market_sentiment': sentiment_details['label'],
+        'sentiment_score': sentiment_details['score'],  # -100 to +100
+        'sentiment_factors': sentiment_details['factors'],  # 詳細因素分析
         'chain_flows': chain_data,
         'cex_flows': cex_data,
         'stablecoin_marketcap': stablecoin_marketcap,
@@ -125,23 +130,136 @@ async def _get_stablecoin_marketcap(provider: DataProvider) -> float:
     return 0
 
 
+def _calculate_sentiment_score(chain_data: Dict, cex_data: Dict) -> Dict[str, Any]:
+    """
+    加權情緒評分系統 (優化版)
+    
+    Returns:
+        {
+            'score': -100 to +100,
+            'label': 'Strong Bullish' | 'Bullish' | 'Neutral' | 'Bearish' | 'Strong Bearish',
+            'factors': [{name, weight, impact, reason}, ...]
+        }
+    """
+    factors = []
+    total_score = 0
+    
+    # === Factor 1: 公鏈穩定幣流入 (權重 30%) ===
+    chain_summary = chain_data.get('summary', {})
+    stable_inflow = chain_summary.get('total_stable_inflow_24h', 0)
+    
+    if stable_inflow > 100_000_000:  # > $100M 流入
+        impact = min(30, int(stable_inflow / 100_000_000 * 10))
+        factors.append({
+            'name': 'Chain Stablecoin Inflow',
+            'weight': 0.3,
+            'impact': impact,
+            'reason': f'穩定幣流入 ${stable_inflow/1e6:.1f}M (買盤資金)'
+        })
+        total_score += impact
+    elif stable_inflow < -100_000_000:  # > $100M 流出
+        impact = max(-30, int(stable_inflow / 100_000_000 * 10))
+        factors.append({
+            'name': 'Chain Stablecoin Outflow',
+            'weight': 0.3,
+            'impact': impact,
+            'reason': f'穩定幣流出 ${abs(stable_inflow)/1e6:.1f}M (資金撤離)'
+        })
+        total_score += impact
+    
+    # === Factor 2: 交易所 BTC/ETH 流入 (權重 30%) ===
+    cex_summary = cex_data.get('summary', {})
+    btc_eth_flow = cex_summary.get('total_btc_eth_flow_24h', 0)
+    
+    if btc_eth_flow > 50_000_000:  # BTC/ETH 大量流入交易所 = 賣壓
+        impact = max(-30, int(-btc_eth_flow / 50_000_000 * 10))
+        factors.append({
+            'name': 'CEX BTC/ETH Inflow',
+            'weight': 0.3,
+            'impact': impact,
+            'reason': f'BTC/ETH 流入交易所 ${btc_eth_flow/1e6:.1f}M (潛在賣壓)'
+        })
+        total_score += impact
+    elif btc_eth_flow < -50_000_000:  # BTC/ETH 流出交易所 = 囤貨
+        impact = min(30, int(-btc_eth_flow / 50_000_000 * 10))
+        factors.append({
+            'name': 'CEX BTC/ETH Outflow',
+            'weight': 0.3,
+            'impact': impact,
+            'reason': f'BTC/ETH 流出交易所 ${abs(btc_eth_flow)/1e6:.1f}M (囤貨信號)'
+        })
+        total_score += impact
+    
+    # === Factor 3: 信號數量比較 (權重 20%) ===
+    chain_bullish = chain_summary.get('bullish_signals', 0)
+    chain_bearish = chain_summary.get('bearish_signals', 0)
+    cex_bullish = cex_summary.get('bullish_signals', 0)
+    cex_bearish = cex_summary.get('bearish_signals', 0)
+    
+    total_bullish = chain_bullish + cex_bullish
+    total_bearish = chain_bearish + cex_bearish
+    
+    signal_diff = total_bullish - total_bearish
+    if signal_diff != 0:
+        impact = min(20, max(-20, signal_diff * 5))
+        factors.append({
+            'name': 'Signal Balance',
+            'weight': 0.2,
+            'impact': impact,
+            'reason': f'{total_bullish} 看多信號 vs {total_bearish} 看空信號'
+        })
+        total_score += impact
+    
+    # === Factor 4: 穩定幣流入交易所 (權重 20%) ===
+    cex_stable_flow = cex_summary.get('total_stablecoin_flow_24h', 0)
+    
+    if cex_stable_flow > 100_000_000:  # 穩定幣流入交易所 = 潛在買盤
+        impact = min(20, int(cex_stable_flow / 100_000_000 * 8))
+        factors.append({
+            'name': 'CEX Stablecoin Inflow',
+            'weight': 0.2,
+            'impact': impact,
+            'reason': f'穩定幣流入交易所 ${cex_stable_flow/1e6:.1f}M (備戰買入)'
+        })
+        total_score += impact
+    elif cex_stable_flow < -100_000_000:  # 穩定幣流出 = 減少買盤
+        impact = max(-20, int(cex_stable_flow / 100_000_000 * 8))
+        factors.append({
+            'name': 'CEX Stablecoin Outflow',
+            'weight': 0.2,
+            'impact': impact,
+            'reason': f'穩定幣流出交易所 ${abs(cex_stable_flow)/1e6:.1f}M (買盤減少)'
+        })
+        total_score += impact
+    
+    # 限制分數範圍
+    total_score = max(-100, min(100, total_score))
+    
+    # 轉換為標籤
+    if total_score >= 40:
+        label = 'Strong Bullish'
+    elif total_score >= 15:
+        label = 'Bullish'
+    elif total_score <= -40:
+        label = 'Strong Bearish'
+    elif total_score <= -15:
+        label = 'Bearish'
+    else:
+        label = 'Neutral'
+    
+    return {
+        'score': total_score,
+        'label': label,
+        'factors': factors
+    }
+
+
 def _determine_overall_sentiment(chain_data: Dict, cex_data: Dict) -> str:
     """
-    綜合判斷市場情緒
+    綜合判斷市場情緒 (向後兼容包裝函數)
     """
-    chain_sentiment = chain_data.get('summary', {}).get('market_sentiment', 'Neutral')
-    cex_sentiment = cex_data.get('summary', {}).get('market_sentiment', 'Neutral')
-    
-    # 簡單邏輯：兩者都看漲 -> Bullish，都看跌 -> Bearish，否則 Neutral
-    if chain_sentiment == 'Bullish' and cex_sentiment == 'Bullish':
-        return 'Bullish'
-    elif chain_sentiment == 'Bearish' and cex_sentiment == 'Bearish':
-        return 'Bearish'
-    elif chain_sentiment == 'Bullish' or cex_sentiment == 'Bullish':
-        return 'Slightly Bullish'
-    elif chain_sentiment == 'Bearish' or cex_sentiment == 'Bearish':
-        return 'Slightly Bearish'
-    return 'Neutral'
+    result = _calculate_sentiment_score(chain_data, cex_data)
+    return result['label']
 
 
 async def _save_outputs(

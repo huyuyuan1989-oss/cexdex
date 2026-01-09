@@ -12,6 +12,7 @@
 
 import asyncio
 import logging
+from datetime import datetime
 from typing import Dict, List, Any, Optional
 from data_provider import DataProvider
 
@@ -63,24 +64,31 @@ class CEXAnalyzer:
     
     async def analyze_exchange(self, slug: str) -> Dict[str, Any]:
         """
-        分析單一交易所的資金流向
+        分析單一交易所的資金流向 (增強版 - 多時間週期)
         
         Args:
             slug: 交易所 slug (例如 'binance-cex', 'okx')
         
         Returns:
-            結構化分析結果 (可直接 JSON 輸出)
+            結構化分析結果 (包含 24H 和估算的 4H 流向)
         """
         result = {
             'exchange': slug,
             'total_tvl': 0,
+            # 24H 數據 (原有)
             'net_flow_24h': 0,
             'stablecoin_flow_24h': 0,
             'btc_eth_flow_24h': 0,
             'other_flow_24h': 0,
+            # 4H 數據 (新增 - 估算)
+            'net_flow_4h': 0,
+            'stablecoin_flow_4h': 0,
+            'btc_eth_flow_4h': 0,
+            # 元數據
             'stablecoin_pct': 0,
             'asset_breakdown': {},
             'tags': [],
+            'confidence_score': 0,  # 0-100 數據可信度
             'error': None
         }
         
@@ -90,10 +98,12 @@ class CEXAnalyzer:
             
             if not detail:
                 result['error'] = 'Failed to fetch protocol detail'
+                result['confidence_score'] = 0
                 return result
             
             if 'tokensInUsd' not in detail or not detail['tokensInUsd']:
                 result['error'] = 'No token data available'
+                result['confidence_score'] = 0
                 return result
             
             # 獲取當前與 24H 前的數據
@@ -101,6 +111,7 @@ class CEXAnalyzer:
             
             if len(history) < 2:
                 result['error'] = 'Insufficient historical data'
+                result['confidence_score'] = 20
                 return result
             
             current = history[-1]
@@ -127,10 +138,27 @@ class CEXAnalyzer:
             result['other_flow_24h'] = flows['other']
             result['asset_breakdown'] = flows['breakdown']
             
+            # === 4H 流向估算 (24H 的 ~25%) ===
+            # 由於 DefiLlama 只提供每日數據，4H 使用比例估算
+            result['net_flow_4h'] = result['net_flow_24h'] * 0.25
+            result['stablecoin_flow_4h'] = result['stablecoin_flow_24h'] * 0.25
+            result['btc_eth_flow_4h'] = result['btc_eth_flow_24h'] * 0.25
+            
             # 計算穩定幣佔比
             stable_total = sum(v for k, v in current_tokens.items() 
                               if self._is_stablecoin(k))
             result['stablecoin_pct'] = (stable_total / current_total * 100) if current_total > 0 else 0
+            
+            # 計算數據可信度
+            data_age_hours = (int(datetime.now().timestamp()) - current['date']) / 3600 if 'date' in current else 999
+            confidence = 100
+            if data_age_hours > 24:
+                confidence -= 30  # 數據超過 24 小時
+            if data_age_hours > 48:
+                confidence -= 30  # 數據超過 48 小時
+            if len(current_tokens) < 5:
+                confidence -= 20  # 資產種類太少
+            result['confidence_score'] = max(0, confidence)
             
             # 生成信號標籤
             result['tags'] = self._generate_tags(
@@ -142,6 +170,7 @@ class CEXAnalyzer:
         except Exception as e:
             logger.error(f"CEX analysis error for {slug}: {e}")
             result['error'] = str(e)
+            result['confidence_score'] = 0
         
         return result
     
