@@ -40,6 +40,7 @@ class DataProvider:
     DEFILLAMA_BASE = "https://api.llama.fi"
     STABLECOINS_BASE = "https://stablecoins.llama.fi"
     BINANCE_FUTURES_BASE = "https://fapi.binance.com"
+    FEAR_GREED_BASE = "https://api.alternative.me"
     
     ENDPOINTS = {
         # DefiLlama 核心 API
@@ -340,6 +341,27 @@ class DataProvider:
             },
             'timestamp': datetime.utcnow().isoformat() + "Z"
         }
+
+    async def fetch_fear_greed_index(self) -> Dict[str, Any]:
+        """
+        獲取加密貨幣貪婪恐慌指數
+        Returns: {'value': 50, 'value_classification': 'Neutral'}
+        """
+        try:
+            url = f"{self.FEAR_GREED_BASE}/fng/"
+            data = await self.fetch_with_retry(url)
+            
+            if data and data.get('data'):
+                latest = data['data'][0]
+                return {
+                    'value': int(latest.get('value', 50)),
+                    'value_classification': latest.get('value_classification', 'Neutral'),
+                    'timestamp': latest.get('timestamp')
+                }
+            return {'value': 50, 'value_classification': 'Neutral'}
+        except Exception as e:
+            logger.error(f"Error fetching Fear & Greed Index: {e}")
+            return {'value': 50, 'value_classification': 'Neutral'}
 
     async def test(self) -> bool:
         """

@@ -687,10 +687,25 @@
 
             <!-- TAB 1: MONITOR VIEW -->
             <div v-show="currentTab === 'monitor'">
-                <!-- Market Weather Banner -->
-                <div :class="['weather-banner', weatherClass]" style="margin-bottom: 2rem;">
-                    <span style="font-size: 1.5rem;">{{ weatherIcon }}</span>
-                    <span>{{ weatherText }}</span>
+                <!-- Market Weather Banner (AI Powered) -->
+                <div :class="['weather-banner', weatherClass]"
+                    style="margin-bottom: 2rem; display: flex; align-items: center; justify-content: space-between; padding: 1.5rem;">
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <span style="font-size: 2.5rem;">{{ weatherIcon }}</span>
+                        <div>
+                            <div style="font-size: 1.2rem; font-weight: bold;">{{ data.market_overview?.sentiment?.label
+                                }}</div>
+                            <div style="font-size: 0.9rem; opacity: 0.8;">
+                                AI Score: {{ data.market_overview?.sentiment?.score }} | F&G: {{
+                                data.market_overview?.sentiment?.factors?.find(f => f.name.includes('Sentiment'))?.value
+                                || 'N/A' }}
+                            </div>
+                        </div>
+                    </div>
+                    <div style="text-align: right; font-size: 0.8rem; opacity: 0.7; max-width: 40%;"
+                        class="hide-mobile">
+                        <span>{{ weatherText }}</span>
+                    </div>
                 </div>
 
                 <!-- Key Stats Cards (Monitor Style) -->

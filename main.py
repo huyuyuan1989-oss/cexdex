@@ -81,18 +81,32 @@ async def run_pipeline() -> Dict[str, Any]:
         # 4. 獲取衍生品數據 (Institutional Grade)
         logger.info("📈 獲取衍生品數據 (Funding/OI)...")
         derivs_data = await provider.get_derivatives_data()
+
+        # 5. 獲取市場情緒指標 (Macro)
+        logger.info("😨 獲取恐慌貪婪指數...")
+        fng_data = await provider.fetch_fear_greed_index()
     
-    # 5. 生成統一報告
+    # 6. 生成統一報告
     from report_generator import ReportGenerator
     
     logger.info("📝 生成統一報告 (V2 Schema)...")
+    
+    # 計算加權情緒 (Phase 3: AI Sentiment Weighting)
+    sentiment_details = _calculate_sentiment_score(
+        chain_data, 
+        cex_data, 
+        derivs_data, 
+        fng_data
+    )
+    
     generator = ReportGenerator()
     unified_report = generator.generate_unified_report(
         chain_data=chain_data,
         cex_data=cex_data,
-        sentiment_details=_calculate_sentiment_score(chain_data, cex_data),
+        sentiment_details=sentiment_details,
         stablecoin_marketcap=stablecoin_marketcap,
-        derivs_data=derivs_data  # Pass new data
+        derivs_data=derivs_data,
+        fng_data=fng_data  # Pass Macro Data
     )
     
     # 添加執行時間
@@ -132,125 +146,98 @@ async def _get_stablecoin_marketcap(provider: DataProvider) -> float:
     return 0
 
 
-def _calculate_sentiment_score(chain_data: Dict, cex_data: Dict) -> Dict[str, Any]:
+def _calculate_sentiment_score(
+    chain_data: Dict, 
+    cex_data: Dict, 
+    derivs_data: Dict = None, 
+    fng_data: Dict = None
+) -> Dict[str, Any]:
     """
-    加權情緒評分系統 (優化版)
-    
-    Returns:
-        {
-            'score': -100 to +100,
-            'label': 'Strong Bullish' | 'Bullish' | 'Neutral' | 'Bearish' | 'Strong Bearish',
-            'factors': [{name, weight, impact, reason}, ...]
-        }
+    加權情緒評分系統 V3 (AI Weighted Model)
+    包含: Smart Money Flow, Derivatives Structure, Macro Sentiment
     """
+    derivs_data = derivs_data or {}
+    fng_data = fng_data or {}
     factors = []
     total_score = 0
     
-    # === Factor 1: 公鏈穩定幣流入 (權重 30%) ===
+    # 1. Smart Money Flow (權重 40%) - 最重要指標
+    sm_flow = cex_data.get('summary', {}).get('smart_money_stable_flow', 0)
+    score_sm = 0
+    if sm_flow > 50_000_000: score_sm = 100    # Strong Buy
+    elif sm_flow > 10_000_000: score_sm = 75   # Buy
+    elif sm_flow > 0: score_sm = 25            # Weak Buy
+    elif sm_flow < -50_000_000: score_sm = -100 # Strong Sell
+    elif sm_flow < -10_000_000: score_sm = -75  # Sell
+    elif sm_flow < 0: score_sm = -25            # Weak Sell
+    
+    total_score += score_sm * 0.4
+    factors.append({
+        'name': '主力動向 (Smart Money)',
+        'score': score_sm,
+        'weight': '40%',
+        'value': f"${sm_flow/1e6:+.1f}M"
+    })
+    
+    # 2. Derivatives Structure (權重 30%)
+    funding_btc = derivs_data.get('funding_rates', {}).get('BTC', 0.01)
+    score_derivs = 0
+    if funding_btc > 0.03: score_derivs = -80      # 極度過熱
+    elif funding_btc > 0.01: score_derivs = -40    # 偏多過熱
+    elif funding_btc < -0.01: score_derivs = 60    # 軋空預期
+    elif funding_btc < -0.02: score_derivs = 90    # 強烈軋空預期
+    else: score_derivs = 10                        # 中性偏多 (健康費率)
+    
+    total_score += score_derivs * 0.3
+    factors.append({
+        'name': '合約結構 (Derivatives)',
+        'score': score_derivs,
+        'weight': '30%',
+        'value': f"Funding {funding_btc*100:.4f}%"
+    })
+    
+    # 3. Chain Activity (20%)
     chain_summary = chain_data.get('summary', {})
-    stable_inflow = chain_summary.get('total_stable_inflow_24h', 0)
+    chain_flow = chain_summary.get('stablecoin_flow_24h', 0)
+    score_chain = 0
+    if chain_flow > 20_000_000: score_chain = 100
+    elif chain_flow > 0: score_chain = 50
+    else: score_chain = -50
     
-    if stable_inflow > 100_000_000:  # > $100M 流入
-        impact = min(30, int(stable_inflow / 100_000_000 * 10))
-        factors.append({
-            'name': 'Chain Stablecoin Inflow',
-            'weight': 0.3,
-            'impact': impact,
-            'reason': f'穩定幣流入 ${stable_inflow/1e6:.1f}M (買盤資金)'
-        })
-        total_score += impact
-    elif stable_inflow < -100_000_000:  # > $100M 流出
-        impact = max(-30, int(stable_inflow / 100_000_000 * 10))
-        factors.append({
-            'name': 'Chain Stablecoin Outflow',
-            'weight': 0.3,
-            'impact': impact,
-            'reason': f'穩定幣流出 ${abs(stable_inflow)/1e6:.1f}M (資金撤離)'
-        })
-        total_score += impact
+    total_score += score_chain * 0.2
+    factors.append({
+        'name': '公鏈生態 (On-chain)',
+        'score': score_chain,
+        'weight': '20%',
+        'value': f"${chain_flow/1e6:+.1f}M"
+    })
     
-    # === Factor 2: 交易所 BTC/ETH 流入 (權重 30%) ===
-    cex_summary = cex_data.get('summary', {})
-    btc_eth_flow = cex_summary.get('total_btc_eth_flow_24h', 0)
+    # 4. Macro Sentiment (Contra) (10%)
+    fng_val = fng_data.get('value', 50)
+    score_macro = 0
+    # 逆勢邏輯: 極度恐慌(20)是買點(+80分)
+    if fng_val < 20: score_macro = 80       
+    elif fng_val < 40: score_macro = 40     
+    elif fng_val > 80: score_macro = -80    
+    elif fng_val > 60: score_macro = -40    
     
-    if btc_eth_flow > 50_000_000:  # BTC/ETH 大量流入交易所 = 賣壓
-        impact = max(-30, int(-btc_eth_flow / 50_000_000 * 10))
-        factors.append({
-            'name': 'CEX BTC/ETH Inflow',
-            'weight': 0.3,
-            'impact': impact,
-            'reason': f'BTC/ETH 流入交易所 ${btc_eth_flow/1e6:.1f}M (潛在賣壓)'
-        })
-        total_score += impact
-    elif btc_eth_flow < -50_000_000:  # BTC/ETH 流出交易所 = 囤貨
-        impact = min(30, int(-btc_eth_flow / 50_000_000 * 10))
-        factors.append({
-            'name': 'CEX BTC/ETH Outflow',
-            'weight': 0.3,
-            'impact': impact,
-            'reason': f'BTC/ETH 流出交易所 ${abs(btc_eth_flow)/1e6:.1f}M (囤貨信號)'
-        })
-        total_score += impact
+    total_score += score_macro * 0.1
+    factors.append({
+        'name': '市場情緒 (Sentiment)',
+        'score': score_macro,
+        'weight': '10%',
+        'value': f"F&G {fng_val}"
+    })
     
-    # === Factor 3: 信號數量比較 (權重 20%) ===
-    chain_bullish = chain_summary.get('bullish_signals', 0)
-    chain_bearish = chain_summary.get('bearish_signals', 0)
-    cex_bullish = cex_summary.get('bullish_signals', 0)
-    cex_bearish = cex_summary.get('bearish_signals', 0)
-    
-    total_bullish = chain_bullish + cex_bullish
-    total_bearish = chain_bearish + cex_bearish
-    
-    signal_diff = total_bullish - total_bearish
-    if signal_diff != 0:
-        impact = min(20, max(-20, signal_diff * 5))
-        factors.append({
-            'name': 'Signal Balance',
-            'weight': 0.2,
-            'impact': impact,
-            'reason': f'{total_bullish} 看多信號 vs {total_bearish} 看空信號'
-        })
-        total_score += impact
-    
-    # === Factor 4: 穩定幣流入交易所 (權重 20%) ===
-    cex_stable_flow = cex_summary.get('total_stablecoin_flow_24h', 0)
-    
-    if cex_stable_flow > 100_000_000:  # 穩定幣流入交易所 = 潛在買盤
-        impact = min(20, int(cex_stable_flow / 100_000_000 * 8))
-        factors.append({
-            'name': 'CEX Stablecoin Inflow',
-            'weight': 0.2,
-            'impact': impact,
-            'reason': f'穩定幣流入交易所 ${cex_stable_flow/1e6:.1f}M (備戰買入)'
-        })
-        total_score += impact
-    elif cex_stable_flow < -100_000_000:  # 穩定幣流出 = 減少買盤
-        impact = max(-20, int(cex_stable_flow / 100_000_000 * 8))
-        factors.append({
-            'name': 'CEX Stablecoin Outflow',
-            'weight': 0.2,
-            'impact': impact,
-            'reason': f'穩定幣流出交易所 ${abs(cex_stable_flow)/1e6:.1f}M (買盤減少)'
-        })
-        total_score += impact
-    
-    # 限制分數範圍
-    total_score = max(-100, min(100, total_score))
-    
-    # 轉換為標籤
-    if total_score >= 40:
-        label = 'Strong Bullish'
-    elif total_score >= 15:
-        label = 'Bullish'
-    elif total_score <= -40:
-        label = 'Strong Bearish'
-    elif total_score <= -15:
-        label = 'Bearish'
-    else:
-        label = 'Neutral'
+    # 最終評級
+    label = 'Neutral'
+    if total_score >= 60: label = 'Strong Bullish 🚀'
+    elif total_score >= 20: label = 'Bullish 🟢'
+    elif total_score <= -60: label = 'Strong Bearish 🩸'
+    elif total_score <= -20: label = 'Bearish 🔴'
     
     return {
-        'score': total_score,
+        'score': round(total_score, 1),
         'label': label,
         'factors': factors
     }
