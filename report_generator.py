@@ -86,6 +86,9 @@ class ReportGenerator:
         weekly_comparison = self._generate_weekly_comparison(cex_summary, dex_summary)
         
         # 組裝統一報告
+        # V3 Alpha Hunter Logic Injection
+        alpha_picks = self._generate_alpha_opportunities(chain_data, cex_data, derivs_data)
+
         report = {
             "meta": {
                 "timestamp": datetime.utcnow().isoformat() + "Z",
@@ -96,6 +99,7 @@ class ReportGenerator:
             
             "market_overview": {
                 "sentiment": sentiment_details,
+                "alpha_opportunities": alpha_picks,
                 "stablecoin_marketcap": stablecoin_marketcap,
                 "derivatives": derivs_data or {},
                 "fear_greed": fng_data or {},
@@ -231,6 +235,124 @@ class ReportGenerator:
             'bearish_signals': sum(1 for c in valid_chains if c.get('tags') and c['tags'][0].get('signal') == 'Bearish')
         }
     
+    
+    def _generate_alpha_opportunities(
+        self, 
+        chain_data: Dict, 
+        cex_data: Dict,
+        derivs_data: Dict
+    ) -> List[Dict[str, Any]]:
+        """
+        V3 Alpha Hunter: 自動篩選高勝率交易機會
+        邏輯: 趨勢(7D) + 動能(4H) + 資金(Stable) + 結構(Derivs)
+        """
+        opportunities = []
+        chains = chain_data.get('chains', [])
+        exchanges = cex_data.get('exchanges', [])
+        
+        # 1. Chain Screener (Golden Setup)
+        for chain in chains:
+            name = chain['chain']
+            flow_stable_24h = chain.get('stable_inflow_24h', 0)
+            flow_stable_4h = chain.get('stable_inflow_4h', 0)
+            tvl_change_7d = chain.get('change_7d_pct', 0)
+            
+            # 費率過濾器 (Funding Filter) - 若市場過熱，不做多
+            # 這裡簡單假設大多數鏈跟隨 ETH/BTC 費率，或未來可擴充 specific funding
+            funding_filter_passed = True
+            funding_rate = derivs_data.get('funding_rates', {}).get('ETH', 0)
+            
+            # --- LONG Logic ---
+            if tvl_change_7d > 0 and flow_stable_24h > 0:
+                score = 60
+                reasons = ["7D Uptrend", "24H Inflow"]
+                
+                # Momentum Boost
+                if flow_stable_4h > 0:
+                    score += 20
+                    reasons.append("4H Momentum")
+                
+                # Volume Boost
+                if flow_stable_24h > 10_000_000:
+                    score += 10
+                    reasons.append("High Volume")
+                    
+                # Derivs Check (Safety)
+                if funding_rate > 0.03: # > 0.03% is overheated
+                    score -= 30
+                    reasons.append("⚠️ High Funding")
+                elif funding_rate < 0: # Short Squeeze Potential
+                    score += 10
+                    reasons.append("Short Squeeze Pot.")
+                    
+                if score >= 80:
+                    opportunities.append({
+                        "asset": name.upper(),
+                        "type": "CHAIN",
+                        "direction": "LONG 🟢",
+                        "score": score,
+                        "reason": " + ".join(reasons),
+                        "data": f"7D:{tvl_change_7d:.1f}% | 24H:${flow_stable_24h/1e6:.1f}M"
+                    })
+
+            # --- SHORT Logic ---
+            if tvl_change_7d < -2 and flow_stable_24h < 0:
+                score = 60
+                reasons = ["7D Downtrend", "24H Outflow"]
+                
+                if flow_stable_4h < 0:
+                    score += 20
+                    reasons.append("4H Sell-off")
+                    
+                if flow_stable_24h < -10_000_000:
+                    score += 10
+                    reasons.append("High Outflow")
+                    
+                # Derivs Check
+                if funding_rate < -0.03: # Too many shorts already
+                    score -= 30
+                    reasons.append("⚠️ Crowded Shorts")
+                    
+                if score >= 80:
+                    opportunities.append({
+                        "asset": name.upper(),
+                        "type": "CHAIN",
+                        "direction": "SHORT 🔴",
+                        "score": score,
+                        "reason": " + ".join(reasons),
+                        "data": f"7D:{tvl_change_7d:.1f}% | 24H:${flow_stable_24h/1e6:.1f}M"
+                    })
+
+        # 2. CEX Screener (Whale Action)
+        for ex in exchanges:
+            name = ex['exchange']
+            stable_flow_4h = ex.get('stablecoin_flow_4h', 0)
+            btc_flow_4h = ex.get('btc_eth_flow_4h', 0)
+            
+            if stable_flow_4h > 20_000_000:
+                opportunities.append({
+                    "asset": name.upper(),
+                    "type": "CEX",
+                    "direction": "BUY ALERT 🟢",
+                    "score": 90,
+                    "reason": "Massive 4H Stablecoin Inflow (Whale Buy)",
+                    "data": f"4H Stable: +${stable_flow_4h/1e6:.1f}M"
+                })
+                
+            if btc_flow_4h > 20_000_000:
+                opportunities.append({
+                    "asset": name.upper(),
+                    "type": "CEX",
+                    "direction": "DUMP ALERT 🔴",
+                    "score": 85,
+                    "reason": "Massive BTC Inflow to Exchange",
+                    "data": f"4H BTC Inflow: +${btc_flow_4h/1e6:.1f}M"
+                })
+        
+        # Sort
+        opportunities.sort(key=lambda x: x['score'], reverse=True)
+        return opportunities
+
     def _generate_4h_narrative(self, cex: Dict, dex: Dict) -> str:
         """生成 4H 敘述性分析"""
         parts = []
