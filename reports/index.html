@@ -1145,6 +1145,14 @@
                         "Asset Rotation": "🔄 資產輪動",
                         "Neutral": "➖ 中性"
                     };
+                    // Simple fuzzy matching for V3 tags
+                    if (tag === 'CHAIN') return '🔗 公鏈';
+                    if (tag === 'CEX') return '🏦 交易所';
+                    if (tag.includes('Stablecoin Outflow')) return '💸 穩定幣流出';
+                    if (tag.includes('Short-term Outflow')) return '📉 短期流出';
+                    if (tag.includes('Trend Confirmed')) return '✅ 趨勢確認';
+                    if (tag.includes('Trend Divergence')) return '⚠️ 趨勢背離';
+
                     return map[tag] || tag;
                 },
                 sortBy(key, tableType) {
