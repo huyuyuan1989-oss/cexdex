@@ -13,32 +13,102 @@
         :root {
             /* Financial Terminal Theme (Slate-900 base) */
             --bg-body: #0f172a;
-            /* Slate 900 */
             --bg-card: #1e293b;
-            /* Slate 800 */
             --bg-header: #334155;
-            /* Slate 700 */
             --border: #475569;
-            /* Slate 600 */
 
             --text-primary: #f8fafc;
-            /* Slate 50 */
             --text-secondary: #94a3b8;
-            /* Slate 400 */
+            --text-accent: #00ffcc;
+            /* Neon Cyan from Monitor */
 
             /* High Contrast Financial Colors */
             --bullish: #22c55e;
-            /* Green 500 */
             --bullish-bg: rgba(34, 197, 94, 0.15);
             --bearish: #ef4444;
-            /* Red 500 */
             --bearish-bg: rgba(239, 68, 68, 0.15);
             --neutral: #fbbf24;
-            /* Amber 400 */
             --neutral-bg: rgba(251, 191, 36, 0.15);
 
             --accent: #6366f1;
-            /* Indigo 500 */
+
+            /* Monitor Specifics */
+            --badge-whale-bg: rgba(255, 215, 0, 0.15);
+            --badge-whale-text: #ffd700;
+            --badge-smart-bg: rgba(180, 80, 255, 0.15);
+            --badge-smart-text: #b450ff;
+            --badge-inst-bg: rgba(0, 150, 255, 0.15);
+            --badge-inst-text: #0096ff;
+
+            --alert-border: #ff3333;
+        }
+
+        /* Pulse Animation */
+        @keyframes pulse-red {
+            0% {
+                box-shadow: 0 0 0 0 rgba(255, 51, 51, 0.4);
+            }
+
+            70% {
+                box-shadow: 0 0 0 6px rgba(255, 51, 51, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(255, 51, 51, 0);
+            }
+        }
+
+        /* Badge Styles */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border: 1px solid transparent;
+        }
+
+        .badge-whale {
+            background: var(--badge-whale-bg);
+            color: var(--badge-whale-text);
+            border-color: rgba(255, 215, 0, 0.3);
+        }
+
+        .badge-smart {
+            background: var(--badge-smart-bg);
+            color: var(--badge-smart-text);
+            border-color: rgba(180, 80, 255, 0.3);
+        }
+
+        /* Tab Navigation Styles */
+        .nav-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 0;
+        }
+
+        .nav-tab {
+            padding: 0.75rem 1.5rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+            font-weight: 600;
+        }
+
+        .nav-tab:hover {
+            color: var(--text-primary);
+        }
+
+        .nav-tab.active {
+            color: var(--text-accent);
+            border-bottom-color: var(--text-accent);
         }
 
         * {
@@ -592,6 +662,16 @@
                 Terminal v3.1</p>
         </header>
 
+        <!-- Navigation Tabs -->
+        <div class="nav-tabs">
+            <div class="nav-tab" :class="{ active: currentTab === 'monitor' }" @click="currentTab = 'monitor'">
+                ⚡ 即時戰情室 (Monitor)
+            </div>
+            <div class="nav-tab" :class="{ active: currentTab === 'analysis' }" @click="currentTab = 'analysis'">
+                📊 深度分析 (Analysis)
+            </div>
+        </div>
+
         <!-- Loading State -->
         <div v-if="loading" class="loading">
             <span style="display: inline-block; animation: pulse 1.5s infinite;">📡</span> 正在建立加密數據連線...
@@ -604,85 +684,80 @@
 
         <!-- Main Content -->
         <div v-else>
-            <!-- 2. AI Market Weather -->
-            <div :class="['weather-banner', weatherClass]">
-                <span style="font-size: 1.5rem;">{{ weatherIcon }}</span>
-                <span>{{ weatherText }}</span>
-            </div>
 
-            <!-- Stats Grid -->
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-value text-neutral">${{ formatB(data.market_overview?.stablecoin_marketcap ||
-                        data.stablecoin_marketcap) }}B</div>
-                    <div class="stat-label">穩定幣總市值 (Market Cap)</div>
+            <!-- TAB 1: MONITOR VIEW -->
+            <div v-show="currentTab === 'monitor'">
+                <!-- Market Weather Banner -->
+                <div :class="['weather-banner', weatherClass]" style="margin-bottom: 2rem;">
+                    <span style="font-size: 1.5rem;">{{ weatherIcon }}</span>
+                    <span>{{ weatherText }}</span>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-value"
-                        :class="data.cex_flows?.summary?.total_stablecoin_flow_24h > 0 ? 'text-green' : 'text-red'">
-                        ${{ formatM(data.cex_flows?.summary?.total_stablecoin_flow_24h) }}M
-                    </div>
-                    <div class="stat-label">CEX 24H 穩定幣淨流向</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value"
-                        :class="data.cex_flows?.summary?.total_btc_eth_flow_24h > 0 ? 'text-red' : 'text-green'">
-                        ${{ formatM(data.cex_flows?.summary?.total_btc_eth_flow_24h) }}M
-                    </div>
-                    <div class="stat-label">CEX 24H BTC/ETH 淨流向</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value text-neutral">{{ formatTime(data.meta?.execution_time_seconds ||
-                        data.execution_time_seconds) }}s</div>
-                    <div class="stat-label">上次更新: {{ formatDate(data.meta?.generated_at || data.generated_at) }}</div>
-                </div>
-            </div>
 
-            <!-- Chain Flows Table -->
-            <div class="section">
-                <div class="section-header">
-                    <h2>🔗 公鏈資金流向 (Chain Flows)</h2>
-                    <span style="font-size: 0.8rem; color: var(--text-secondary);">顯示前 10 大 TVL 公鏈</span>
+                <!-- Key Stats Cards (Monitor Style) -->
+                <div
+                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                    <div
+                        style="background: var(--bg-card); padding: 1rem; border-radius: 8px; border: 1px solid var(--border);">
+                        <div style="color: var(--text-secondary); font-size: 0.8rem; margin-bottom: 0.5rem;">4H 趨勢
+                            (Trend)</div>
+                        <div class="font-mono" style="font-size: 1.2rem;"
+                            :class="data.timeframes?.['4h']?.cex?.net_flow > 0 ? 'text-green' : 'text-red'">
+                            {{ formatM(data.timeframes?.['4h']?.cex?.net_flow) }}M
+                        </div>
+                    </div>
+                    <div
+                        style="background: var(--bg-card); padding: 1rem; border-radius: 8px; border: 1px solid var(--border);">
+                        <div style="color: var(--text-secondary); font-size: 0.8rem; margin-bottom: 0.5rem;">24H 總量
+                            (Volume)</div>
+                        <div class="font-mono text-neutral" style="font-size: 1.2rem;">
+                            ${{ formatB(data.market_overview?.total_tvl?.total) }}B
+                        </div>
+                    </div>
                 </div>
-                <div class="table-container">
-                    <table>
+
+                <!-- Simple Monitor Table -->
+                <div class="section">
+                    <div class="section-header">
+                        <h2>🚀 重點關注資產 (Key Assets)</h2>
+                    </div>
+                    <table class="market-table">
                         <thead>
                             <tr>
-                                <th>公鏈名稱</th>
-                                <th @click="sortBy('tvl_total', 'chain')" class="sortable"
-                                    :class="{active: chainSortKey === 'tvl_total'}">
-                                    <span class="has-tooltip"
-                                        data-tooltip="總鎖倉量 (Total Value Locked)。&#10;代表該條區塊鏈上所有 DeFi 協議中鎖定的資金總和。&#10;💡 TVL 越高，代表該生態越繁榮、資金沉澱越多。">TVL</span>
-                                    <span class="sort-icon">↕</span>
-                                </th>
-                                <th @click="sortBy('change_24h_pct', 'chain')" class="sortable"
-                                    :class="{active: chainSortKey === 'change_24h_pct'}">
-                                    24H 變動 <span class="sort-icon">↕</span>
-                                </th>
-                                <th @click="sortBy('stable_inflow_24h', 'chain')" class="sortable"
-                                    :class="{active: chainSortKey === 'stable_inflow_24h'}">
-                                    <span class="has-tooltip"
-                                        data-tooltip="穩定幣 (USDT/USDC) 24小時淨流入量。&#10;💡 這是市場的『乾火藥』(Buying Power)。&#10;🟢 正值: 資金進場，通常是我們進場做多的信號。&#10;🔴 負值: 資金撤退，可能代表主力正在獲利了結。">穩定幣流入</span>
-                                    <span class="sort-icon">↕</span>
-                                </th>
-                                <th style="text-align: left;">AI 智能標籤</th>
+                                <th>Asset (資產)</th>
+                                <th>4H Flow (4小時)</th>
+                                <th>24H Net (日淨流)</th>
+                                <th>Status (狀態)</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="chain in sortedChains" :key="chain.chain">
-                                <td :data-label="'公鏈名稱'">{{ chain.chain }}</td>
-                                <td data-label="TVL" class="text-neutral">${{ formatB(chain.tvl_total) }}B</td>
-                                <td data-label="24H 變動" :class="chain.change_24h_pct >= 0 ? 'text-green' : 'text-red'">
-                                    {{ chain.change_24h_pct >= 0 ? '+' : '' }}{{ chain.change_24h_pct }}%
+                            <!-- Top Checks (using existing CEX data logic) -->
+                            <tr v-for="cex in sortedCex.slice(0, 5)" :key="'mon-'+cex.exchange">
+                                <td data-label="Asset">
+                                    <div class="token-cell">
+                                        <span>{{ cex.exchange }}</span>
+                                        <span v-if="cex.tags?.[0]" class="badge badge-whale">{{ cex.tags[0].type
+                                            }}</span>
+                                    </div>
                                 </td>
-                                <td data-label="穩定幣流入 (Buying Power)"
-                                    :class="chain.stable_inflow_24h >= 0 ? 'text-green' : 'text-red'">
-                                    ${{ formatM(chain.stable_inflow_24h) }}M
+                                <td data-label="4H Flow" class="font-mono"
+                                    :class="cex.net_flow_4h > 0 ? 'text-green' : 'text-red'">
+                                    {{ formatM(cex.net_flow_4h) }}M
                                 </td>
-                                <td data-label="AI 智能標籤" style="text-align: left;">
-                                    <span v-for="tag in chain.tags" :key="tag.type" class="tag"
-                                        :class="getTagClass(tag.signal)">
-                                        {{ translateTag(tag.type) }}
+                                <td data-label="24H Net" class="font-mono"
+                                    :class="cex.net_flow_24h > 0 ? 'text-green' : 'text-red'">
+                                    {{ formatM(cex.net_flow_24h) }}M
+                                </td>
+                                <td data-label="Status">
+                                    <span v-if="cex.net_flow_4h > 0 && cex.net_flow_24h > 0"
+                                        style="color: var(--bullish);">
+                                        🚀 強勢流入
+                                    </span>
+                                    <span v-else-if="cex.net_flow_4h < 0 && cex.net_flow_24h < 0"
+                                        style="color: var(--bearish);">
+                                        📉 持續流出
+                                    </span>
+                                    <span v-else style="color: var(--text-secondary);">
+                                        🔄 震盪整理
                                     </span>
                                 </td>
                             </tr>
@@ -691,134 +766,227 @@
                 </div>
             </div>
 
-            <!-- CEX Flows Table -->
-            <div class="section">
-                <div class="section-header">
-                    <h2>🏦 交易所資金流向 (CEX Flows)</h2>
-                    <span style="font-size: 0.8rem; color: var(--text-secondary);">監測穩定幣與風險資產的進出</span>
+            <!-- TAB 2: ANALYSIS VIEW (Original Content) -->
+            <div v-show="currentTab === 'analysis'">
+                <!-- 2. AI Market Weather -->
+                <div :class="['weather-banner', weatherClass]">
+                    <span style="font-size: 1.5rem;">{{ weatherIcon }}</span>
+                    <span>{{ weatherText }}</span>
                 </div>
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>交易所</th>
-                                <th @click="sortBy('total_tvl', 'cex')" class="sortable"
-                                    :class="{active: cexSortKey === 'total_tvl'}">
-                                    <span class="has-tooltip"
-                                        data-tooltip="交易所公開錢包資產總值 (Total Assets)。&#10;💡 代表該交易所的資金深度與用戶信任度。">TVL</span>
-                                    <span class="sort-icon">↕</span>
-                                </th>
-                                <th @click="sortBy('net_flow_24h', 'cex')" class="sortable"
-                                    :class="{active: cexSortKey === 'net_flow_24h'}">
-                                    淨流向 (Net) <span class="sort-icon">↕</span>
-                                </th>
-                                <th @click="sortBy('stablecoin_flow_24h', 'cex')" class="sortable"
-                                    :class="{active: cexSortKey === 'stablecoin_flow_24h'}">
-                                    <span class="has-tooltip"
-                                        data-tooltip="穩定幣 (USDT/USDC) 24小時淨流入量。&#10;🟢 正值: 資金進入交易所，這通常是潛在買盤 (準備抄底)。&#10;🔴 負值: 資金提現離場，市場購買力下降。">穩定幣</span>
-                                    <span class="sort-icon">↕</span>
-                                </th>
-                                <th @click="sortBy('btc_eth_flow_24h', 'cex')" class="sortable"
-                                    :class="{active: cexSortKey === 'btc_eth_flow_24h'}">
-                                    <span class="has-tooltip"
-                                        data-tooltip="BTC/ETH 等風險資產 24小時淨流入量。&#10;🔴 正值: 大戶將幣轉入交易所，這通常是潛在賣壓 (準備倒貨)。&#10;🟢 負值: 大戶提幣囤貨，減少了市場上的流通籌碼 (利多)。">BTC/ETH</span>
-                                    <span class="sort-icon">↕</span>
-                                </th>
-                                <table class="market-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Exchange (交易所)</th>
-                                            <th>Total Net Flow (總淨流向)</th>
-                                            <!-- <th>1H Flow (1小時)</th> -->
-                                            <th>4H Flow (4小時)</th>
-                                            <th>Stablecoins (穩定幣)</th>
-                                            <th>BTC/ETH (風險資產)</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr v-for="cex in sortedCex" :key="cex.exchange">
-                                            <td data-label="Exchange (交易所)">
-                                                <div class="token-cell">
-                                                    <span>{{ cex.exchange }}</span>
-                                                    <span v-if="cex.tags && cex.tags.length" class="badge badge-whale"
-                                                        :class="getTagClass(cex.tags[0].signal)">{{
-                                                        translateTag(cex.tags[0].type) }}</span>
-                                                </div>
-                                            </td>
-                                            <td data-label="Total Net (總淨流)" class="font-mono"
-                                                :class="cex.net_flow_24h >= 0 ? 'text-green' : 'text-red'">
-                                                ${{ formatM(cex.net_flow_24h) }}M
-                                            </td>
-                                            <!-- 1H data not available in V2 API, hiding or replacing -->
-                                            <!-- <td data-label="1H Flow (1小時)" class="font-mono text-gray">--</td> -->
 
-                                            <td data-label="4H Flow (4小時)" class="font-mono"
-                                                :class="cex.net_flow_4h >= 0 ? 'text-green' : 'text-red'">
-                                                ${{ formatM(cex.net_flow_4h) }}M
-                                            </td>
-
-                                            <td data-label="Stablecoins (穩定幣)" class="font-mono"
-                                                :class="cex.stablecoin_flow_24h >= 0 ? 'text-green' : 'text-red'">
-                                                ${{ formatM(cex.stablecoin_flow_24h) }}M
-                                            </td>
-                                            <td data-label="BTC/ETH (風險資產)" class="font-mono"
-                                                :class="cex.btc_eth_flow_24h >= 0 ? 'text-red' : 'text-green'">
-                                                ${{ formatM(cex.btc_eth_flow_24h) }}M
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                    </table>ody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- 5. Quant Zone -->
-            <div class="quant-zone">
-                <h3 style="color: var(--text-secondary); font-size: 1rem;">👨‍💻 量化分析專區 (Quant Zone)</h3>
-                <p style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.5rem;">此數據格式專為量化分析模型
-                    (Quantitative Models) 優化，包含完整的資金歸因標籤與歷史流向紀錄。</p>
-                <div class="btn-group">
-                    <a href="./data.json" class="btn btn-primary" download>
-                        <span>📥</span> 匯出原始數據 (JSON) | API 專用
-                    </a>
-                    <a href="./history.csv" class="btn" download>
-                        <span>📊</span> 下載回測數據 (CSV) | 量化專用
-                    </a>
-                </div>
-            </div>
-
-            <!-- 6. Methodology Footer -->
-            <div class="footer">
-                <div class="method-box">
-                    <strong>📖 分析方法論 (Methodology & Definitions)</strong>
-                    <div class="method-grid">
-                        <div class="method-item">
-                            <h4>🧮 統計週期與計算 (Calculation & Period)</h4>
-                            <p>
-                                <strong>• 統計週期:</strong> 採用過去 24 小時滾動窗口 (Rolling 24H)。<br>
-                                <strong>• 更新頻率:</strong> 每 30 分鐘自動同步鏈上數據。<br>
-                                <strong>• 淨流向:</strong> 該週期內 [充值總額 - 提現總額]。
-                            </p>
+                <!-- Stats Grid -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value text-neutral">${{ formatB(data.market_overview?.stablecoin_marketcap ||
+                            data.stablecoin_marketcap) }}B</div>
+                        <div class="stat-label">穩定幣總市值 (Market Cap)</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value"
+                            :class="data.cex_flows?.summary?.total_stablecoin_flow_24h > 0 ? 'text-green' : 'text-red'">
+                            ${{ formatM(data.cex_flows?.summary?.total_stablecoin_flow_24h) }}M
                         </div>
-                        <div class="method-item">
-                            <h4>💪 主力吸籌 (Buying Power)</h4>
-                            <p>定義為穩定幣 (USDT/USDC/DAI) 淨流入單一實體 > $50M USD。這通常代表主力資金已進入市場，正在等待機會買入。</p>
+                        <div class="stat-label">CEX 24H 穩定幣淨流向</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value"
+                            :class="data.cex_flows?.summary?.total_btc_eth_flow_24h > 0 ? 'text-red' : 'text-green'">
+                            ${{ formatM(data.cex_flows?.summary?.total_btc_eth_flow_24h) }}M
                         </div>
-                        <div class="method-item">
-                            <h4>⚠️ 倒貨風險 (Dump Risk)</h4>
-                            <p>定義為波動性資產 (BTC/ETH) 淨流入交易所 > $100M USD。這代表大戶將冷錢包資產轉移至交易所，存在潛在拋售壓力。</p>
-                        </div>
-                        <div class="method-item">
-                            <h4>📡 數據來源 (Data Source)</h4>
-                            <p>聚合 DefiLlama Protocol API 與多鏈 RPC 節點數據。我們已算法剔除交易所內部錢包轉帳的雜訊，以反映真實的資金流動。</p>
+                        <div class="stat-label">CEX 24H BTC/ETH 淨流向</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value text-neutral">{{ formatTime(data.meta?.execution_time_seconds ||
+                            data.execution_time_seconds) }}s</div>
+                        <div class="stat-label">上次更新: {{ formatDate(data.meta?.generated_at || data.generated_at) }}
                         </div>
                     </div>
                 </div>
-                <div style="text-align: center;">
-                    <p>Powered by DefiLlama & Chain RPCs | Build v3.1 | Data updates every 30 mins</p>
+
+                <!-- Chain Flows Table -->
+                <div class="section">
+                    <div class="section-header">
+                        <h2>🔗 公鏈資金流向 (Chain Flows)</h2>
+                        <span style="font-size: 0.8rem; color: var(--text-secondary);">顯示前 10 大 TVL 公鏈</span>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>公鏈名稱</th>
+                                    <th @click="sortBy('tvl_total', 'chain')" class="sortable"
+                                        :class="{active: chainSortKey === 'tvl_total'}">
+                                        <span class="has-tooltip"
+                                            data-tooltip="總鎖倉量 (Total Value Locked)。&#10;代表該條區塊鏈上所有 DeFi 協議中鎖定的資金總和。&#10;💡 TVL 越高，代表該生態越繁榮、資金沉澱越多。">TVL</span>
+                                        <span class="sort-icon">↕</span>
+                                    </th>
+                                    <th @click="sortBy('change_24h_pct', 'chain')" class="sortable"
+                                        :class="{active: chainSortKey === 'change_24h_pct'}">
+                                        24H 變動 <span class="sort-icon">↕</span>
+                                    </th>
+                                    <th @click="sortBy('stable_inflow_24h', 'chain')" class="sortable"
+                                        :class="{active: chainSortKey === 'stable_inflow_24h'}">
+                                        <span class="has-tooltip"
+                                            data-tooltip="穩定幣 (USDT/USDC) 24小時淨流入量。&#10;💡 這是市場的『乾火藥』(Buying Power)。&#10;🟢 正值: 資金進場，通常是我們進場做多的信號。&#10;🔴 負值: 資金撤退，可能代表主力正在獲利了結。">穩定幣流入</span>
+                                        <span class="sort-icon">↕</span>
+                                    </th>
+                                    <th style="text-align: left;">AI 智能標籤</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="chain in sortedChains" :key="chain.chain">
+                                    <td :data-label="'公鏈名稱'">{{ chain.chain }}</td>
+                                    <td data-label="TVL" class="text-neutral">${{ formatB(chain.tvl_total) }}B</td>
+                                    <td data-label="24H 變動"
+                                        :class="chain.change_24h_pct >= 0 ? 'text-green' : 'text-red'">
+                                        {{ chain.change_24h_pct >= 0 ? '+' : '' }}{{ chain.change_24h_pct }}%
+                                    </td>
+                                    <td data-label="穩定幣流入 (Buying Power)"
+                                        :class="chain.stable_inflow_24h >= 0 ? 'text-green' : 'text-red'">
+                                        ${{ formatM(chain.stable_inflow_24h) }}M
+                                    </td>
+                                    <td data-label="AI 智能標籤" style="text-align: left;">
+                                        <span v-for="tag in chain.tags" :key="tag.type" class="tag"
+                                            :class="getTagClass(tag.signal)">
+                                            {{ translateTag(tag.type) }}
+                                        </span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-            </div>
+
+                <!-- CEX Flows Table -->
+                <div class="section">
+                    <div class="section-header">
+                        <h2>🏦 交易所資金流向 (CEX Flows)</h2>
+                        <span style="font-size: 0.8rem; color: var(--text-secondary);">監測穩定幣與風險資產的進出</span>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>交易所</th>
+                                    <th @click="sortBy('total_tvl', 'cex')" class="sortable"
+                                        :class="{active: cexSortKey === 'total_tvl'}">
+                                        <span class="has-tooltip"
+                                            data-tooltip="交易所公開錢包資產總值 (Total Assets)。&#10;💡 代表該交易所的資金深度與用戶信任度。">TVL</span>
+                                        <span class="sort-icon">↕</span>
+                                    </th>
+                                    <th @click="sortBy('net_flow_24h', 'cex')" class="sortable"
+                                        :class="{active: cexSortKey === 'net_flow_24h'}">
+                                        淨流向 (Net) <span class="sort-icon">↕</span>
+                                    </th>
+                                    <th @click="sortBy('stablecoin_flow_24h', 'cex')" class="sortable"
+                                        :class="{active: cexSortKey === 'stablecoin_flow_24h'}">
+                                        <span class="has-tooltip"
+                                            data-tooltip="穩定幣 (USDT/USDC) 24小時淨流入量。&#10;🟢 正值: 資金進入交易所，這通常是潛在買盤 (準備抄底)。&#10;🔴 負值: 資金提現離場，市場購買力下降。">穩定幣</span>
+                                        <span class="sort-icon">↕</span>
+                                    </th>
+                                    <th @click="sortBy('btc_eth_flow_24h', 'cex')" class="sortable"
+                                        :class="{active: cexSortKey === 'btc_eth_flow_24h'}">
+                                        <span class="has-tooltip"
+                                            data-tooltip="BTC/ETH 等風險資產 24小時淨流入量。&#10;🔴 正值: 大戶將幣轉入交易所，這通常是潛在賣壓 (準備倒貨)。&#10;🟢 負值: 大戶提幣囤貨，減少了市場上的流通籌碼 (利多)。">BTC/ETH</span>
+                                        <span class="sort-icon">↕</span>
+                                    </th>
+                                    <table class="market-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Exchange (交易所)</th>
+                                                <th>Total Net Flow (總淨流向)</th>
+                                                <!-- <th>1H Flow (1小時)</th> -->
+                                                <th>4H Flow (4小時)</th>
+                                                <th>Stablecoins (穩定幣)</th>
+                                                <th>BTC/ETH (風險資產)</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr v-for="cex in sortedCex" :key="cex.exchange">
+                                                <td data-label="Exchange (交易所)">
+                                                    <div class="token-cell">
+                                                        <span>{{ cex.exchange }}</span>
+                                                        <span v-if="cex.tags && cex.tags.length"
+                                                            class="badge badge-whale"
+                                                            :class="getTagClass(cex.tags[0].signal)">{{
+                                                            translateTag(cex.tags[0].type) }}</span>
+                                                    </div>
+                                                </td>
+                                                <td data-label="Total Net (總淨流)" class="font-mono"
+                                                    :class="cex.net_flow_24h >= 0 ? 'text-green' : 'text-red'">
+                                                    ${{ formatM(cex.net_flow_24h) }}M
+                                                </td>
+                                                <!-- 1H data not available in V2 API, hiding or replacing -->
+                                                <!-- <td data-label="1H Flow (1小時)" class="font-mono text-gray">--</td> -->
+
+                                                <td data-label="4H Flow (4小時)" class="font-mono"
+                                                    :class="cex.net_flow_4h >= 0 ? 'text-green' : 'text-red'">
+                                                    ${{ formatM(cex.net_flow_4h) }}M
+                                                </td>
+
+                                                <td data-label="Stablecoins (穩定幣)" class="font-mono"
+                                                    :class="cex.stablecoin_flow_24h >= 0 ? 'text-green' : 'text-red'">
+                                                    ${{ formatM(cex.stablecoin_flow_24h) }}M
+                                                </td>
+                                                <td data-label="BTC/ETH (風險資產)" class="font-mono"
+                                                    :class="cex.btc_eth_flow_24h >= 0 ? 'text-red' : 'text-green'">
+                                                    ${{ formatM(cex.btc_eth_flow_24h) }}M
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                        </table>ody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 5. Quant Zone -->
+                <div class="quant-zone">
+                    <h3 style="color: var(--text-secondary); font-size: 1rem;">👨‍💻 量化分析專區 (Quant Zone)</h3>
+                    <p style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.5rem;">此數據格式專為量化分析模型
+                        (Quantitative Models) 優化，包含完整的資金歸因標籤與歷史流向紀錄。</p>
+                    <div class="btn-group">
+                        <a href="./data.json" class="btn btn-primary" download>
+                            <span>📥</span> 匯出原始數據 (JSON) | API 專用
+                        </a>
+                        <a href="./history.csv" class="btn" download>
+                            <span>📊</span> 下載回測數據 (CSV) | 量化專用
+                        </a>
+                    </div>
+                </div>
+
+                <!-- 6. Methodology Footer -->
+                <div class="footer">
+                    <div class="method-box">
+                        <strong>📖 分析方法論 (Methodology & Definitions)</strong>
+                        <div class="method-grid">
+                            <div class="method-item">
+                                <h4>🧮 統計週期與計算 (Calculation & Period)</h4>
+                                <p>
+                                    <strong>• 統計週期:</strong> 採用過去 24 小時滾動窗口 (Rolling 24H)。<br>
+                                    <strong>• 更新頻率:</strong> 每 30 分鐘自動同步鏈上數據。<br>
+                                    <strong>• 淨流向:</strong> 該週期內 [充值總額 - 提現總額]。
+                                </p>
+                            </div>
+                            <div class="method-item">
+                                <h4>💪 主力吸籌 (Buying Power)</h4>
+                                <p>定義為穩定幣 (USDT/USDC/DAI) 淨流入單一實體 > $50M USD。這通常代表主力資金已進入市場，正在等待機會買入。</p>
+                            </div>
+                            <div class="method-item">
+                                <h4>⚠️ 倒貨風險 (Dump Risk)</h4>
+                                <p>定義為波動性資產 (BTC/ETH) 淨流入交易所 > $100M USD。這代表大戶將冷錢包資產轉移至交易所，存在潛在拋售壓力。</p>
+                            </div>
+                            <div class="method-item">
+                                <h4>📡 數據來源 (Data Source)</h4>
+                                <p>聚合 DefiLlama Protocol API 與多鏈 RPC 節點數據。我們已算法剔除交易所內部錢包轉帳的雜訊，以反映真實的資金流動。</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="text-align: center;">
+                        <p>Powered by DefiLlama & Chain RPCs | Build v3.1 | Data updates every 30 mins</p>
+                    </div>
+                </div>
+            </div> <!-- End v-show="analysis" -->
         </div>
     </div>
 
@@ -828,6 +996,7 @@
         createApp({
             data() {
                 return {
+                    currentTab: 'analysis',
                     data: {},
                     loading: true,
                     error: null,
@@ -946,6 +1115,12 @@
                 }
             },
             mounted() {
+                // Check tab param
+                const urlParams = new URLSearchParams(window.location.search);
+                if (urlParams.get('tab') === 'monitor') {
+                    this.currentTab = 'monitor';
+                }
+
                 this.fetchData();
                 // Auto refresh every 5 mins
                 setInterval(() => this.fetchData(), 5 * 60 * 1000);

@@ -366,9 +366,8 @@ def send_summary_notification(data: Dict[str, Any]) -> bool:
         message=(
             f"**{datetime.now(timezone(timedelta(hours=8))).strftime('%Y-%m-%d %H:%M (UTC+8)')} 執行完成**\n\n"
             f"🔗 **相關連結:**\n"
-            f"• [💎 加密貨幣即時戰情室 (Live Monitor)](https://huyuyuan1989-oss.github.io/cexdex/reports/monitor.html)\n"
+            f"• [💎 加密貨幣即時戰情室 (Live Monitor)](https://huyuyuan1989-oss.github.io/cexdex/reports/index.html?tab=monitor)\n"
             f"• [💰 全鏈資金流向總站 (Main Terminal)]({DASHBOARD_URL})\n"
-            f"• [📄 完整數據報告 (Full Report)](https://huyuyuan1989-oss.github.io/cexdex/reports/index.html)\n"
             f"• [📊 原始數據源 (Raw JSON)](https://huyuyuan1989-oss.github.io/cexdex/reports/data.json)"
         ),
         color=color,
