@@ -727,7 +727,7 @@
                                         <tr>
                                             <th>Exchange (交易所)</th>
                                             <th>Total Net Flow (總淨流向)</th>
-                                            <th>1H Flow (1小時)</th>
+                                            <!-- <th>1H Flow (1小時)</th> -->
                                             <th>4H Flow (4小時)</th>
                                             <th>Stablecoins (穩定幣)</th>
                                             <th>BTC/ETH (風險資產)</th>
@@ -747,9 +747,13 @@
                                                 :class="cex.net_flow_24h >= 0 ? 'text-green' : 'text-red'">
                                                 ${{ formatM(cex.net_flow_24h) }}M
                                             </td>
-                                            <!-- Placeholder data for new columns until backend is ready -->
-                                            <td data-label="1H Flow (1小時)" class="font-mono text-gray">--</td>
-                                            <td data-label="4H Flow (4小時)" class="font-mono text-gray">--</td>
+                                            <!-- 1H data not available in V2 API, hiding or replacing -->
+                                            <!-- <td data-label="1H Flow (1小時)" class="font-mono text-gray">--</td> -->
+
+                                            <td data-label="4H Flow (4小時)" class="font-mono"
+                                                :class="cex.net_flow_4h >= 0 ? 'text-green' : 'text-red'">
+                                                ${{ formatM(cex.net_flow_4h) }}M
+                                            </td>
 
                                             <td data-label="Stablecoins (穩定幣)" class="font-mono"
                                                 :class="cex.stablecoin_flow_24h >= 0 ? 'text-green' : 'text-red'">

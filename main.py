@@ -78,39 +78,36 @@ async def run_pipeline() -> Dict[str, Any]:
         logger.info("💵 獲取穩定幣市值...")
         stablecoin_marketcap = await _get_stablecoin_marketcap(provider)
     
-    # 4. 聚合數據
-    timestamp = datetime.now(timezone.utc).isoformat()
+    # 4. 生成統一報告
+    from report_generator import ReportGenerator
     
-    # 計算加權情緒分數
-    sentiment_details = _calculate_sentiment_score(chain_data, cex_data)
+    logger.info("📝 生成統一報告 (V2 Schema)...")
+    generator = ReportGenerator()
+    unified_report = generator.generate_unified_report(
+        chain_data=chain_data,
+        cex_data=cex_data,
+        sentiment_details=_calculate_sentiment_score(chain_data, cex_data),
+        stablecoin_marketcap=stablecoin_marketcap
+    )
     
-    snapshot = {
-        'timestamp': timestamp,
-        'generated_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-        'market_sentiment': sentiment_details['label'],
-        'sentiment_score': sentiment_details['score'],  # -100 to +100
-        'sentiment_factors': sentiment_details['factors'],  # 詳細因素分析
-        'chain_flows': chain_data,
-        'cex_flows': cex_data,
-        'stablecoin_marketcap': stablecoin_marketcap,
-        'execution_time_seconds': (datetime.now() - start_time).total_seconds()
-    }
+    # 添加執行時間
+    unified_report['meta']['execution_time_seconds'] = (datetime.now() - start_time).total_seconds()
     
     # 5. 儲存輸出
-    await _save_outputs(snapshot, chain_data, cex_data, stablecoin_marketcap)
+    await _save_outputs(unified_report, chain_data, cex_data, stablecoin_marketcap)
     
     # 6. 發送 Discord 通知
     logger.info("🔔 檢查並發送 Discord 警報...")
-    alerts_sent = check_and_alert(snapshot)
+    alerts_sent = check_and_alert(unified_report)  # 確保 check_and_alert 能處理新格式
     if alerts_sent > 0:
         logger.info(f"   → 已發送 {alerts_sent} 個警報")
     
     # 7. 發送摘要通知
-    send_summary_notification(snapshot)
+    send_summary_notification(unified_report)
     
-    logger.info(f"✅ 管道執行完成 ({snapshot['execution_time_seconds']:.2f}s)")
+    logger.info(f"✅ 管道執行完成 ({unified_report['meta']['execution_time_seconds']:.2f}s)")
     
-    return snapshot
+    return unified_report
 
 
 async def _get_stablecoin_marketcap(provider: DataProvider) -> float:
@@ -346,13 +343,19 @@ def main():
     print("\n" + "=" * 60)
     print("📊 執行結果摘要")
     print("=" * 60)
-    print(f"   市場情緒: {snapshot['market_sentiment']}")
-    print(f"   穩定幣市值: ${snapshot['stablecoin_marketcap']/1e9:.1f}B")
-    print(f"   分析公鏈數: {len(snapshot['chain_flows'].get('chains', []))}")
-    print(f"   分析交易所數: {len(snapshot['cex_flows'].get('exchanges', []))}")
-    print(f"   執行時間: {snapshot['execution_time_seconds']:.2f}s")
+    # V2 Schema Output
+    try:
+        print(f"   市場情緒: {snapshot['market_overview']['sentiment']['label']}")
+        print(f"   穩定幣市值: ${snapshot['market_overview']['stablecoin_marketcap']/1e9:.1f}B")
+        print(f"   分析公鏈數: {snapshot['market_overview']['total_tvl']['dex']:.0f} (Total TVL)") # Simplify print
+        print(f"   分析交易所數: {snapshot['cex_analysis']['summary']['exchange_count']}")
+    except KeyError:
+        # Fallback for older schema or partial data
+        print("   (Summary data format changed, check data.json)")
+    
+    print(f"   執行時間: {snapshot['meta']['execution_time_seconds']:.2f}s")
     print("=" * 60)
-    print(f"📁 輸出文件:")
+    print("📁 輸出文件:")
     print(f"   → {DATA_JSON_PATH}")
     print(f"   → {HISTORY_CSV_PATH}")
     print("=" * 60)
