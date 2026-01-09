@@ -613,7 +613,8 @@
             <!-- Stats Grid -->
             <div class="stats-grid">
                 <div class="stat-card">
-                    <div class="stat-value text-neutral">${{ formatB(data.stablecoin_marketcap) }}B</div>
+                    <div class="stat-value text-neutral">${{ formatB(data.market_overview?.stablecoin_marketcap ||
+                        data.stablecoin_marketcap) }}B</div>
                     <div class="stat-label">穩定幣總市值 (Market Cap)</div>
                 </div>
                 <div class="stat-card">
@@ -631,8 +632,9 @@
                     <div class="stat-label">CEX 24H BTC/ETH 淨流向</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-value text-neutral">{{ formatTime(data.execution_time_seconds) }}s</div>
-                    <div class="stat-label">上次更新: {{ formatDate(data.generated_at) }}</div>
+                    <div class="stat-value text-neutral">{{ formatTime(data.meta?.execution_time_seconds ||
+                        data.execution_time_seconds) }}s</div>
+                    <div class="stat-label">上次更新: {{ formatDate(data.meta?.generated_at || data.generated_at) }}</div>
                 </div>
             </div>
 
@@ -855,7 +857,7 @@
                     return "市場多雲 (盤整) | 資金流向不明顯，觀望氣氛濃厚。";
                 },
                 sortedChains() {
-                    const chains = this.data.chain_flows?.chains || [];
+                    const chains = this.data.dex_analysis?.chains || this.data.chain_flows?.chains || [];
                     return [...chains].sort((a, b) => {
                         const aVal = a[this.chainSortKey] || 0;
                         const bVal = b[this.chainSortKey] || 0;
@@ -863,7 +865,7 @@
                     });
                 },
                 sortedCex() {
-                    const exchanges = this.data.cex_flows?.exchanges || [];
+                    const exchanges = this.data.cex_analysis?.exchanges || this.data.cex_flows?.exchanges || [];
                     return [...exchanges].sort((a, b) => {
                         const aVal = a[this.cexSortKey] || 0;
                         const bVal = b[this.cexSortKey] || 0;
