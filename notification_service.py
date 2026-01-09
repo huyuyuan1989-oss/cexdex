@@ -305,15 +305,30 @@ def send_summary_notification(data: Dict[str, Any]) -> bool:
     """
     # V2 Schema Compatibility
     if 'market_overview' in data:
-        sentiment = data['market_overview'].get('sentiment', {}).get('label', 'Unknown')
+        sentiment_data = data['market_overview'].get('sentiment', {})
+        sentiment = sentiment_data.get('label', 'Unknown')
+        sentiment_score = sentiment_data.get('score', 0)
+        
+        # Extract F&G from factors
+        factors = sentiment_data.get('factors', [])
+        fng_val = 'N/A'
+        for f in factors:
+            if 'Sentiment' in f.get('name', ''):
+                fng_val = f.get('value', 'N/A')
+                break
+                
         stablecoin_cap = data['market_overview'].get('stablecoin_marketcap', 0)
+        smart_money = data['market_overview'].get('smart_money', {}).get('stable_flow_24h', 0)
         
         # 4H Data
         cex_flow_4h = data.get('timeframes', {}).get('4h', {}).get('cex', {}).get('net_flow', 0)
     else:
         # Fallback to V1
         sentiment = data.get('market_sentiment', 'Unknown')
+        sentiment_score = 0
+        fng_val = 'N/A'
         stablecoin_cap = data.get('stablecoin_marketcap', 0)
+        smart_money = 0
         cex_flow_4h = 0
     
     chain_summary = data.get('chain_flows', {}).get('summary', {})
@@ -329,8 +344,13 @@ def send_summary_notification(data: Dict[str, Any]) -> bool:
     
     fields = [
         {
-            "name": "📊 市場情緒",
-            "value": sentiment,
+            "name": "🧠 AI 市場情緒 (V3)",
+            "value": f"**{sentiment}**\nScore: {sentiment_score} | {fng_val}",
+            "inline": True
+        },
+        {
+            "name": "🐋 主力動向 (Smart Money)",
+            "value": f"${smart_money / 1e6:+.1f}M",
             "inline": True
         },
         {
