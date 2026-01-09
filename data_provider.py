@@ -365,6 +365,18 @@ class DataProvider:
         except Exception as e:
             logger.error(f"All OI sources failed for {symbol}: {e}")
             
+                # 4. Try Gate.io (Fallback 3)
+        try:
+            # Gate.io: BTC_USDT
+            gate_symbol = symbol.replace('USDT', '_USDT') # BTC_USDT
+            url = f"https://api.gateio.ws/api/v4/futures/usdt/tickers?contract={gate_symbol}"
+            data = await self.fetch_with_retry(url)
+            if data and isinstance(data, list) and len(data) > 0:
+                # Gate returns 'total_size' in Base Currency (BTC)
+                return float(data[0].get('total_size', 0))
+        except Exception as e:
+            logger.debug(f"Gate.io OI failed for {symbol}: {e}")
+            
         return 0.0
 
 
