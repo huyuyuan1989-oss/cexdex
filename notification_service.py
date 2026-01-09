@@ -303,8 +303,18 @@ def send_summary_notification(data: Dict[str, Any]) -> bool:
     Args:
         data: 來自 main.py 的快照數據
     """
-    sentiment = data.get('market_sentiment', 'Unknown')
-    stablecoin_cap = data.get('stablecoin_marketcap', 0)
+    # V2 Schema Compatibility
+    if 'market_overview' in data:
+        sentiment = data['market_overview'].get('sentiment', {}).get('label', 'Unknown')
+        stablecoin_cap = data['market_overview'].get('stablecoin_marketcap', 0)
+        
+        # 4H Data
+        cex_flow_4h = data.get('timeframes', {}).get('4h', {}).get('cex', {}).get('net_flow', 0)
+    else:
+        # Fallback to V1
+        sentiment = data.get('market_sentiment', 'Unknown')
+        stablecoin_cap = data.get('stablecoin_marketcap', 0)
+        cex_flow_4h = 0
     
     chain_summary = data.get('chain_flows', {}).get('summary', {})
     cex_summary = data.get('cex_flows', {}).get('summary', {})
@@ -340,13 +350,13 @@ def send_summary_notification(data: Dict[str, Any]) -> bool:
             "inline": True
         },
         {
-            "name": "💰 穩定幣流向",
-            "value": f"${cex_summary.get('total_stablecoin_flow_24h', 0) / 1e6:+.1f}M",
+            "name": "⏱️ CEX 淨流向 (4H/短期)",
+            "value": f"${cex_flow_4h / 1e6:+.1f}M",
             "inline": True
         },
         {
-            "name": "🪙 BTC/ETH 流向",
-            "value": f"${cex_summary.get('total_btc_eth_flow_24h', 0) / 1e6:+.1f}M",
+            "name": "💰 穩定幣流向 (24H)",
+            "value": f"${cex_summary.get('total_stablecoin_flow_24h', 0) / 1e6:+.1f}M",
             "inline": True
         }
     ]
