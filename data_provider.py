@@ -280,6 +280,67 @@ class DataProvider:
     
     # ================= 驗證測試 =================
     
+    async def get_funding_rates(self) -> Dict[str, float]:
+        """
+        獲取主要幣種的資金費率 (Funding Rate)
+        Returns: {'BTC': 0.0001, 'ETH': 0.0001}
+        """
+        try:
+            url = f"{self.BINANCE_FUTURES_BASE}{self.ENDPOINTS['funding_rates']}"
+            data = await self.fetch_with_retry(url)
+            
+            rates = {}
+            if data:
+                for item in data:
+                    symbol = item.get('symbol', '')
+                    if symbol == 'BTCUSDT':
+                        rates['BTC'] = float(item.get('lastFundingRate', 0))
+                    elif symbol == 'ETHUSDT':
+                        rates['ETH'] = float(item.get('lastFundingRate', 0))
+            
+            return rates
+        except Exception as e:
+            logger.error(f"Error fetching funding rates: {e}")
+            return {'BTC': 0.0, 'ETH': 0.0}
+
+    async def get_open_interest(self, symbol: str) -> float:
+        """
+        獲取合約未平倉量 (Open Interest) - 單位: 幣的數量 (Coins)
+        Args:
+            symbol: 'BTCUSDT' or 'ETHUSDT'
+        Returns:
+            OI value (Quantity of coins)
+        """
+        try:
+            endpoint = "/fapi/v1/openInterest"
+            url = f"{self.BINANCE_FUTURES_BASE}{endpoint}"
+            data = await self.fetch_with_retry(url, params={'symbol': symbol})
+            
+            return float(data.get('openInterest', 0)) if data else 0.0
+        except Exception as e:
+            logger.error(f"Error fetching OI for {symbol}: {e}")
+            return 0.0
+
+    async def get_derivatives_data(self) -> Dict[str, Any]:
+        """
+        一次性獲取所有衍生品數據 (OI + Funding)
+        """
+        # 需要導入 datetime
+        from datetime import datetime 
+        
+        funding = await self.get_funding_rates()
+        btc_oi = await self.get_open_interest('BTCUSDT')
+        eth_oi = await self.get_open_interest('ETHUSDT')
+        
+        return {
+            'funding_rates': funding,
+            'open_interest': {
+                'BTC': btc_oi,
+                'ETH': eth_oi
+            },
+            'timestamp': datetime.utcnow().isoformat() + "Z"
+        }
+
     async def test(self) -> bool:
         """
         執行驗證測試，確認 API 可正常獲取數據

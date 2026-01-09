@@ -64,7 +64,8 @@ class ReportGenerator:
         chain_data: Dict, 
         cex_data: Dict,
         sentiment_details: Dict,
-        stablecoin_marketcap: float
+        stablecoin_marketcap: float,
+        derivs_data: Dict[str, Any] = None  # New Argument
     ) -> Dict[str, Any]:
         """
         生成統一格式報告
@@ -95,6 +96,7 @@ class ReportGenerator:
             "market_overview": {
                 "sentiment": sentiment_details,
                 "stablecoin_marketcap": stablecoin_marketcap,
+                "derivatives": derivs_data or {},  # New Field
                 "total_tvl": {
                     "cex": cex_summary['total_tvl'],
                     "dex": dex_summary['total_tvl'],

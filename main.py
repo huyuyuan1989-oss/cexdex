@@ -77,8 +77,12 @@ async def run_pipeline() -> Dict[str, Any]:
         # 3. 獲取穩定幣市值
         logger.info("💵 獲取穩定幣市值...")
         stablecoin_marketcap = await _get_stablecoin_marketcap(provider)
+
+        # 4. 獲取衍生品數據 (Institutional Grade)
+        logger.info("📈 獲取衍生品數據 (Funding/OI)...")
+        derivs_data = await provider.get_derivatives_data()
     
-    # 4. 生成統一報告
+    # 5. 生成統一報告
     from report_generator import ReportGenerator
     
     logger.info("📝 生成統一報告 (V2 Schema)...")
@@ -87,7 +91,8 @@ async def run_pipeline() -> Dict[str, Any]:
         chain_data=chain_data,
         cex_data=cex_data,
         sentiment_details=_calculate_sentiment_score(chain_data, cex_data),
-        stablecoin_marketcap=stablecoin_marketcap
+        stablecoin_marketcap=stablecoin_marketcap,
+        derivs_data=derivs_data  # Pass new data
     )
     
     # 添加執行時間

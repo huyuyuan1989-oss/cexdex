@@ -713,6 +713,26 @@
                             ${{ formatB(data.market_overview?.total_tvl?.total) }}B
                         </div>
                     </div>
+                    <!-- Derivatives Context (New) -->
+                    <div
+                        style="background: var(--bg-card); padding: 1rem; border-radius: 8px; border: 1px solid var(--border);">
+                        <div style="color: var(--text-secondary); font-size: 0.8rem; margin-bottom: 0.5rem;">合約情緒
+                            (Derivs)</div>
+                        <div class="font-mono" style="font-size: 0.9rem;">
+                            <div style="display: flex; justify-content: space-between;">
+                                <span>費率:</span>
+                                <span
+                                    :class="(data.market_overview?.derivatives?.funding_rates?.BTC || 0) > 0.01 ? 'text-green' : 'text-neutral'">
+                                    {{ ((data.market_overview?.derivatives?.funding_rates?.BTC || 0) * 100).toFixed(4)
+                                    }}%
+                                </span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin-top: 2px;">
+                                <span>OI (BTC):</span>
+                                <span>{{ formatB(data.market_overview?.derivatives?.open_interest?.BTC) }} 🪙</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Simple Monitor Table -->
