@@ -224,7 +224,11 @@ class ReportGenerator:
             'native_flow_4h': sum(c.get('native_inflow_4h', 0) for c in valid_chains),
             'native_flow_7d': sum(c.get('native_inflow_7d', 0) for c in valid_chains),
             'change_7d_pct': sum(c.get('change_7d_pct', 0) for c in valid_chains) / max(len(valid_chains), 1),
-            'chain_count': len(valid_chains)
+            'chain_count': len(valid_chains),
+            
+            # Count Signals
+            'bullish_signals': sum(1 for c in valid_chains if c.get('tags') and c['tags'][0].get('signal') == 'Bullish'),
+            'bearish_signals': sum(1 for c in valid_chains if c.get('tags') and c['tags'][0].get('signal') == 'Bearish')
         }
     
     def _generate_4h_narrative(self, cex: Dict, dex: Dict) -> str:
