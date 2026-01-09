@@ -40,6 +40,7 @@ class DataProvider:
     DEFILLAMA_BASE = "https://api.llama.fi"
     STABLECOINS_BASE = "https://stablecoins.llama.fi"
     BINANCE_FUTURES_BASE = "https://fapi.binance.com"
+    BYBIT_BASE = "https://api.bybit.com"
     FEAR_GREED_BASE = "https://api.alternative.me"
     
     ENDPOINTS = {
@@ -283,44 +284,64 @@ class DataProvider:
     
     async def get_funding_rates(self) -> Dict[str, float]:
         """
-        獲取主要幣種的資金費率 (Funding Rate)
-        Returns: {'BTC': 0.0001, 'ETH': 0.0001}
+        獲取主要幣種的資金費率 (Fallback: Binance -> Bybit)
         """
+        rates = {'BTC': 0.0, 'ETH': 0.0}
+        
+        # 1. Try Binance
         try:
             url = f"{self.BINANCE_FUTURES_BASE}{self.ENDPOINTS['funding_rates']}"
             data = await self.fetch_with_retry(url)
-            
-            rates = {}
-            if data:
+            if data and isinstance(data, list):
                 for item in data:
-                    symbol = item.get('symbol', '')
-                    if symbol == 'BTCUSDT':
-                        rates['BTC'] = float(item.get('lastFundingRate', 0))
-                    elif symbol == 'ETHUSDT':
-                        rates['ETH'] = float(item.get('lastFundingRate', 0))
-            
+                    s = item.get('symbol')
+                    if s == 'BTCUSDT': rates['BTC'] = float(item.get('lastFundingRate', 0))
+                    elif s == 'ETHUSDT': rates['ETH'] = float(item.get('lastFundingRate', 0))
+                if rates['BTC'] != 0: return rates
+        except Exception as e:
+            logger.warning(f"Binance Funding Rate failed, trying Bybit... ({e})")
+
+        # 2. Try Bybit (Fallback)
+        try:
+            # Bybit V5 Tickers
+            for symbol in ['BTCUSDT', 'ETHUSDT']:
+                url = f"{self.BYBIT_BASE}/v5/market/tickers?category=linear&symbol={symbol}"
+                data = await self.fetch_with_retry(url)
+                if data and data.get('retCode') == 0:
+                    item = data['result']['list'][0]
+                    key = 'BTC' if 'BTC' in symbol else 'ETH'
+                    rates[key] = float(item.get('fundingRate', 0))
             return rates
         except Exception as e:
-            logger.error(f"Error fetching funding rates: {e}")
-            return {'BTC': 0.0, 'ETH': 0.0}
+            logger.error(f"All Funding Rate sources failed: {e}")
+            return rates
 
     async def get_open_interest(self, symbol: str) -> float:
         """
-        獲取合約未平倉量 (Open Interest) - 單位: 幣的數量 (Coins)
-        Args:
-            symbol: 'BTCUSDT' or 'ETHUSDT'
-        Returns:
-            OI value (Quantity of coins)
+        獲取合約未平倉量 (Fallback: Binance -> Bybit)
         """
+        # 1. Try Binance
         try:
             endpoint = "/fapi/v1/openInterest"
             url = f"{self.BINANCE_FUTURES_BASE}{endpoint}"
             data = await self.fetch_with_retry(url, params={'symbol': symbol})
-            
-            return float(data.get('openInterest', 0)) if data else 0.0
+            if data: return float(data.get('openInterest', 0))
         except Exception as e:
-            logger.error(f"Error fetching OI for {symbol}: {e}")
-            return 0.0
+            logger.warning(f"Binance OI failed for {symbol}, trying Bybit... ({e})")
+            
+        # 2. Try Bybit (Fallback)
+        try:
+            # Bybit V5 Open Interest
+            # Bybit unit is usually size (coins) for linear? Need to confirm. 
+            # API returns 'openInterest'.
+            url = f"{self.BYBIT_BASE}/v5/market/open-interest?category=linear&symbol={symbol}&intervalTime=5min&limit=1"
+            data = await self.fetch_with_retry(url)
+            if data and data.get('retCode') == 0 and data['result']['list']:
+                return float(data['result']['list'][0].get('openInterest', 0))
+        except Exception as e:
+            logger.error(f"All OI sources failed for {symbol}: {e}")
+            
+        return 0.0
 
     async def get_derivatives_data(self) -> Dict[str, Any]:
         """
