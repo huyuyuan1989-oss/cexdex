@@ -265,31 +265,31 @@ class ReportGenerator:
             # --- LONG Logic ---
             if tvl_change_7d > 0 and flow_stable_24h > 0:
                 score = 60
-                reasons = ["7D Uptrend", "24H Inflow"]
+                reasons = ["7日趨勢向上", "24H資金流入"]
                 
                 # Momentum Boost
                 if flow_stable_4h > 0:
                     score += 20
-                    reasons.append("4H Momentum")
+                    reasons.append("4H短線動能")
                 
                 # Volume Boost
                 if flow_stable_24h > 10_000_000:
                     score += 10
-                    reasons.append("High Volume")
+                    reasons.append("巨量交易")
                     
                 # Derivs Check (Safety)
                 if funding_rate > 0.03: # > 0.03% is overheated
                     score -= 30
-                    reasons.append("⚠️ High Funding")
+                    reasons.append("⚠️ 費率過熱")
                 elif funding_rate < 0: # Short Squeeze Potential
                     score += 10
-                    reasons.append("Short Squeeze Pot.")
+                    reasons.append("軋空潛力")
                     
                 if score >= 80:
                     opportunities.append({
                         "asset": name.upper(),
                         "type": "CHAIN",
-                        "direction": "LONG 🟢",
+                        "direction": "做多訊號 🟢",
                         "score": score,
                         "reason": " + ".join(reasons),
                         "data": f"7D:{tvl_change_7d:.1f}% | 24H:${flow_stable_24h/1e6:.1f}M"
@@ -298,26 +298,26 @@ class ReportGenerator:
             # --- SHORT Logic ---
             if tvl_change_7d < -2 and flow_stable_24h < 0:
                 score = 60
-                reasons = ["7D Downtrend", "24H Outflow"]
+                reasons = ["7日趨勢向下", "24H資金流出"]
                 
                 if flow_stable_4h < 0:
                     score += 20
-                    reasons.append("4H Sell-off")
+                    reasons.append("4H短線拋壓")
                     
                 if flow_stable_24h < -10_000_000:
                     score += 10
-                    reasons.append("High Outflow")
+                    reasons.append("巨量流出")
                     
                 # Derivs Check
                 if funding_rate < -0.03: # Too many shorts already
                     score -= 30
-                    reasons.append("⚠️ Crowded Shorts")
+                    reasons.append("⚠️ 做空擁擠")
                     
                 if score >= 80:
                     opportunities.append({
                         "asset": name.upper(),
                         "type": "CHAIN",
-                        "direction": "SHORT 🔴",
+                        "direction": "做空訊號 🔴",
                         "score": score,
                         "reason": " + ".join(reasons),
                         "data": f"7D:{tvl_change_7d:.1f}% | 24H:${flow_stable_24h/1e6:.1f}M"
@@ -333,9 +333,9 @@ class ReportGenerator:
                 opportunities.append({
                     "asset": name.upper(),
                     "type": "CEX",
-                    "direction": "BUY ALERT 🟢",
+                    "direction": "買入訊號 🟢",
                     "score": 90,
-                    "reason": "Massive 4H Stablecoin Inflow (Whale Buy)",
+                    "reason": "4H穩定幣巨量流入 (主力建倉)",
                     "data": f"4H Stable: +${stable_flow_4h/1e6:.1f}M"
                 })
                 
@@ -343,9 +343,9 @@ class ReportGenerator:
                 opportunities.append({
                     "asset": name.upper(),
                     "type": "CEX",
-                    "direction": "DUMP ALERT 🔴",
+                    "direction": "倒貨警報 🔴",
                     "score": 85,
-                    "reason": "Massive BTC Inflow to Exchange",
+                    "reason": "BTC巨量轉入交易所 (主力倒貨)",
                     "data": f"4H BTC Inflow: +${btc_flow_4h/1e6:.1f}M"
                 })
         

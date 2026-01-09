@@ -779,7 +779,7 @@
                                 style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
                                 <div>
                                     <div style="font-weight: bold; font-size: 1.1rem;">{{ opp.asset }}</div>
-                                    <div style="font-size: 0.8rem; opacity: 0.8;">{{ opp.type }}</div>
+                                    <div style="font-size: 0.8rem; opacity: 0.8;">{{ translateTag(opp.type) }}</div>
                                 </div>
                                 <div class="badge"
                                     :class="opp.direction.includes('LONG') || opp.direction.includes('BUY') ? 'badge-bullish' : 'badge-bearish'"
