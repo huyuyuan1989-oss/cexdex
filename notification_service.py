@@ -13,7 +13,7 @@
 import os
 import logging
 import requests
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 from typing import Dict, List, Any, Optional
 
 logger = logging.getLogger(__name__)
@@ -168,7 +168,9 @@ def check_and_alert(data: Dict[str, Any]) -> int:
     total_stablecoin_flow = summary.get('total_stablecoin_flow_24h', 0)
     total_btc_eth_flow = summary.get('total_btc_eth_flow_24h', 0)
     
-    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    # 使用台灣時間 (UTC+8)
+    tz = timezone(timedelta(hours=8))
+    timestamp = datetime.now(tz).strftime('%Y-%m-%d %H:%M:%S (UTC+8)')
     
     # 1. 穩定幣大量流入 -> Buying Power Alert
     if total_stablecoin_flow > THRESHOLDS['stablecoin_inflow']:
@@ -352,7 +354,7 @@ def send_summary_notification(data: Dict[str, Any]) -> bool:
     return send_discord_alert(
         title="📡 資金流向監控報告",
         message=(
-            f"**{datetime.now().strftime('%Y-%m-%d %H:%M')} 執行完成**\n\n"
+            f"**{datetime.now(timezone(timedelta(hours=8))).strftime('%Y-%m-%d %H:%M (UTC+8)')} 執行完成**\n\n"
             f"🔗 **相關連結:**\n"
             f"• [💎 加密貨幣即時戰情室 (Live Monitor)](https://huyuyuan1989-oss.github.io/cexdex/reports/monitor.html)\n"
             f"• [💰 全鏈資金流向總站 (Main Terminal)]({DASHBOARD_URL})\n"
