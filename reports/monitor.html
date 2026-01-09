@@ -446,11 +446,33 @@
                 const response = await fetch(DATA_URL + '?t=' + Date.now()); // 防止緩存
                 const data = await response.json();
                 updateUI(data);
-                document.getElementById('last-update').textContent =
-                    '上次更新: ' + (data.meta?.generated_at || data.generated_at || 'N/A');
+                // 轉換為台灣時間 (UTC+8)
+                const generatedAt = data.meta?.generated_at || data.generated_at || 'N/A';
+                const taiwanTime = convertToTaiwanTime(generatedAt);
+                document.getElementById('last-update').textContent = '上次更新: ' + taiwanTime;
             } catch (error) {
                 console.error('數據載入失敗:', error);
                 document.getElementById('last-update').textContent = '數據載入失敗';
+            }
+        }
+
+        function convertToTaiwanTime(dateStr) {
+            if (!dateStr || dateStr === 'N/A') return 'N/A';
+            // 如果已經是台灣時間格式，直接返回
+            if (dateStr.includes(':') && !dateStr.includes('Z') && !dateStr.includes('+')) {
+                return dateStr + ' (台灣時間)';
+            }
+            // 如果是 ISO 格式，轉換為台灣時間
+            try {
+                const date = new Date(dateStr);
+                const options = {
+                    year: 'numeric', month: '2-digit', day: '2-digit',
+                    hour: '2-digit', minute: '2-digit', second: '2-digit',
+                    timeZone: 'Asia/Taipei', hour12: false
+                };
+                return date.toLocaleString('zh-TW', options) + ' (台灣時間)';
+            } catch (e) {
+                return dateStr;
             }
         }
 
