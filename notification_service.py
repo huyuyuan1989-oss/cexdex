@@ -214,7 +214,7 @@ def check_and_alert(data: Dict[str, Any]) -> int:
             f"🔗 **相關連結:**\n"
             f"• [💎 加密貨幣即時戰情室 (Live Monitor)](https://huyuyuan1989-oss.github.io/cexdex/reports/monitor.html)\n"
             f"• [💰 全鏈資金流向總站 (Main Terminal)]({DASHBOARD_URL})\n"
-            f"• [📄 完整數據報告 (Full Report)](https://huyuyuan1989-oss.github.io/cexdex/reports/latest.html)\n"
+            f"• [📄 完整數據報告 (Full Report)](https://huyuyuan1989-oss.github.io/cexdex/reports/index.html)\n"
             f"• [📊 原始數據源 (Raw JSON)](https://huyuyuan1989-oss.github.io/cexdex/reports/data.json)"
         )
         
@@ -272,7 +272,7 @@ def check_and_alert(data: Dict[str, Any]) -> int:
             f"🔗 **相關連結:**\n"
             f"• [💎 加密貨幣即時戰情室 (Live Monitor)](https://huyuyuan1989-oss.github.io/cexdex/reports/monitor.html)\n"
             f"• [💰 全鏈資金流向總站 (Main Terminal)]({DASHBOARD_URL})\n"
-            f"• [📄 完整數據報告 (Full Report)](https://huyuyuan1989-oss.github.io/cexdex/reports/latest.html)\n"
+            f"• [📄 完整數據報告 (Full Report)](https://huyuyuan1989-oss.github.io/cexdex/reports/index.html)\n"
             f"• [📊 原始數據源 (Raw JSON)](https://huyuyuan1989-oss.github.io/cexdex/reports/data.json)"
         )
         
@@ -356,7 +356,7 @@ def send_summary_notification(data: Dict[str, Any]) -> bool:
             f"🔗 **相關連結:**\n"
             f"• [💎 加密貨幣即時戰情室 (Live Monitor)](https://huyuyuan1989-oss.github.io/cexdex/reports/monitor.html)\n"
             f"• [💰 全鏈資金流向總站 (Main Terminal)]({DASHBOARD_URL})\n"
-            f"• [📄 完整數據報告 (Full Report)](https://huyuyuan1989-oss.github.io/cexdex/reports/latest.html)\n"
+            f"• [📄 完整數據報告 (Full Report)](https://huyuyuan1989-oss.github.io/cexdex/reports/index.html)\n"
             f"• [📊 原始數據源 (Raw JSON)](https://huyuyuan1989-oss.github.io/cexdex/reports/data.json)"
         ),
         color=color,
