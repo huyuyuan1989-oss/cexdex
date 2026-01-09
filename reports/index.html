@@ -958,74 +958,56 @@
                             <thead>
                                 <tr>
                                     <th>交易所</th>
-                                    <th @click="sortBy('total_tvl', 'cex')" class="sortable"
-                                        :class="{active: cexSortKey === 'total_tvl'}">
-                                        <span class="has-tooltip"
-                                            data-tooltip="交易所公開錢包資產總值 (Total Assets)。&#10;💡 代表該交易所的資金深度與用戶信任度。">TVL</span>
-                                        <span class="sort-icon">↕</span>
-                                    </th>
                                     <th @click="sortBy('net_flow_24h', 'cex')" class="sortable"
                                         :class="{active: cexSortKey === 'net_flow_24h'}">
-                                        淨流向 (Net) <span class="sort-icon">↕</span>
+                                        總淨流向 (24H) <span class="sort-icon">↕</span>
+                                    </th>
+                                    <th @click="sortBy('net_flow_4h', 'cex')" class="sortable"
+                                        :class="{active: cexSortKey === 'net_flow_4h'}">
+                                        淨流向 (4H) <span class="sort-icon">↕</span>
                                     </th>
                                     <th @click="sortBy('stablecoin_flow_24h', 'cex')" class="sortable"
                                         :class="{active: cexSortKey === 'stablecoin_flow_24h'}">
                                         <span class="has-tooltip"
-                                            data-tooltip="穩定幣 (USDT/USDC) 24小時淨流入量。&#10;🟢 正值: 資金進入交易所，這通常是潛在買盤 (準備抄底)。&#10;🔴 負值: 資金提現離場，市場購買力下降。">穩定幣</span>
+                                            data-tooltip="穩定幣 (USDT/USDC) 24小時淨流入量。&#10;🟢 正值: 資金進入交易所 (潛在買盤)。&#10;🔴 負值: 資金提現離場 (購買力下降)。">穩定幣</span>
                                         <span class="sort-icon">↕</span>
                                     </th>
                                     <th @click="sortBy('btc_eth_flow_24h', 'cex')" class="sortable"
                                         :class="{active: cexSortKey === 'btc_eth_flow_24h'}">
                                         <span class="has-tooltip"
-                                            data-tooltip="BTC/ETH 等風險資產 24小時淨流入量。&#10;🔴 正值: 大戶將幣轉入交易所，這通常是潛在賣壓 (準備倒貨)。&#10;🟢 負值: 大戶提幣囤貨，減少了市場上的流通籌碼 (利多)。">BTC/ETH</span>
+                                            data-tooltip="BTC/ETH 等風險資產 24小時淨流入量。&#10;🔴 正值: 大戶轉入交易所 (潛在賣壓)。&#10;🟢 負值: 大戶提幣囤貨 (減少流通)。">BTC/ETH</span>
                                         <span class="sort-icon">↕</span>
                                     </th>
-                                    <table class="market-table">
-                                        <thead>
-                                            <tr>
-                                                <th>Exchange (交易所)</th>
-                                                <th>Total Net Flow (總淨流向)</th>
-                                                <!-- <th>1H Flow (1小時)</th> -->
-                                                <th>4H Flow (4小時)</th>
-                                                <th>Stablecoins (穩定幣)</th>
-                                                <th>BTC/ETH (風險資產)</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr v-for="cex in sortedCex" :key="cex.exchange">
-                                                <td data-label="Exchange (交易所)">
-                                                    <div class="token-cell">
-                                                        <span>{{ cex.exchange }}</span>
-                                                        <span v-if="cex.tags && cex.tags.length"
-                                                            class="badge badge-whale"
-                                                            :class="getTagClass(cex.tags[0].signal)">{{
-                                                            translateTag(cex.tags[0].type) }}</span>
-                                                    </div>
-                                                </td>
-                                                <td data-label="Total Net (總淨流)" class="font-mono"
-                                                    :class="cex.net_flow_24h >= 0 ? 'text-green' : 'text-red'">
-                                                    ${{ formatM(cex.net_flow_24h) }}M
-                                                </td>
-                                                <!-- 1H data not available in V2 API, hiding or replacing -->
-                                                <!-- <td data-label="1H Flow (1小時)" class="font-mono text-gray">--</td> -->
-
-                                                <td data-label="4H Flow (4小時)" class="font-mono"
-                                                    :class="cex.net_flow_4h >= 0 ? 'text-green' : 'text-red'">
-                                                    ${{ formatM(cex.net_flow_4h) }}M
-                                                </td>
-
-                                                <td data-label="Stablecoins (穩定幣)" class="font-mono"
-                                                    :class="cex.stablecoin_flow_24h >= 0 ? 'text-green' : 'text-red'">
-                                                    ${{ formatM(cex.stablecoin_flow_24h) }}M
-                                                </td>
-                                                <td data-label="BTC/ETH (風險資產)" class="font-mono"
-                                                    :class="cex.btc_eth_flow_24h >= 0 ? 'text-red' : 'text-green'">
-                                                    ${{ formatM(cex.btc_eth_flow_24h) }}M
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                        </table>ody>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="cex in sortedCex" :key="cex.exchange">
+                                    <td data-label="交易所">
+                                        <div class="token-cell">
+                                            <span>{{ cex.exchange }}</span>
+                                            <span v-if="cex.tags && cex.tags.length" class="badge badge-whale"
+                                                :class="getTagClass(cex.tags[0].signal)">{{
+                                                translateTag(cex.tags[0].type) }}</span>
+                                        </div>
+                                    </td>
+                                    <td data-label="總淨流向 (24H)" class="font-mono"
+                                        :class="cex.net_flow_24h >= 0 ? 'text-green' : 'text-red'">
+                                        ${{ formatM(cex.net_flow_24h) }}M
+                                    </td>
+                                    <td data-label="淨流向 (4H)" class="font-mono"
+                                        :class="cex.net_flow_4h >= 0 ? 'text-green' : 'text-red'">
+                                        ${{ formatM(cex.net_flow_4h) }}M
+                                    </td>
+                                    <td data-label="穩定幣" class="font-mono"
+                                        :class="cex.stablecoin_flow_24h >= 0 ? 'text-green' : 'text-red'">
+                                        ${{ formatM(cex.stablecoin_flow_24h) }}M
+                                    </td>
+                                    <td data-label="BTC/ETH" class="font-mono"
+                                        :class="cex.btc_eth_flow_24h >= 0 ? 'text-red' : 'text-green'">
+                                        ${{ formatM(cex.btc_eth_flow_24h) }}M
+                                    </td>
+                                </tr>
+                            </tbody>
                         </table>
                     </div>
                 </div>
