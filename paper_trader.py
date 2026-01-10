@@ -23,6 +23,7 @@ class PaperTrader:
         self.provider = provider
         self.trades_file = Path(__file__).parent / "reports" / "paper_trades.json"
         self.history_file = Path(__file__).parent / "reports" / "trade_history.csv"
+        logger.info(f"📂 PaperTrader initialized. trades_file: {self.trades_file}")
         self.positions = self._load_positions()
         
         # Mapping Chain to Tradeable Token (V7 Expanded)
@@ -86,6 +87,7 @@ class PaperTrader:
 
         # Fetch current prices
         prices = await self.provider.get_token_prices(list(active_symbols))
+        logger.info(f"🔭 PaperTrader: Fetched prices for {list(active_symbols)}: {prices}")
         
         total_unrealized_pnl_pct = 0
         total_pnl_usd = 0

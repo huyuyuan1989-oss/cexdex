@@ -90,8 +90,8 @@ async def run_pipeline() -> Dict[str, Any]:
     rl_optimizer = RLOptimizer()
     yield_farmer = YieldFarmer()
     macro_analyzer = MacroAnalyzer() # V8
-    treasury = TreasuryManager(initial_capital=10000.0) # V8 Treasury ($10k starting capital)
-    hedge_manager = HedgeManager() # V8 The Shield
+    treasury = TreasuryManager(initial_capital=10000.0, state_file=TREASURY_STATE_PATH) # V8 Treasury
+    hedge_manager = HedgeManager(state_file=HEDGE_STATE_PATH) # V8 The Shield
     
     async with provider:
         # 1. 並行獲取數據
@@ -171,6 +171,10 @@ async def run_pipeline() -> Dict[str, Any]:
         # 6. [V6 Feature] Paper Trading Simulation
         logger.info("🤖 執行模擬交易引擎 (Paper Trading)...")
         trading_result = await paper_trader.update_positions() # Update PnL for dirty positions
+        if trading_result:
+            logger.info(f"   → PnL 更新成功: {trading_result.get('total_unrealized_pnl_pct', 0):.2f}%")
+        else:
+            logger.warning("   ⚠️ Paper Trader 未返回更新結果")
         
         # 6.1 [V8 Feature] Treasury Management
         if trading_result:
