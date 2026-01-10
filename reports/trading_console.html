@@ -454,7 +454,9 @@
         <div class="section">
             <div class="section-header">
                 <h2>📋 當前持倉</h2>
-                <div style="font-size: 0.8rem; color: var(--text-secondary);">最後更新: {{ lastUpdated }}</div>
+                <div style="font-size: 0.8rem; color: var(--text-secondary);">
+                    數據生成: {{ dataGenTime }} | 頁面同步: {{ lastUpdated }}
+                </div>
             </div>
             <table class="market-table">
                 <thead>
@@ -528,7 +530,8 @@
                     weights: {},
                     yieldData: {},
                     treasury: {},
-                    shieldData: {}
+                    shieldData: {},
+                    dataGenTime: '-'
                 }
             },
             methods: {
@@ -556,7 +559,6 @@
                             const data = await response.json();
                             this.positions = data.filter(p => p.status === 'OPEN');
                             this.totalPnL = this.positions.reduce((acc, p) => acc + (p.pnl_usd || 0), 0);
-                            this.lastUpdated = new Date().toLocaleString('zh-TW');
                             this.addLog(`Synced ${this.positions.length} active positions.`, 'success');
                         }
 
@@ -590,7 +592,7 @@
                 this.addLog('V8 Trading Console initialized.', 'info');
                 this.addLog('Connected to Hive Mind + Shield.', 'success');
                 this.fetchData();
-                setInterval(this.fetchData, 30000); // 30s poll
+                setInterval(() => this.fetchData(), 30000); // 30s poll
             }
         }).mount('#app');
     </script>
