@@ -2,8 +2,8 @@ name: Chain Money Flow Monitor
 
 on:
   schedule:
-    # 每 30 分鐘執行一次 (注意: GitHub Action 有時會有延遲)
-    - cron: '*/30 * * * *'
+    # 每 15 分鐘執行一次 (大幅提升 Paper Trading 止損反應速度)
+    - cron: '*/15 * * * *'
   # 允許手動觸發
   workflow_dispatch:
   # 允許推送時觸發 (方便測試)
