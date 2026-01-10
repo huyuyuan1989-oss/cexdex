@@ -30,6 +30,7 @@ from analyzer_social import SocialSentimentAnalyzer
 from market_agents import HiveMind # V7 Feature
 from rl_optimizer import RLOptimizer # V7 RL Core
 from yield_farmer import YieldFarmer # V7 Omni-Chain Yield
+from macro_analyzer import MacroAnalyzer # V8 Macro Intelligence
 
 # 設定日誌
 logging.basicConfig(
@@ -82,6 +83,7 @@ async def run_pipeline() -> Dict[str, Any]:
     hive_mind = HiveMind() # V7
     rl_optimizer = RLOptimizer()
     yield_farmer = YieldFarmer()
+    macro_analyzer = MacroAnalyzer() # V8
     
     async with provider:
         # 1. 並行獲取數據
@@ -136,9 +138,15 @@ async def run_pipeline() -> Dict[str, Any]:
         )
         unified_report['meta']['execution_time_seconds'] = (datetime.now() - start_time).total_seconds()
         
-        # 5. [V7 Feature] The Hive Mind Debate
+        # 4.5. [V8 Feature] Macro Intelligence Analysis
+        logger.info("🧠 V8 Macro Intelligence: Analyzing Market Regime...")
+        stablecoin_flow = unified_report.get('market_overview', {}).get('stablecoin_flow_24h', 0)
+        macro_result = macro_analyzer.analyze(fng_data, derivs_data, stablecoin_flow)
+        unified_report['macro_intelligence'] = macro_result
+        
+        # 5. [V7 Feature] The Hive Mind Debate (now with V8 Macro Bias)
         if 'alpha_opportunities' in unified_report:
-            logger.info("🧠 V7 Hive Mind: Running Agent Debate...")
+            logger.info(f"🧠 V7 Hive Mind: Running Agent Debate... (Macro Bias: {macro_result['macro_bias']:+.2f})")
             
             # Prepare Global Context
             context = {
@@ -147,8 +155,9 @@ async def run_pipeline() -> Dict[str, Any]:
             }
             
             for opp in unified_report['alpha_opportunities']:
-                debate_result = hive_mind.debate(opp, context)
-                opp['hive_analysis'] = debate_result # Inject V7 Result
+                # V8: Pass macro_bias to debate
+                debate_result = hive_mind.debate(opp, context, macro_bias=macro_result['macro_bias'])
+                opp['hive_analysis'] = debate_result
                 
         
         # 6. [V6 Feature] Paper Trading Simulation

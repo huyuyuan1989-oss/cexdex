@@ -137,15 +137,30 @@ class HiveMind:
                 pass
         return default
 
-    def debate(self, opportunity: Dict, global_context: Dict) -> Dict:
+    def debate(self, opportunity: Dict, global_context: Dict, macro_bias: float = 0.0) -> Dict:
         """
-        Run the debate with WEIGHTED Consensus.
+        Run the debate with WEIGHTED Consensus + V8 Macro Bias.
+        
+        Args:
+            opportunity: The alpha opportunity to debate
+            global_context: F&G, Funding rates, etc.
+            macro_bias: V8 Macro Intelligence bias (-1.0 to 1.0)
+                        Positive = Bullish environment (boost Aggressor)
+                        Negative = Bearish environment (boost Skeptic)
         """
         results = []
         total_score = 0
         total_weight = 0
         
         weights = self._load_weights()
+        
+        # === V8: Apply Macro Bias to Agent Weights ===
+        if macro_bias != 0:
+            # Boost Aggressor in RISK_ON, boost Skeptic in RISK_OFF
+            if macro_bias > 0:
+                weights['Momentum'] = weights.get('Momentum', 1.0) * (1 + macro_bias * 0.5)
+            else:
+                weights['Risk Control'] = weights.get('Risk Control', 1.0) * (1 + abs(macro_bias) * 0.5)
         
         for agent in self.agents:
             res = agent.analyze(opportunity, global_context)
