@@ -1265,16 +1265,15 @@
                         try {
                             const paperRes = await fetch(`./paper_trades.json?t=${new Date().getTime()}`);
                             if (paperRes.ok) {
-                                let tradesData = await paperRes.json();
-                                // Calculate summary stats locally if not present
+                                const tradesData = await paperRes.json();
                                 let totalPnL = 0;
-                                if (tradesData.length > 0) {
+                                if (Array.isArray(tradesData)) {
                                     totalPnL = tradesData.reduce((acc, pos) => acc + (pos.pnl_usd || 0), 0);
+                                    this.paperTrades = {
+                                        positions: tradesData.filter(p => p.status === 'OPEN'),
+                                        summary: { total_unrealized_pnl: totalPnL }
+                                    };
                                 }
-                                this.paperTrades = {
-                                    positions: activePositions = tradesData.filter(p => p.status === 'OPEN'),
-                                    summary: { total_unrealized_pnl: totalPnL }
-                                };
                             }
                         } catch (e) {
                             console.warn("Paper trades fetch failed", e);

@@ -383,10 +383,10 @@
             <!-- V8 風控盾 -->
             <div class="metric-card" style="border-color: rgba(231, 76, 60, 0.3);">
                 <h3>🛡️ V8 風控盾牌</h3>
-                <div class="metric-value font-mono" :style="{color: shieldData.analysis?.risk_level === 'LOW' ? '#2ecc71' : 
-                              shieldData.analysis?.risk_level === 'MEDIUM' ? '#f1c40f' :
-                              shieldData.analysis?.risk_level === 'HIGH' ? '#e67e22' : '#e74c3c'}">
-                    {{ shieldData.analysis?.risk_level || 'LOW' }}
+                <div class="metric-value font-mono" :style="{color: (shieldData.analysis?.risk_level || 'LOW') === 'LOW' ? '#2ecc71' : 
+                               (shieldData.analysis?.risk_level || '') === 'MEDIUM' ? '#f1c40f' :
+                               (shieldData.analysis?.risk_level || '') === 'HIGH' ? '#e67e22' : '#e74c3c'}">
+                    {{ shieldData.analysis?.risk_level || 'INITIALIZING' }}
                 </div>
                 <div style="margin-top: 10px; font-size: 0.85rem;">
                     <div style="display: flex; justify-content: space-between;">
@@ -557,9 +557,13 @@
                         const response = await fetch(`./paper_trades.json?t=${ts}`);
                         if (response.ok) {
                             const data = await response.json();
-                            this.positions = data.filter(p => p.status === 'OPEN');
-                            this.totalPnL = this.positions.reduce((acc, p) => acc + (p.pnl_usd || 0), 0);
-                            this.addLog(`Synced ${this.positions.length} active positions.`, 'success');
+                            if (Array.isArray(data)) {
+                                this.positions = data.filter(p => p.status === 'OPEN');
+                                this.totalPnL = this.positions.reduce((acc, p) => acc + (p.pnl_usd || 0), 0);
+                                this.addLog(`Synced ${this.positions.length} active positions.`, 'success');
+                            } else {
+                                this.addLog("Paper trades format error (Not an array)", "warn");
+                            }
                         }
 
                         // 2. Fetch Agent Config (RL Weights)
@@ -573,9 +577,13 @@
                         const dataRes = await fetch(`./data.json?t=${ts}`);
                         if (dataRes.ok) {
                             const fullData = await dataRes.json();
+                            console.log("V8 Debug: Full Data Fetched", fullData);
                             if (fullData.yield_farming) this.yieldData = fullData.yield_farming;
                             if (fullData.treasury) this.treasury = fullData.treasury;
-                            if (fullData.hedge_shield) this.shieldData = fullData.hedge_shield;
+                            if (fullData.hedge_shield) {
+                                this.shieldData = fullData.hedge_shield;
+                                this.addLog(`V8 Shield Updated: ${this.shieldData.analysis?.risk_level || 'OK'}`, 'info');
+                            }
                             if (fullData.meta && fullData.meta.generated_at) {
                                 this.dataGenTime = new Date(fullData.meta.generated_at).toLocaleString('zh-TW', { timeZone: 'Asia/Taipei', hour12: false });
                             }
