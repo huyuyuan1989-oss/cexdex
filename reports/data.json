@@ -1,8 +1,8 @@
 {
   "meta": {
-    "generated_at": "2026-01-10T14:30:13.469434+08:00",
+    "generated_at": "2026-01-10T14:52:31.369553+08:00",
     "version": "v3.0.0",
-    "execution_time_seconds": 11.751521
+    "execution_time_seconds": 7.655812
   },
   "market_overview": {
     "sentiment": {
@@ -42,10 +42,10 @@
         "ETH": 0.0001
       },
       "open_interest": {
-        "BTC": 26303.944200000093,
-        "ETH": 614167.2720000023
+        "BTC": 26298.574800000086,
+        "ETH": 614704.9310000023
       },
-      "timestamp": "2026-01-10T06:30:13.109408Z"
+      "timestamp": "2026-01-10T06:52:31.003172Z"
     },
     "fear_greed": {
       "value": 25,
@@ -57,41 +57,41 @@
     },
     "total_tvl": {
       "cex": 303652338504.658,
-      "dex": 105815963851,
-      "total": 409468302355.658
+      "dex": 105815768413,
+      "total": 409468106917.658
     },
     "total_flow_24h": {
       "cex": -13916898.903479576,
-      "dex": -12832728157.0,
-      "total": -12846645055.90348
+      "dex": -12832343730.0,
+      "total": -12846260628.90348
     }
   },
   "timeframes": {
     "4h": {
       "cex": {
         "net_flow": -3479224.725869894,
-        "stablecoin_flow": -4206876.778102301,
+        "stablecoin_flow": -4206876.778102312,
         "btc_eth_flow": -181593163.00302622
       },
       "dex": {
-        "net_flow": -3208182039.25,
-        "stablecoin_flow": -2561682889.275,
-        "native_flow": -646499149.9749999
+        "net_flow": -3208085932.5,
+        "stablecoin_flow": -2561621656.9999995,
+        "native_flow": -646464275.4999998
       },
       "narrative": "BTC/ETH 流出交易所 $182M (囤貨信號) | 【DEX】穩定幣流出鏈上 $2562M，資金撤離 DeFi"
     },
     "24h": {
       "cex": {
         "net_flow": -13916898.903479576,
-        "stablecoin_flow": -16827507.112409204,
+        "stablecoin_flow": -16827507.11240925,
         "btc_eth_flow": -726372652.0121049
       },
       "dex": {
-        "net_flow": -12832728157.0,
-        "stablecoin_flow": -10246731557.1,
-        "native_flow": -2585996599.8999996
+        "net_flow": -12832343730.0,
+        "stablecoin_flow": -10246486627.999998,
+        "native_flow": -2585857101.999999
       },
-      "narrative": "💎 BTC/ETH 大量流出交易所 $726M，長期囤貨信號 | 📉 鏈上 TVL 減少 $12833M，資金撤離 DeFi"
+      "narrative": "💎 BTC/ETH 大量流出交易所 $726M，長期囤貨信號 | 📉 鏈上 TVL 減少 $12832M，資金撤離 DeFi"
     },
     "7d": {
       "cex": {
@@ -99,9 +99,9 @@
         "change_pct": 0
       },
       "dex": {
-        "net_flow": -180159230.0,
-        "stablecoin_flow": -166575937.49999997,
-        "change_pct": 2.0632
+        "net_flow": -180354668.0,
+        "stablecoin_flow": -166504969.9,
+        "change_pct": 2.1016000000000004
       },
       "narrative": "本週鏈上 TVL 變化 +2.1%，整體平穩",
       "wow_comparison": {
@@ -382,7 +382,46 @@
       "direction": "做空訊號 🔴",
       "score": 80,
       "reason": "7日趨勢向下 + 24H資金流出 + 4H短線拋壓",
-      "data": "7D:-6.6% | 24H:$-1.0M",
+      "data": "7D:-6.5% | 24H:$-0.9M",
+      "hive_analysis": {
+        "verdict": "SELL 🔴",
+        "action": "REDUCE_POS",
+        "consensus_score": -29.0,
+        "debate_log": [
+          {
+            "agent": "Momentum",
+            "role": "High-Risk/Reward",
+            "icon": "🦁",
+            "vote": -1,
+            "weight": 1.1,
+            "comment": "動能衰竭！資金正在撤退，這是雪崩的開始。做空！"
+          },
+          {
+            "agent": "Risk Control",
+            "role": "Contrarian",
+            "icon": "🐻",
+            "vote": 0.2,
+            "weight": 1.0,
+            "comment": "風險指標尚可，但要小心回調。"
+          },
+          {
+            "agent": "Smart Money",
+            "role": "Fundamental",
+            "icon": "🦉",
+            "vote": 0,
+            "weight": 1.0,
+            "comment": "缺乏足夠的鏈上證據，我保持中立。"
+          }
+        ]
+      }
+    },
+    {
+      "asset": "SCROLL",
+      "type": "CHAIN",
+      "direction": "做空訊號 🔴",
+      "score": 80,
+      "reason": "7日趨勢向下 + 24H資金流出 + 4H短線拋壓",
+      "data": "7D:-1.4% | 24H:$-0.0M",
       "hive_analysis": {
         "verdict": "SELL 🔴",
         "action": "REDUCE_POS",
@@ -693,7 +732,7 @@
     "summary": {
       "total_tvl": 303652338504.658,
       "net_flow_24h": -13916898.903479576,
-      "stablecoin_flow_24h": -16827507.112409204,
+      "stablecoin_flow_24h": -16827507.11240925,
       "btc_eth_flow_24h": -726372652.0121049,
       "dominant_action": "持平觀望",
       "action_narrative": "交易所資金流向平穩，市場觀望中"
@@ -703,11 +742,11 @@
         "exchange": "binance-cex",
         "total_tvl": 171871921148.26102,
         "net_flow_24h": 667837214.9992676,
-        "stablecoin_flow_24h": -695041.5470090657,
+        "stablecoin_flow_24h": -695041.5470090508,
         "btc_eth_flow_24h": -213605721.316964,
         "other_flow_24h": 882274074.8463705,
         "net_flow_4h": 166959303.7498169,
-        "stablecoin_flow_4h": -173760.38675226644,
+        "stablecoin_flow_4h": -173760.3867522627,
         "btc_eth_flow_4h": -53401430.329241,
         "stablecoin_pct": 27.243243822009944,
         "asset_breakdown": [
@@ -964,7 +1003,7 @@
         "net_flow_24h": -122925926.48641205,
         "stablecoin_flow_24h": 6440924.352429658,
         "btc_eth_flow_24h": -100913775.8598398,
-        "other_flow_24h": -27960107.89130974,
+        "other_flow_24h": -27960107.89130973,
         "net_flow_4h": -30731481.621603012,
         "stablecoin_flow_4h": 1610231.0881074145,
         "btc_eth_flow_4h": -25228443.96495995,
@@ -1242,7 +1281,7 @@
         "net_flow_24h": -49885896.75769043,
         "stablecoin_flow_24h": -26094089.39777002,
         "btc_eth_flow_24h": -6628103.367659837,
-        "other_flow_24h": -15282863.117020097,
+        "other_flow_24h": -15282863.117020095,
         "net_flow_4h": -12471474.189422607,
         "stablecoin_flow_4h": -6523522.349442505,
         "btc_eth_flow_4h": -1657025.8419149593,
@@ -1317,11 +1356,11 @@
         "exchange": "htx",
         "total_tvl": 6219155878.014389,
         "net_flow_24h": -21312438.16329193,
-        "stablecoin_flow_24h": -470101.6894798279,
+        "stablecoin_flow_24h": -470101.68947988236,
         "btc_eth_flow_24h": -3516094.1840800606,
         "other_flow_24h": -17020278.24207972,
         "net_flow_4h": -5328109.540822983,
-        "stablecoin_flow_4h": -117525.42236995697,
+        "stablecoin_flow_4h": -117525.42236997059,
         "btc_eth_flow_4h": -879023.5460200151,
         "stablecoin_pct": 23.389177105244194,
         "asset_breakdown": [
@@ -1396,7 +1435,7 @@
         "net_flow_24h": -4114460.8457374573,
         "stablecoin_flow_24h": -86810985.2059399,
         "btc_eth_flow_24h": 83159045.80154002,
-        "other_flow_24h": 990003.230460031,
+        "other_flow_24h": 990003.2304600307,
         "net_flow_4h": -1028615.2114343643,
         "stablecoin_flow_4h": -21702746.301484976,
         "btc_eth_flow_4h": 20789761.450385004,
@@ -1538,7 +1577,7 @@
         "net_flow_24h": -5551063.503691673,
         "stablecoin_flow_24h": 5094874.199820056,
         "btc_eth_flow_24h": -9512958.541650074,
-        "other_flow_24h": -40705.53658997826,
+        "other_flow_24h": -40705.53658997698,
         "net_flow_4h": -1387765.8759229183,
         "stablecoin_flow_4h": 1273718.549955014,
         "btc_eth_flow_4h": -2378239.6354125184,
@@ -1810,7 +1849,7 @@
         "net_flow_24h": -6912384.774460077,
         "stablecoin_flow_24h": 5087895.141170004,
         "btc_eth_flow_24h": -7676512.787010014,
-        "other_flow_24h": -4074400.7205899833,
+        "other_flow_24h": -4074400.7205899837,
         "net_flow_4h": -1728096.1936150193,
         "stablecoin_flow_4h": 1271973.785292501,
         "btc_eth_flow_4h": -1919128.1967525035,
@@ -1916,7 +1955,7 @@
         "net_flow_24h": -18681093.96525979,
         "stablecoin_flow_24h": -965051.9252000004,
         "btc_eth_flow_24h": -5504040.71886,
-        "other_flow_24h": -11584487.765599981,
+        "other_flow_24h": -11584487.765599983,
         "net_flow_4h": -4670273.491314948,
         "stablecoin_flow_4h": -241262.9813000001,
         "btc_eth_flow_4h": -1376010.179715,
@@ -2085,12 +2124,12 @@
   },
   "dex_analysis": {
     "summary": {
-      "total_tvl": 105815963851,
-      "net_flow_24h": -12832728157.0,
-      "stablecoin_flow_24h": -10246731557.1,
-      "native_flow_24h": -2585996599.8999996,
+      "total_tvl": 105815768413,
+      "net_flow_24h": -12832343730.0,
+      "stablecoin_flow_24h": -10246486627.999998,
+      "native_flow_24h": -2585857101.999999,
       "dominant_action": "DeFi 資金撤離",
-      "action_narrative": "穩定幣從鏈上流出 $10247M，資金撤離 DeFi"
+      "action_narrative": "穩定幣從鏈上流出 $10246M，資金撤離 DeFi"
     },
     "chains": [
       {
@@ -2243,18 +2282,18 @@
       },
       {
         "chain": "arbitrum",
-        "tvl_total": 3027344475,
-        "tvl_stable": 2421875580.0,
-        "tvl_volatile": 605468894.9999999,
-        "stable_inflow_24h": 5173811.2,
-        "native_inflow_24h": 1293452.7999999998,
-        "change_24h_pct": 0.21,
-        "stable_inflow_4h": 1293452.8,
-        "native_inflow_4h": 323363.19999999995,
-        "change_4h_pct": 0.05,
-        "stable_inflow_7d": 1386104.8,
-        "native_inflow_7d": 346526.1999999999,
-        "change_7d_pct": 0.06,
+        "tvl_total": 3028214667,
+        "tvl_stable": 2422571733.6,
+        "tvl_volatile": 605642933.3999999,
+        "stable_inflow_24h": 5869965.600000001,
+        "native_inflow_24h": 1467491.3999999997,
+        "change_24h_pct": 0.24,
+        "stable_inflow_4h": 1467491.4000000001,
+        "native_inflow_4h": 366872.8499999999,
+        "change_4h_pct": 0.06,
+        "stable_inflow_7d": 2082258.4000000001,
+        "native_inflow_7d": 520564.59999999986,
+        "change_7d_pct": 0.09,
         "tags": [
           {
             "type": "Stable",
@@ -2316,18 +2355,18 @@
       },
       {
         "chain": "base",
-        "tvl_total": 4708356975,
-        "tvl_stable": 3766685580.0,
-        "tvl_volatile": 941671394.9999998,
-        "stable_inflow_24h": -9771424.0,
-        "native_inflow_24h": -2442855.9999999995,
-        "change_24h_pct": -0.26,
-        "stable_inflow_4h": -2442856.0,
-        "native_inflow_4h": -610713.9999999999,
+        "tvl_total": 4707745981,
+        "tvl_stable": 3766196784.8,
+        "tvl_volatile": 941549196.1999998,
+        "stable_inflow_24h": -10260216.8,
+        "native_inflow_24h": -2565054.1999999993,
+        "change_24h_pct": -0.27,
+        "stable_inflow_4h": -2565054.2,
+        "native_inflow_4h": -641263.5499999998,
         "change_4h_pct": -0.07,
-        "stable_inflow_7d": 50458724.800000004,
-        "native_inflow_7d": 12614681.199999997,
-        "change_7d_pct": 1.36,
+        "stable_inflow_7d": 49969929.6,
+        "native_inflow_7d": 12492482.399999997,
+        "change_7d_pct": 1.34,
         "tags": [
           {
             "type": "Stable",
@@ -2414,18 +2453,18 @@
       },
       {
         "chain": "linea",
-        "tvl_total": 177808623,
-        "tvl_stable": 53342586.9,
-        "tvl_volatile": 124466036.1,
-        "stable_inflow_24h": -1018781.1,
-        "native_inflow_24h": -2377155.9,
-        "change_24h_pct": -1.87,
-        "stable_inflow_4h": -254695.275,
-        "native_inflow_4h": -594288.975,
-        "change_4h_pct": -0.47,
-        "stable_inflow_7d": -3787270.1999999997,
-        "native_inflow_7d": -8836963.799999999,
-        "change_7d_pct": -6.63,
+        "tvl_total": 178149264,
+        "tvl_stable": 53444779.199999996,
+        "tvl_volatile": 124704484.8,
+        "stable_inflow_24h": -916588.7999999999,
+        "native_inflow_24h": -2138707.1999999997,
+        "change_24h_pct": -1.69,
+        "stable_inflow_4h": -229147.19999999998,
+        "native_inflow_4h": -534676.7999999999,
+        "change_4h_pct": -0.42,
+        "stable_inflow_7d": -3685077.9,
+        "native_inflow_7d": -8598515.1,
+        "change_7d_pct": -6.45,
         "tags": [
           {
             "type": "Stable",
@@ -2439,18 +2478,18 @@
       },
       {
         "chain": "scroll",
-        "tvl_total": 198732457,
-        "tvl_stable": 59619737.1,
-        "tvl_volatile": 139112719.9,
-        "stable_inflow_24h": 23668.8,
-        "native_inflow_24h": 55227.2,
-        "change_24h_pct": 0.04,
-        "stable_inflow_4h": 5917.2,
-        "native_inflow_4h": 13806.8,
-        "change_4h_pct": 0.01,
-        "stable_inflow_7d": -608295.9,
-        "native_inflow_7d": -1419357.0999999999,
-        "change_7d_pct": -1.01,
+        "tvl_total": 197935006,
+        "tvl_stable": 59380501.8,
+        "tvl_volatile": 138554504.2,
+        "stable_inflow_24h": -41608.2,
+        "native_inflow_24h": -97085.79999999999,
+        "change_24h_pct": -0.07,
+        "stable_inflow_4h": -10402.05,
+        "native_inflow_4h": -24271.449999999997,
+        "change_4h_pct": -0.02,
+        "stable_inflow_7d": -847531.2,
+        "native_inflow_7d": -1977572.7999999998,
+        "change_7d_pct": -1.41,
         "tags": [
           {
             "type": "Stable",
@@ -2664,18 +2703,18 @@
       },
       {
         "chain": "cosmos",
-        "tvl_total": 200606,
-        "tvl_stable": 60181.799999999996,
-        "tvl_volatile": 140424.19999999998,
-        "stable_inflow_24h": 1113.3,
-        "native_inflow_24h": 2597.7,
-        "change_24h_pct": 1.88,
-        "stable_inflow_4h": 278.325,
-        "native_inflow_4h": 649.425,
-        "change_4h_pct": 0.47,
-        "stable_inflow_7d": 4515.3,
-        "native_inflow_7d": 10535.699999999999,
-        "change_7d_pct": 8.11,
+        "tvl_total": 202780,
+        "tvl_stable": 60834.0,
+        "tvl_volatile": 141946.0,
+        "stable_inflow_24h": 1765.5,
+        "native_inflow_24h": 4119.5,
+        "change_24h_pct": 2.99,
+        "stable_inflow_4h": 441.375,
+        "native_inflow_4h": 1029.875,
+        "change_4h_pct": 0.75,
+        "stable_inflow_7d": 5167.5,
+        "native_inflow_7d": 12057.5,
+        "change_7d_pct": 9.28,
         "tags": [
           {
             "type": "Stable",
@@ -2941,18 +2980,18 @@
       },
       {
         "chain": "arbitrum",
-        "tvl_total": 3027344475,
-        "tvl_stable": 2421875580.0,
-        "tvl_volatile": 605468894.9999999,
-        "stable_inflow_24h": 5173811.2,
-        "native_inflow_24h": 1293452.7999999998,
-        "change_24h_pct": 0.21,
-        "stable_inflow_4h": 1293452.8,
-        "native_inflow_4h": 323363.19999999995,
-        "change_4h_pct": 0.05,
-        "stable_inflow_7d": 1386104.8,
-        "native_inflow_7d": 346526.1999999999,
-        "change_7d_pct": 0.06,
+        "tvl_total": 3028214667,
+        "tvl_stable": 2422571733.6,
+        "tvl_volatile": 605642933.3999999,
+        "stable_inflow_24h": 5869965.600000001,
+        "native_inflow_24h": 1467491.3999999997,
+        "change_24h_pct": 0.24,
+        "stable_inflow_4h": 1467491.4000000001,
+        "native_inflow_4h": 366872.8499999999,
+        "change_4h_pct": 0.06,
+        "stable_inflow_7d": 2082258.4000000001,
+        "native_inflow_7d": 520564.59999999986,
+        "change_7d_pct": 0.09,
         "tags": [
           {
             "type": "Stable",
@@ -3014,18 +3053,18 @@
       },
       {
         "chain": "base",
-        "tvl_total": 4708356975,
-        "tvl_stable": 3766685580.0,
-        "tvl_volatile": 941671394.9999998,
-        "stable_inflow_24h": -9771424.0,
-        "native_inflow_24h": -2442855.9999999995,
-        "change_24h_pct": -0.26,
-        "stable_inflow_4h": -2442856.0,
-        "native_inflow_4h": -610713.9999999999,
+        "tvl_total": 4707745981,
+        "tvl_stable": 3766196784.8,
+        "tvl_volatile": 941549196.1999998,
+        "stable_inflow_24h": -10260216.8,
+        "native_inflow_24h": -2565054.1999999993,
+        "change_24h_pct": -0.27,
+        "stable_inflow_4h": -2565054.2,
+        "native_inflow_4h": -641263.5499999998,
         "change_4h_pct": -0.07,
-        "stable_inflow_7d": 50458724.800000004,
-        "native_inflow_7d": 12614681.199999997,
-        "change_7d_pct": 1.36,
+        "stable_inflow_7d": 49969929.6,
+        "native_inflow_7d": 12492482.399999997,
+        "change_7d_pct": 1.34,
         "tags": [
           {
             "type": "Stable",
@@ -3112,18 +3151,18 @@
       },
       {
         "chain": "linea",
-        "tvl_total": 177808623,
-        "tvl_stable": 53342586.9,
-        "tvl_volatile": 124466036.1,
-        "stable_inflow_24h": -1018781.1,
-        "native_inflow_24h": -2377155.9,
-        "change_24h_pct": -1.87,
-        "stable_inflow_4h": -254695.275,
-        "native_inflow_4h": -594288.975,
-        "change_4h_pct": -0.47,
-        "stable_inflow_7d": -3787270.1999999997,
-        "native_inflow_7d": -8836963.799999999,
-        "change_7d_pct": -6.63,
+        "tvl_total": 178149264,
+        "tvl_stable": 53444779.199999996,
+        "tvl_volatile": 124704484.8,
+        "stable_inflow_24h": -916588.7999999999,
+        "native_inflow_24h": -2138707.1999999997,
+        "change_24h_pct": -1.69,
+        "stable_inflow_4h": -229147.19999999998,
+        "native_inflow_4h": -534676.7999999999,
+        "change_4h_pct": -0.42,
+        "stable_inflow_7d": -3685077.9,
+        "native_inflow_7d": -8598515.1,
+        "change_7d_pct": -6.45,
         "tags": [
           {
             "type": "Stable",
@@ -3137,18 +3176,18 @@
       },
       {
         "chain": "scroll",
-        "tvl_total": 198732457,
-        "tvl_stable": 59619737.1,
-        "tvl_volatile": 139112719.9,
-        "stable_inflow_24h": 23668.8,
-        "native_inflow_24h": 55227.2,
-        "change_24h_pct": 0.04,
-        "stable_inflow_4h": 5917.2,
-        "native_inflow_4h": 13806.8,
-        "change_4h_pct": 0.01,
-        "stable_inflow_7d": -608295.9,
-        "native_inflow_7d": -1419357.0999999999,
-        "change_7d_pct": -1.01,
+        "tvl_total": 197935006,
+        "tvl_stable": 59380501.8,
+        "tvl_volatile": 138554504.2,
+        "stable_inflow_24h": -41608.2,
+        "native_inflow_24h": -97085.79999999999,
+        "change_24h_pct": -0.07,
+        "stable_inflow_4h": -10402.05,
+        "native_inflow_4h": -24271.449999999997,
+        "change_4h_pct": -0.02,
+        "stable_inflow_7d": -847531.2,
+        "native_inflow_7d": -1977572.7999999998,
+        "change_7d_pct": -1.41,
         "tags": [
           {
             "type": "Stable",
@@ -3362,18 +3401,18 @@
       },
       {
         "chain": "cosmos",
-        "tvl_total": 200606,
-        "tvl_stable": 60181.799999999996,
-        "tvl_volatile": 140424.19999999998,
-        "stable_inflow_24h": 1113.3,
-        "native_inflow_24h": 2597.7,
-        "change_24h_pct": 1.88,
-        "stable_inflow_4h": 278.325,
-        "native_inflow_4h": 649.425,
-        "change_4h_pct": 0.47,
-        "stable_inflow_7d": 4515.3,
-        "native_inflow_7d": 10535.699999999999,
-        "change_7d_pct": 8.11,
+        "tvl_total": 202780,
+        "tvl_stable": 60834.0,
+        "tvl_volatile": 141946.0,
+        "stable_inflow_24h": 1765.5,
+        "native_inflow_24h": 4119.5,
+        "change_24h_pct": 2.99,
+        "stable_inflow_4h": 441.375,
+        "native_inflow_4h": 1029.875,
+        "change_4h_pct": 0.75,
+        "stable_inflow_7d": 5167.5,
+        "native_inflow_7d": 12057.5,
+        "change_7d_pct": 9.28,
         "tags": [
           {
             "type": "Stable",
@@ -3487,8 +3526,8 @@
       }
     ],
     "summary": {
-      "total_stable_inflow_24h": -10246731557.1,
-      "total_native_inflow_24h": -2585996599.8999996,
+      "total_stable_inflow_24h": -10246486627.999998,
+      "total_native_inflow_24h": -2585857101.999999,
       "bullish_signals": 1,
       "bearish_signals": 3,
       "market_sentiment": "Bearish"
@@ -3500,11 +3539,11 @@
         "exchange": "binance-cex",
         "total_tvl": 171871921148.26102,
         "net_flow_24h": 667837214.9992676,
-        "stablecoin_flow_24h": -695041.5470090657,
+        "stablecoin_flow_24h": -695041.5470090508,
         "btc_eth_flow_24h": -213605721.316964,
         "other_flow_24h": 882274074.8463705,
         "net_flow_4h": 166959303.7498169,
-        "stablecoin_flow_4h": -173760.38675226644,
+        "stablecoin_flow_4h": -173760.3867522627,
         "btc_eth_flow_4h": -53401430.329241,
         "stablecoin_pct": 27.243243822009944,
         "asset_breakdown": [
@@ -3761,7 +3800,7 @@
         "net_flow_24h": -122925926.48641205,
         "stablecoin_flow_24h": 6440924.352429658,
         "btc_eth_flow_24h": -100913775.8598398,
-        "other_flow_24h": -27960107.89130974,
+        "other_flow_24h": -27960107.89130973,
         "net_flow_4h": -30731481.621603012,
         "stablecoin_flow_4h": 1610231.0881074145,
         "btc_eth_flow_4h": -25228443.96495995,
@@ -4039,7 +4078,7 @@
         "net_flow_24h": -49885896.75769043,
         "stablecoin_flow_24h": -26094089.39777002,
         "btc_eth_flow_24h": -6628103.367659837,
-        "other_flow_24h": -15282863.117020097,
+        "other_flow_24h": -15282863.117020095,
         "net_flow_4h": -12471474.189422607,
         "stablecoin_flow_4h": -6523522.349442505,
         "btc_eth_flow_4h": -1657025.8419149593,
@@ -4114,11 +4153,11 @@
         "exchange": "htx",
         "total_tvl": 6219155878.014389,
         "net_flow_24h": -21312438.16329193,
-        "stablecoin_flow_24h": -470101.6894798279,
+        "stablecoin_flow_24h": -470101.68947988236,
         "btc_eth_flow_24h": -3516094.1840800606,
         "other_flow_24h": -17020278.24207972,
         "net_flow_4h": -5328109.540822983,
-        "stablecoin_flow_4h": -117525.42236995697,
+        "stablecoin_flow_4h": -117525.42236997059,
         "btc_eth_flow_4h": -879023.5460200151,
         "stablecoin_pct": 23.389177105244194,
         "asset_breakdown": [
@@ -4193,7 +4232,7 @@
         "net_flow_24h": -4114460.8457374573,
         "stablecoin_flow_24h": -86810985.2059399,
         "btc_eth_flow_24h": 83159045.80154002,
-        "other_flow_24h": 990003.230460031,
+        "other_flow_24h": 990003.2304600307,
         "net_flow_4h": -1028615.2114343643,
         "stablecoin_flow_4h": -21702746.301484976,
         "btc_eth_flow_4h": 20789761.450385004,
@@ -4335,7 +4374,7 @@
         "net_flow_24h": -5551063.503691673,
         "stablecoin_flow_24h": 5094874.199820056,
         "btc_eth_flow_24h": -9512958.541650074,
-        "other_flow_24h": -40705.53658997826,
+        "other_flow_24h": -40705.53658997698,
         "net_flow_4h": -1387765.8759229183,
         "stablecoin_flow_4h": 1273718.549955014,
         "btc_eth_flow_4h": -2378239.6354125184,
@@ -4607,7 +4646,7 @@
         "net_flow_24h": -6912384.774460077,
         "stablecoin_flow_24h": 5087895.141170004,
         "btc_eth_flow_24h": -7676512.787010014,
-        "other_flow_24h": -4074400.7205899833,
+        "other_flow_24h": -4074400.7205899837,
         "net_flow_4h": -1728096.1936150193,
         "stablecoin_flow_4h": 1271973.785292501,
         "btc_eth_flow_4h": -1919128.1967525035,
@@ -4713,7 +4752,7 @@
         "net_flow_24h": -18681093.96525979,
         "stablecoin_flow_24h": -965051.9252000004,
         "btc_eth_flow_24h": -5504040.71886,
-        "other_flow_24h": -11584487.765599981,
+        "other_flow_24h": -11584487.765599983,
         "net_flow_4h": -4670273.491314948,
         "stablecoin_flow_4h": -241262.9813000001,
         "btc_eth_flow_4h": -1376010.179715,
@@ -4880,11 +4919,11 @@
       }
     ],
     "summary": {
-      "total_stablecoin_flow_24h": -16827507.112409204,
+      "total_stablecoin_flow_24h": -16827507.11240925,
       "total_btc_eth_flow_24h": -726372652.0121049,
       "total_net_flow_24h": -13916898.903479576,
       "smart_money_stable_flow": 77705868.34131055,
-      "smart_money_dominance": -4.617788471116287,
+      "smart_money_dominance": -4.617788471116275,
       "bullish_signals": 2,
       "bearish_signals": 0,
       "market_sentiment": "Bullish"
@@ -4897,7 +4936,7 @@
       "😨 恐慌區 (F&G=25): 市場情緒低迷，留意反彈機會"
     ],
     "description": "宏觀環境中性，維持正常辯論權重",
-    "timestamp": "2026-01-10T06:30:13.469637"
+    "timestamp": "2026-01-10T06:52:31.369788"
   },
   "treasury": {
     "current_capital": 10000.0,
@@ -4910,7 +4949,7 @@
     "withdrawable": 0.0,
     "total_trades": 0,
     "win_rate": 0,
-    "updated_at": "2026-01-10T06:30:13.639325"
+    "updated_at": "2026-01-10T06:52:31.544596"
   },
   "hedge_shield": {
     "analysis": {
