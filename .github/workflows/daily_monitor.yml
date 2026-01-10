@@ -11,8 +11,6 @@ on:
     branches:
       - main
 
-
-
 jobs:
   run-monitor:
     runs-on: ubuntu-latest
@@ -38,21 +36,19 @@ jobs:
           # Discord Webhook URL (設定在 GitHub Secrets 中)
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
         run: |
+          echo "🚀 Pipeline started"
           python main.py
+          echo "✅ Pipeline finished"
 
-      - name: Commit and Push Report & DB
+      - name: Commit and Push Data & Reports
         run: |
-          # 設定 git 用戶
           git config --global user.name 'GitHub Action Bot'
           git config --global user.email 'action@github.com'
-          
-          # 添加生成的報告變更
-          git add reports/
-          
-          # 檢查是否有變更此提交
+          git add reports/*.json reports/*.csv reports/*.html reports/*.md
+          git add *.db *.json || true
           if git diff --staged --quiet; then
             echo "No changes to commit"
           else
-            git commit -m "📈 Auto-update: Reports and Database [skip ci]"
+            git commit -m "📈 Auto-update: Dashboards and Persistent DB [skip ci]"
             git push
           fi

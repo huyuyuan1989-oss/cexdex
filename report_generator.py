@@ -19,7 +19,8 @@ from typing import Dict, Any, List, Optional
 logger = logging.getLogger(__name__)
 
 # 報告目錄
-REPORTS_DIR = Path(__file__).parent / "reports"
+BASE_DIR = Path(__file__).parent
+REPORTS_DIR = BASE_DIR / "reports"
 WEEKLY_HISTORY_FILE = REPORTS_DIR / "weekly_history.json"
 
 

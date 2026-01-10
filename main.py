@@ -41,10 +41,14 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# 輸出路徑
-REPORTS_DIR = Path(__file__).parent / "reports"
+# 路徑設定
+BASE_DIR = Path(__file__).parent
+REPORTS_DIR = BASE_DIR / "reports"
 DATA_JSON_PATH = REPORTS_DIR / "data.json"
 HISTORY_CSV_PATH = REPORTS_DIR / "history.csv"
+AGENT_CONFIG_PATH = REPORTS_DIR / "agent_config.json"
+TREASURY_STATE_PATH = REPORTS_DIR / "treasury_state.json"
+HEDGE_STATE_PATH = REPORTS_DIR / "hedge_state.json"
 
 # 分析的公鏈列表 (V7 Expanded Coverage)
 CHAINS_TO_ANALYZE = [
