@@ -105,7 +105,10 @@ class PaperTrader:
                         pnl_pct *= -1
                     
                     p['pnl_pct'] = round(pnl_pct, 2)
-                    p['pnl_usd'] = round(TRADE_SIZE * (pnl_pct / 100), 2)
+                    
+                    # Use position's original size if available, otherwise default
+                    pos_size = p.get('entry_size_usd', TRADE_SIZE)
+                    p['pnl_usd'] = round(pos_size * (pnl_pct / 100), 2)
                     
                     total_unrealized_pnl_pct += pnl_pct
                     total_pnl_usd += p['pnl_usd']
@@ -169,12 +172,18 @@ class PaperTrader:
             existing = next((p for p in self.positions if p['symbol'] == token and p['status'] == 'OPEN'), None)
             
             if not existing:
+                # V8: Use individual trade size (configured via set_trade_size or default)
+                trade_size = getattr(self, 'trade_size', 1000.0)
+                qty = trade_size / price
+                
                 # Open New Position
                 new_trade = {
                     "id": f"{token}-{int(datetime.now().timestamp())}",
                     "symbol": token,
                     "direction": direction,
                     "entry_price": price,
+                    "entry_size_usd": trade_size,
+                    "quantity": qty,
                     "entry_time": datetime.now().isoformat(),
                     "reason": op['reason'],
                     "confidence": op['score'],
@@ -183,6 +192,6 @@ class PaperTrader:
                     "pnl_usd": 0.0
                 }
                 self.positions.append(new_trade)
-                logger.info(f"🆕 Paper Trade Opened: {direction} {token} @ ${price} ({op['reason']})")
+                logger.info(f"🆕 Paper Trade Opened: {direction} {token} @ ${price} (Size: ${trade_size:.1f})")
                 
         self._save_positions()

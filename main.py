@@ -204,6 +204,8 @@ async def run_pipeline() -> Dict[str, Any]:
         rl_optimizer.run_optimization()
         
         if 'alpha_opportunities' in unified_report:
+            # V8: Use Treasury recommended position size
+            paper_trader.trade_size = treasury.get_position_size()
             await paper_trader.execute_signals(unified_report['alpha_opportunities'])
             
         # 6.4 [V7 Feature] Yield Farming

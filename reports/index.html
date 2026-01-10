@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🔗 全鏈資金流向戰情室 | Capital Flow Terminal</title>
+    <title>🔗 V8 全鏈資金流向戰情室 | Sovereign Terminal</title>
     <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
     <link
         href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&display=swap"
@@ -649,6 +649,7 @@
             font-size: 1.2rem;
         }
     </style>
+    <title>🔗 V8 全鏈資金流向戰情室 | Capital Flow Terminal</title>
 </head>
 
 <body>
@@ -657,7 +658,7 @@
         <header style="margin-bottom: 2rem; text-align: center;">
             <h1
                 style="font-size: 2.5rem; margin-bottom: 0.5rem; background: linear-gradient(to right, #00C9FF, #92FE9D); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0 0 20px rgba(0,201,255,0.3);">
-                🧠 V7 Hive Mind Terminal</h1>
+                🧠 V8 Sovereign Terminal</h1>
             <p style="color: var(--text-secondary); font-family: 'JetBrains Mono', monospace;">Autonomous Multi-Agent
                 Hedge Fund System</p>
         </header>
@@ -703,6 +704,12 @@
                                 AI Score: {{ data.market_overview?.sentiment?.score }} | F&G: {{
                                 data.market_overview?.sentiment?.factors?.find(f => f.name.includes('Sentiment'))?.value
                                 || 'N/A' }}
+                                <br v-if="data.macro_intelligence">
+                                <span v-if="data.macro_intelligence" style="color: #00ffcc; font-weight: bold;">
+                                    🧠 V8 Macro: {{ data.macro_intelligence.regime }} (Bias: {{
+                                    data.macro_intelligence.macro_bias > 0 ? '+' : '' }}{{
+                                    data.macro_intelligence.macro_bias }})
+                                </span>
                             </div>
                         </div>
                     </div>
