@@ -35,7 +35,15 @@ class PaperTrader:
             'AVALANCHE': 'AVAX',
             'OPTIMISM': 'OP',
             'TRON': 'TRX',
-            'BASE': 'ETH' # Base uses ETH
+            'BASE': 'WETH',     # Base usually means ETH flows
+            'SUI': 'SUI',       # New
+            'APTOS': 'APT',     # New
+            'SEI': 'SEI',       # New
+            'NEAR': 'NEAR',     # New
+            'FANTOM': 'FTM',    # New
+            'COSMOS': 'ATOM',   # New
+            'CARDANO': 'ADA',   # New
+            'DOGE': 'DOGE'      # Market sentiment proxy
         }
 
     def _load_positions(self) -> List[Dict]:
