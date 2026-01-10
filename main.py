@@ -26,7 +26,8 @@ from analyzer_cex import CEXAnalyzer
 from notification_service import check_and_alert, send_summary_notification
 from report_generator import ReportGenerator
 from paper_trader import PaperTrader
-from analyzer_social import SocialSentimentAnalyzer # V5
+from analyzer_social import SocialSentimentAnalyzer 
+from market_agents import HiveMind # V7 Feature
 
 # 設定日誌
 logging.basicConfig(
@@ -70,6 +71,7 @@ async def run_pipeline() -> Dict[str, Any]:
     generator = ReportGenerator()
     social_analyzer = SocialSentimentAnalyzer() # V5
     paper_trader = PaperTrader(provider) # V6 Simulation
+    hive_mind = HiveMind() # V7
     
     async with provider:
         # 1. 並行獲取數據
@@ -124,17 +126,32 @@ async def run_pipeline() -> Dict[str, Any]:
         )
         unified_report['meta']['execution_time_seconds'] = (datetime.now() - start_time).total_seconds()
         
-        # 5. [V6 Feature] Paper Trading Simulation
+        # 5. [V7 Feature] The Hive Mind Debate
+        if 'alpha_opportunities' in unified_report:
+            logger.info("🧠 V7 Hive Mind: Running Agent Debate...")
+            
+            # Prepare Global Context
+            context = {
+                'fng_val': fng_data.get('value', 50),
+                'funding_btc': derivs_data.get('funding_rates', {}).get('BTC', 0)
+            }
+            
+            for opp in unified_report['alpha_opportunities']:
+                debate_result = hive_mind.debate(opp, context)
+                opp['hive_analysis'] = debate_result # Inject V7 Result
+                
+        
+        # 6. [V6 Feature] Paper Trading Simulation
         logger.info("🤖 執行模擬交易引擎 (Paper Trading)...")
         await paper_trader.update_positions() # Update PnL for dirty positions
         
         if 'alpha_opportunities' in unified_report:
             await paper_trader.execute_signals(unified_report['alpha_opportunities'])
     
-    # 6. 儲存輸出
+    # 7. 儲存輸出
     await _save_outputs(unified_report, chain_data, cex_data, stablecoin_marketcap)
     
-    # 7. 發送 Discord 通知
+    # 8. 發送 Discord 通知
     logger.info("🔔 檢查並發送 Discord 警報...")
     alerts_sent = check_and_alert(unified_report)
     if alerts_sent > 0:
