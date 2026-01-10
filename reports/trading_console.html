@@ -542,7 +542,7 @@
                     });
                 },
                 addLog(msg, type = 'info') {
-                    const time = new Date().toLocaleTimeString('zh-TW', { hour12: false });
+                    const time = new Date().toLocaleTimeString('zh-TW', { timeZone: 'Asia/Taipei', hour12: false });
                     this.logs.unshift({ id: Date.now() + Math.random(), time, msg, type });
                     if (this.logs.length > 50) this.logs.pop();
                 },
@@ -574,10 +574,15 @@
                             if (fullData.yield_farming) this.yieldData = fullData.yield_farming;
                             if (fullData.treasury) this.treasury = fullData.treasury;
                             if (fullData.hedge_shield) this.shieldData = fullData.hedge_shield;
+                            if (fullData.meta && fullData.meta.generated_at) {
+                                this.dataGenTime = new Date(fullData.meta.generated_at).toLocaleString('zh-TW', { timeZone: 'Asia/Taipei', hour12: false });
+                            }
                         }
 
                     } catch (e) {
                         this.addLog(`Connection error: ${e.message}`, 'warn');
+                    } finally {
+                        this.lastUpdated = new Date().toLocaleString('zh-TW', { timeZone: 'Asia/Taipei', hour12: false });
                     }
                 }
             },
