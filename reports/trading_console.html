@@ -307,6 +307,56 @@
             </div>
         </div>
 
+        <!-- Logic Cores & Yield Farming -->
+        <div class="dashboard-grid">
+            <!-- RL Core Weights -->
+            <div class="metric-card" style="border-color: rgba(0, 201, 255, 0.3);">
+                <h3>🧠 Neural Weights (RL Core)</h3>
+                <div style="margin-top: 10px; font-size: 0.9rem;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                        <span>🦁 Aggressor</span>
+                        <span class="font-mono">{{ weights['Momentum']?.toFixed(1) || '1.0' }}</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="fill" :style="{width: (weights['Momentum'] || 1)*33 + '%', background: '#e74c3c'}">
+                        </div>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px; margin-top: 8px;">
+                        <span>🐻 Skeptic</span>
+                        <span class="font-mono">{{ weights['Risk Control']?.toFixed(1) || '1.0' }}</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="fill"
+                            :style="{width: (weights['Risk Control'] || 1)*33 + '%', background: '#9b59b6'}"></div>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px; margin-top: 8px;">
+                        <span>🦉 Sage</span>
+                        <span class="font-mono">{{ weights['Smart Money']?.toFixed(1) || '1.0' }}</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="fill"
+                            :style="{width: (weights['Smart Money'] || 1)*33 + '%', background: '#3498db'}"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Yield Farming -->
+            <div class="metric-card" style="border-color: rgba(241, 196, 15, 0.3);">
+                <h3>🌾 Omni-Chain Yield (Idle)</h3>
+                <div class="metric-value font-mono" style="color: #f1c40f; font-size: 1.5rem;">
+                    {{ yieldData.status || 'SCANNING' }}
+                </div>
+                <div v-if="yieldData.top_opportunity"
+                    style="margin-top: 10px; font-size: 0.9rem; color: var(--text-secondary);">
+                    <div>Protocol: <span style="color: #fff;">{{ yieldData.top_opportunity.protocol }}</span></div>
+                    <div>Chain: <span style="color: #fff;">{{ yieldData.top_opportunity.chain }}</span></div>
+                    <div>APY: <span class="text-green">{{ yieldData.top_opportunity.apy }}%</span></div>
+                </div>
+            </div>
+        </div>
+
         <!-- Active Positions Table -->
         <div class="section">
             <div class="section-header">
@@ -379,9 +429,11 @@
                 return {
                     positions: [],
                     totalPnL: 0,
-                    winRate: 0, // Mock for now
+                    winRate: 0,
                     lastUpdated: '-',
-                    logs: []
+                    logs: [],
+                    weights: {},
+                    yieldData: {}
                 }
             },
             methods: {
@@ -401,20 +453,34 @@
                 },
                 async fetchData() {
                     try {
-                        const response = await fetch(`./paper_trades.json?t=${new Date().getTime()}`);
+                        const ts = new Date().getTime();
+
+                        // 1. Fetch Paper Trades
+                        const response = await fetch(`./paper_trades.json?t=${ts}`);
                         if (response.ok) {
                             const data = await response.json();
                             this.positions = data.filter(p => p.status === 'OPEN');
-
-                            // Calculate PnL Mock (since backend doesn't update it realtime in loop yet)
-                            // In real V7 backend, pnl is updated.
                             this.totalPnL = this.positions.reduce((acc, p) => acc + (p.pnl_usd || 0), 0);
-
                             this.lastUpdated = new Date().toLocaleString('zh-TW');
                             this.addLog(`Synced ${this.positions.length} active positions.`, 'success');
-                        } else {
-                            this.addLog('Failed to fetch trades data.', 'warn');
                         }
+
+                        // 2. Fetch Agent Config (RL Weights)
+                        const configRes = await fetch(`./agent_config.json?t=${ts}`);
+                        if (configRes.ok) {
+                            const conf = await configRes.json();
+                            this.weights = conf.weights || {};
+                        }
+
+                        // 3. Fetch Data JSON (Yield Farming)
+                        const dataRes = await fetch(`./data.json?t=${ts}`);
+                        if (dataRes.ok) {
+                            const fullData = await dataRes.json();
+                            if (fullData.yield_farming) {
+                                this.yieldData = fullData.yield_farming;
+                            }
+                        }
+
                     } catch (e) {
                         this.addLog(`Connection error: ${e.message}`, 'warn');
                     }

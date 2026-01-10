@@ -1,5 +1,7 @@
 
 import logging
+import json
+from pathlib import Path
 from typing import Dict, List, Any
 
 logger = logging.getLogger(__name__)
@@ -120,27 +122,51 @@ class HiveMind:
     """
     def __init__(self):
         self.agents = [AggressorAgent(), SkepticAgent(), SageAgent()]
+        self.config_path = Path(__file__).parent / "reports" / "agent_config.json"
+        
+    def _load_weights(self) -> Dict[str, float]:
+        """Load dynamic weights from RL Optimizer"""
+        default = {"Momentum": 1.0, "Risk Control": 1.0, "Smart Money": 1.0}
+        if self.config_path.exists():
+            try:
+                import json
+                with open(self.config_path, 'r') as f:
+                    data = json.load(f)
+                    return data.get('weights', default)
+            except:
+                pass
+        return default
 
     def debate(self, opportunity: Dict, global_context: Dict) -> Dict:
         """
-        Run the debate for a single opportunity.
+        Run the debate with WEIGHTED Consensus.
         """
         results = []
-        total_vote = 0
+        total_score = 0
+        total_weight = 0
+        
+        weights = self._load_weights()
         
         for agent in self.agents:
             res = agent.analyze(opportunity, global_context)
+            weight = weights.get(agent.name, 1.0)
+            
             results.append({
                 "agent": agent.name,
                 "role": agent.role,
                 "icon": agent.icon,
-                "vote": res['vote'], # -1 to 1
+                "vote": res['vote'],
+                "weight": weight,
                 "comment": res['comment']
             })
-            total_vote += res['vote']
             
-        # Determine Consensus
-        avg_vote = total_vote / len(self.agents)
+            total_score += res['vote'] * weight
+            total_weight += weight
+            
+        # Determine Weighted Consensus
+        if total_weight == 0: total_weight = 1
+        avg_vote = total_score / total_weight
+        
         verdict = "NEUTRAL"
         final_action = "WAIT"
         
@@ -160,6 +186,6 @@ class HiveMind:
         return {
             "verdict": verdict,
             "action": final_action,
-            "consensus_score": round(avg_vote * 100, 1), # -100 to 100
+            "consensus_score": round(avg_vote * 100, 1),
             "debate_log": results
         }

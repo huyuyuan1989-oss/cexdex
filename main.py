@@ -28,6 +28,8 @@ from report_generator import ReportGenerator
 from paper_trader import PaperTrader
 from analyzer_social import SocialSentimentAnalyzer 
 from market_agents import HiveMind # V7 Feature
+from rl_optimizer import RLOptimizer # V7 RL Core
+from yield_farmer import YieldFarmer # V7 Omni-Chain Yield
 
 # 設定日誌
 logging.basicConfig(
@@ -72,6 +74,8 @@ async def run_pipeline() -> Dict[str, Any]:
     social_analyzer = SocialSentimentAnalyzer() # V5
     paper_trader = PaperTrader(provider) # V6 Simulation
     hive_mind = HiveMind() # V7
+    rl_optimizer = RLOptimizer()
+    yield_farmer = YieldFarmer()
     
     async with provider:
         # 1. 並行獲取數據
@@ -145,8 +149,17 @@ async def run_pipeline() -> Dict[str, Any]:
         logger.info("🤖 執行模擬交易引擎 (Paper Trading)...")
         await paper_trader.update_positions() # Update PnL for dirty positions
         
+        # 6.1 [V7 Feature] RL Core Optimization
+        # Run optimization *after* updating positions to learn from latest PnL
+        rl_optimizer.run_optimization()
+        
         if 'alpha_opportunities' in unified_report:
             await paper_trader.execute_signals(unified_report['alpha_opportunities'])
+            
+        # 6.2 [V7 Feature] Yield Farming
+        active_pos_count = len([p for p in paper_trader.positions if p['status'] == 'OPEN'])
+        yield_data = yield_farmer.optimize_idle_capital(active_pos_count)
+        unified_report['yield_farming'] = yield_data
     
     # 7. 儲存輸出
     await _save_outputs(unified_report, chain_data, cex_data, stablecoin_marketcap)
