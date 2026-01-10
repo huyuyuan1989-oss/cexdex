@@ -670,6 +670,10 @@
             <div class="nav-tab" :class="{ active: currentTab === 'analysis' }" @click="currentTab = 'analysis'">
                 📊 深度分析 (Analysis)
             </div>
+            <a href="./trading.html" class="nav-tab"
+                style="text-decoration: none; background: rgba(0, 255, 157, 0.1); color: #00ff9d; border: 1px solid #00ff9d;">
+                🤖 進入操盤室 (Trading Console)
+            </a>
         </div>
 
         <!-- Loading State -->
@@ -1115,6 +1119,7 @@
                     data: {},
                     loading: true,
                     error: null,
+                    paperTrades: { positions: [], summary: { total_unrealized_pnl: 0 } },
                     chainSortKey: 'stable_inflow_24h',
                     chainSortOrder: -1, // -1 for descending
                     cexSortKey: 'stablecoin_flow_24h',
@@ -1231,6 +1236,26 @@
                         const response = await fetch(`./data.json?t=${new Date().getTime()}`);
                         if (!response.ok) throw new Error('無法載入 data.json');
                         this.data = await response.json();
+
+                        // Fetch Paper Trades
+                        try {
+                            const paperRes = await fetch(`./paper_trades.json?t=${new Date().getTime()}`);
+                            if (paperRes.ok) {
+                                let tradesData = await paperRes.json();
+                                // Calculate summary stats locally if not present
+                                let totalPnL = 0;
+                                if (tradesData.length > 0) {
+                                    totalPnL = tradesData.reduce((acc, pos) => acc + (pos.pnl_usd || 0), 0);
+                                }
+                                this.paperTrades = {
+                                    positions: activePositions = tradesData.filter(p => p.status === 'OPEN'),
+                                    summary: { total_unrealized_pnl: totalPnL }
+                                };
+                            }
+                        } catch (e) {
+                            console.warn("Paper trades fetch failed", e);
+                        }
+
                     } catch (e) {
                         this.error = e.message;
                     } finally {
