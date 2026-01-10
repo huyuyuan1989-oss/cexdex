@@ -1068,7 +1068,7 @@
         createApp({
             data() {
                 return {
-                    currentTab: 'analysis',
+                    currentTab: 'monitor',
                     data: {},
                     loading: true,
                     error: null,
@@ -1128,7 +1128,6 @@
                         "Neutral": "➖ 中性"
                     };
                     // Simple fuzzy matching for V3 tags
-                    if (tag === 'CHAIN') return '🔗 公鏈';
                     if (tag === 'CHAIN') return '🔗 公鏈';
                     if (tag === 'CEX') return '🏦 交易所';
                     if (tag.includes('Stablecoin Outflow')) return '💸 穩定幣流出';
