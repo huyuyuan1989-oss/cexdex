@@ -24,8 +24,8 @@ class TreasuryManager:
     使用凱利公式 (Kelly Criterion) 計算最佳倉位
     """
     
-    def __init__(self, initial_capital: float = 10000.0):
-        self.state_file = Path(__file__).parent / "reports" / "treasury_state.json"
+    def __init__(self, initial_capital: float = 10000.0, state_file: Path = None):
+        self.state_file = state_file or (Path(__file__).parent / "reports" / "treasury_state.json")
         self.state = self._load_state(initial_capital)
         
         # Allocation ratios

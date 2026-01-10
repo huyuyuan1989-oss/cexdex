@@ -24,8 +24,8 @@ class HedgeManager:
     當市場風險升高時，自動計算並建議對沖倉位
     """
     
-    def __init__(self):
-        self.state_file = Path(__file__).parent / "reports" / "hedge_state.json"
+    def __init__(self, state_file: Path = None):
+        self.state_file = state_file or (Path(__file__).parent / "reports" / "hedge_state.json")
         self.state = self._load_state()
         
         # Risk thresholds
