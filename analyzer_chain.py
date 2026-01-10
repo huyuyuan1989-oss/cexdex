@@ -153,6 +153,13 @@ class ChainAnalyzer:
                 current_tvl
             )
             
+            # 5. [V4 Feature] Deep Dive: 如果信號強烈，抓取該鏈的頭部協議
+            # 觸發條件: 24H 穩定幣流入 > 5M (代表有實質資金進場)
+            if result.get('stable_inflow_24h', 0) > 5_000_000:
+                logger.info(f"🕵️ V4 Deep Dive: Fetching protocols for {chain_name}...")
+                top_protocols = await self.provider.get_top_protocols_on_chain(chain_name)
+                result['top_protocols'] = top_protocols
+            
         except Exception as e:
             logger.error(f"Chain analysis error for {chain_name}: {e}")
             result['error'] = str(e)

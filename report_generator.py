@@ -285,18 +285,24 @@ class ReportGenerator:
                     score += 10
                     reasons.append("軋空潛力")
                     
-                if score >= 80:
-                    opportunities.append({
+                if score >= 85:
+                    top_protocols = chain.get('top_protocols', []) # V4 Feature
+                    opp = {
                         "asset": name.upper(),
                         "type": "CHAIN",
-                        "direction": "做多訊號 🟢",
+                        "direction": "買入訊號 🟢",
                         "score": score,
                         "reason": " + ".join(reasons),
                         "data": f"7D:{tvl_change_7d:.1f}% | 24H:${flow_stable_24h/1e6:.1f}M"
-                    })
+                    }
+                    if top_protocols:
+                        opp['related_tokens'] = [f"{p['symbol']}" for p in top_protocols]  # Just symbols for UI
+                        opp['related_info'] = top_protocols # Full info for tooltip/details
+                    
+                    opportunities.append(opp)
 
             # --- SHORT Logic ---
-            if tvl_change_7d < -2 and flow_stable_24h < 0:
+            if tvl_change_7d < 0 and flow_stable_24h < 0:
                 score = 60
                 reasons = ["7日趨勢向下", "24H資金流出"]
                 

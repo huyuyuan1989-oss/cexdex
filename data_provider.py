@@ -235,6 +235,54 @@ class DataProvider:
     
     # ================= Binance API 方法 =================
     
+    # ================= 輔助方法 =================
+    
+    async def get_top_protocols_on_chain(self, chain_name: str, limit: int = 3) -> List[Dict]:
+        """
+        [V4 Feature] 獲取特定鏈上表現最好的協議
+        
+        Args:
+            chain_name: 公鏈名稱 (e.g., 'solana', 'base')
+            limit: 返回數量
+            
+        Returns:
+            協議列表 [{name, symbol, change_1d, category, tvl}]
+        """
+        # 1. 獲取所有協議 (如果尚未緩存)
+        if not hasattr(self, '_protocols_cache') or not self._protocols_cache:
+            self._protocols_cache = await self.get_protocols()
+            
+        if not self._protocols_cache:
+            return []
+            
+        # 2. 鏈名稱標準化 (DefiLlama 使用 Title Case，如 'Ethereum', 'Base')
+        target_chain = chain_name.title()
+        if target_chain.lower() == 'bsc': target_chain = 'Binance'
+        
+        # 3. 過濾與排序
+        chain_protocols = []
+        for p in self._protocols_cache:
+            # 檢查鏈歸屬 (p['chain'] 是主鏈, p['chains'] 是所有部署鏈)
+            is_on_chain = (p.get('chain') == target_chain) or (target_chain in p.get('chains', []))
+            
+            if is_on_chain and p.get('tvl', 0) > 1_000_000: # 過濾 TVL > 1M 的協議
+                chain_protocols.append({
+                    'name': p.get('name'),
+                    'symbol': p.get('symbol'),
+                    'change_1d': p.get('change_1d') or 0,
+                    'tvl': p.get('tvl', 0),
+                    'category': p.get('category', 'Unknown')
+                })
+        
+        # 4. 排序：優先找 "爆發中" 的項目 (24H 漲幅高)
+        # 過濾掉異常數據 (> 10000% 或 < -90%)
+        chain_protocols = [p for p in chain_protocols if -90 < p['change_1d'] < 10000]
+        chain_protocols.sort(key=lambda x: x['change_1d'], reverse=True)
+        
+        return chain_protocols[:limit]
+
+    # ================= Binance API 方法 =================
+    
     async def get_funding_rates(self) -> Optional[List[Dict]]:
         """
         獲取 Binance 期貨資金費率
@@ -242,8 +290,12 @@ class DataProvider:
         Returns:
             資金費率列表 [{symbol, lastFundingRate, ...}, ...]
         """
-        url = f"{self.BINANCE_FUTURES_BASE}{self.ENDPOINTS['funding_rates']}"
-        return await self.fetch_with_retry(url)
+        try:
+            url = f"{self.BINANCE_FUTURES_BASE}{self.ENDPOINTS['funding_rates']}"
+            return await self.fetch_with_retry(url)
+        except Exception:
+            # Fallback logic here if needed, or rely on fetch_with_retry's robust handling
+            return None
     
     # ================= 便捷方法 =================
     
