@@ -19,6 +19,7 @@ Usage:
 import asyncio
 import aiohttp
 import logging
+from datetime import datetime
 from typing import Optional, Dict, Any, List
 
 # 設定日誌
@@ -283,20 +284,7 @@ class DataProvider:
 
     # ================= Binance API 方法 =================
     
-    async def get_funding_rates(self) -> Optional[List[Dict]]:
-        """
-        獲取 Binance 期貨資金費率
-        
-        Returns:
-            資金費率列表 [{symbol, lastFundingRate, ...}, ...]
-        """
-        try:
-            url = f"{self.BINANCE_FUTURES_BASE}{self.ENDPOINTS['funding_rates']}"
-            return await self.fetch_with_retry(url)
-        except Exception:
-            # Fallback logic here if needed, or rely on fetch_with_retry's robust handling
-            return None
-    
+
     # ================= 便捷方法 =================
     
     async def get_token_prices(self, symbols: List[str]) -> Dict[str, float]:
@@ -460,9 +448,7 @@ class DataProvider:
         """
         一次性獲取所有衍生品數據 (OI + Funding)
         """
-        # 需要導入 datetime
-        from datetime import datetime 
-        
+    
         funding = await self.get_funding_rates()
         btc_oi = await self.get_open_interest('BTCUSDT')
         eth_oi = await self.get_open_interest('ETHUSDT')
