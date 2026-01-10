@@ -342,9 +342,9 @@ def send_summary_notification(data: Dict[str, Any]) -> bool:
     else:
         color = COLORS['yellow']
     
-    fields = [
+    summary_fields = [
         {
-            "name": "🧠 AI 市場情緒 (V3)",
+            "name": "🧠 V7 Hive Mind (AI Consensus)",
             "value": f"**{sentiment}**\nScore: {sentiment_score} | {fng_val}",
             "inline": True
         },
@@ -365,33 +365,48 @@ def send_summary_notification(data: Dict[str, Any]) -> bool:
             "inline": True
         },
         {
-            "name": "🏦 CEX 淨流向 (24H)",
-            "value": f"${cex_summary.get('total_net_flow_24h', 0) / 1e6:+.1f}M",
-            "inline": True
-        },
-        {
-            "name": "⏱️ CEX 淨流向 (4H/短期)",
-            "value": f"${cex_flow_4h / 1e6:+.1f}M",
-            "inline": True
-        },
-        {
             "name": "💰 穩定幣流向 (24H)",
             "value": f"${cex_summary.get('total_stablecoin_flow_24h', 0) / 1e6:+.1f}M",
             "inline": True
         }
     ]
     
+    # [V7 Feature] Hive Mind Top Pick
+    alpha_opps = data.get('alpha_opportunities', [])
+    top_pick_field = None
+    
+    for opp in alpha_opps:
+        hive = opp.get('hive_analysis')
+        if hive and hive.get('consensus_score', 0) > 60:
+            agents = hive.get('debate_log', [])
+            agent_text = "\n".join([f"{a['icon']} {a['agent']}: {a['vote']}" for a in agents])
+            
+            top_pick_field = {
+                "name": f"🚀 Hive Top Pick: {opp.get('asset')}",
+                "value": (
+                    f"**Verdict: {hive.get('verdict')}**\n"
+                    f"Consensus: {hive.get('consensus_score')}%\n"
+                    f"Action: `{hive.get('action')}`\n"
+                    f"Reason: {opp.get('reason')}"
+                ),
+                "inline": False
+            }
+            break # Only show the top one
+            
+    if top_pick_field:
+        summary_fields.insert(1, top_pick_field)
+
     return send_discord_alert(
-        title="📡 資金流向監控報告",
+        title="📡 V7 Hive Mind Intel Report",
         message=(
             f"**{datetime.now(timezone(timedelta(hours=8))).strftime('%Y-%m-%d %H:%M (UTC+8)')} 執行完成**\n\n"
             f"🔗 **相關連結:**\n"
-            f"• [💎 加密貨幣即時戰情室 (Live Monitor)](https://huyuyuan1989-oss.github.io/cexdex/reports/index.html?tab=monitor)\n"
-            f"• [💰 全鏈資金流向總站 (Main Terminal)]({DASHBOARD_URL})\n"
-            f"• [📊 原始數據源 (Raw JSON)](https://huyuyuan1989-oss.github.io/cexdex/reports/data.json)"
+            f"• [🧠 V7 Hive Terminal (Live Monitor)](https://huyuyuan1989-oss.github.io/cexdex/reports/index.html?tab=monitor)\n"
+            f"• [💰 全鏈資金流向總站]({DASHBOARD_URL})\n"
+            f"• [📊 原始數據源](https://huyuyuan1989-oss.github.io/cexdex/reports/data.json)"
         ),
         color=color,
-        fields=fields
+        fields=summary_fields
     )
 
 
