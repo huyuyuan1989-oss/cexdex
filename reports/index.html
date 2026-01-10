@@ -663,6 +663,22 @@
                 Hedge Fund System</p>
         </header>
 
+        <!-- Real-time Status -->
+        <div
+            style="margin-bottom: 2rem; padding: 0.75rem 1rem; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; color: var(--text-secondary); font-family: 'JetBrains Mono', monospace;">
+            <div style="display: flex; gap: 1.5rem; align-items: center;">
+                <span :class="loading ? 'text-neutral' : 'text-green'">
+                    ● 系統狀態: {{ loading ? '同步中...' : '已連線' }}
+                </span>
+                <span v-if="data.meta">
+                    🧠 數據生成時間: {{ formatDate(data.meta.generated_at) }}
+                </span>
+            </div>
+            <div>
+                🔄 頁面最後同步: {{ lastUpdated }}
+            </div>
+        </div>
+
         <!-- Navigation Tabs -->
         <div class="nav-tabs">
             <div class="nav-tab" :class="{ active: currentTab === 'monitor' }" @click="currentTab = 'monitor'">
@@ -1127,6 +1143,7 @@
                     loading: true,
                     error: null,
                     paperTrades: { positions: [], summary: { total_unrealized_pnl: 0 } },
+                    lastUpdated: '-',
                     chainSortKey: 'stable_inflow_24h',
                     chainSortOrder: -1, // -1 for descending
                     cexSortKey: 'stablecoin_flow_24h',
@@ -1267,6 +1284,7 @@
                         this.error = e.message;
                     } finally {
                         this.loading = false;
+                        this.lastUpdated = new Date().toLocaleString('zh-TW');
                     }
                 }
             },
