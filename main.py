@@ -31,6 +31,8 @@ from market_agents import HiveMind # V7 Feature
 from rl_optimizer import RLOptimizer # V7 RL Core
 from yield_farmer import YieldFarmer # V7 Omni-Chain Yield
 from macro_analyzer import MacroAnalyzer # V8 Macro Intelligence
+from treasury_manager import TreasuryManager # V8 Treasury
+from hedge_manager import HedgeManager # V8 The Shield
 
 # 設定日誌
 logging.basicConfig(
@@ -84,6 +86,8 @@ async def run_pipeline() -> Dict[str, Any]:
     rl_optimizer = RLOptimizer()
     yield_farmer = YieldFarmer()
     macro_analyzer = MacroAnalyzer() # V8
+    treasury = TreasuryManager(initial_capital=10000.0) # V8 Treasury ($10k starting capital)
+    hedge_manager = HedgeManager() # V8 The Shield
     
     async with provider:
         # 1. 並行獲取數據
@@ -162,16 +166,47 @@ async def run_pipeline() -> Dict[str, Any]:
         
         # 6. [V6 Feature] Paper Trading Simulation
         logger.info("🤖 執行模擬交易引擎 (Paper Trading)...")
-        await paper_trader.update_positions() # Update PnL for dirty positions
+        trading_result = await paper_trader.update_positions() # Update PnL for dirty positions
         
-        # 6.1 [V7 Feature] RL Core Optimization
-        # Run optimization *after* updating positions to learn from latest PnL
+        # 6.1 [V8 Feature] Treasury Management
+        if trading_result:
+            # Record any closed trades in treasury
+            for trade in trading_result.get('closed_trades', []):
+                treasury.record_trade_result(trade['pnl_usd'], trade['is_win'])
+            # Update unrealized PnL
+            treasury.update_unrealized(trading_result.get('total_unrealized_pnl_usd', 0))
+        
+        # Add treasury summary to report
+        unified_report['treasury'] = treasury.get_summary()
+        
+        # 6.2 [V8 Feature] The Shield - Risk Analysis & Hedging
+        portfolio_value = treasury.state['current_capital']
+        unrealized_pnl_pct = trading_result.get('total_unrealized_pnl_pct', 0) if trading_result else 0
+        hedge_analysis = hedge_manager.analyze_risk(
+            fng_value=fng_data.get('value', 50),
+            funding_btc=derivs_data.get('funding_rates', {}).get('BTC', 0),
+            unrealized_pnl_pct=unrealized_pnl_pct,
+            portfolio_value=portfolio_value
+        )
+        unified_report['hedge_shield'] = {
+            'analysis': hedge_analysis,
+            'status': hedge_manager.get_status()
+        }
+        
+        # Auto-activate/deactivate hedge based on analysis (paper trading simulation)
+        if hedge_analysis['hedge_action'] == 'ACTIVATE_HEDGE' and hedge_analysis['recommended_hedge']:
+            rec = hedge_analysis['recommended_hedge']
+            hedge_manager.activate_hedge(rec['direction'], rec['size_usd'], rec['reason'])
+        elif hedge_analysis['hedge_action'] == 'DEACTIVATE_HEDGE':
+            hedge_manager.deactivate_hedge()
+        
+        # 6.3 [V7 Feature] RL Core Optimization
         rl_optimizer.run_optimization()
         
         if 'alpha_opportunities' in unified_report:
             await paper_trader.execute_signals(unified_report['alpha_opportunities'])
             
-        # 6.2 [V7 Feature] Yield Farming
+        # 6.4 [V7 Feature] Yield Farming
         active_pos_count = len([p for p in paper_trader.positions if p['status'] == 'OPEN'])
         yield_data = yield_farmer.optimize_idle_capital(active_pos_count)
         unified_report['yield_farming'] = yield_data

@@ -371,6 +371,22 @@ def send_summary_notification(data: Dict[str, Any]) -> bool:
         }
     ]
     
+    # [V8 Feature] Treasury & Shield Status
+    treasury = data.get('treasury', {})
+    shield = data.get('hedge_shield', {})
+    macro = data.get('macro_intelligence', {})
+    
+    v8_field = {
+        "name": "🛡️ V8 System Status",
+        "value": (
+            f"**Treasury:** ${treasury.get('current_capital', 10000):,.0f} (ROI: {treasury.get('roi_pct', 0):+.2f}%)\\n"
+            f"**Shield:** {shield.get('analysis', {}).get('risk_level', 'LOW')} (Score: {shield.get('analysis', {}).get('risk_score', 0)})\\n"
+            f"**Macro Bias:** {macro.get('macro_bias', 0):+.2f} ({macro.get('regime', 'NEUTRAL')})"
+        ),
+        "inline": False
+    }
+    summary_fields.insert(0, v8_field)
+    
     # [V7 Feature] Hive Mind Top Pick
     alpha_opps = data.get('alpha_opportunities', [])
     top_pick_field = None
@@ -379,14 +395,14 @@ def send_summary_notification(data: Dict[str, Any]) -> bool:
         hive = opp.get('hive_analysis')
         if hive and hive.get('consensus_score', 0) > 60:
             agents = hive.get('debate_log', [])
-            agent_text = "\n".join([f"{a['icon']} {a['agent']}: {a['vote']}" for a in agents])
+            agent_text = "\\n".join([f"{a['icon']} {a['agent']}: {a['vote']}" for a in agents])
             
             top_pick_field = {
                 "name": f"🚀 Hive Top Pick: {opp.get('asset')}",
                 "value": (
-                    f"**Verdict: {hive.get('verdict')}**\n"
-                    f"Consensus: {hive.get('consensus_score')}%\n"
-                    f"Action: `{hive.get('action')}`\n"
+                    f"**Verdict: {hive.get('verdict')}**\\n"
+                    f"Consensus: {hive.get('consensus_score')}%\\n"
+                    f"Action: `{hive.get('action')}`\\n"
                     f"Reason: {opp.get('reason')}"
                 ),
                 "inline": False
@@ -397,13 +413,13 @@ def send_summary_notification(data: Dict[str, Any]) -> bool:
         summary_fields.insert(1, top_pick_field)
 
     return send_discord_alert(
-        title="📡 V7 Hive Mind Intel Report",
+        title="📡 V8 Sovereign Intel Report",
         message=(
-            f"**{datetime.now(timezone(timedelta(hours=8))).strftime('%Y-%m-%d %H:%M (UTC+8)')} 執行完成**\n\n"
-            f"🔗 **戰情中心 (Console Access):**\n"
-            f"• [⚡ V7 Live Monitor (市場掃描)](https://huyuyuan1989-oss.github.io/cexdex/reports/index.html)\n"
-            f"• [🤖 V7 Trading Console (自動操盤室)](https://huyuyuan1989-oss.github.io/cexdex/reports/trading_console.html)\n\n"
-            f"🔗 **數據源:**\n"
+            f"**{datetime.now(timezone(timedelta(hours=8))).strftime('%Y-%m-%d %H:%M (UTC+8)')} 執行完成**\\n\\n"
+            f"🔗 **戰情中心 (Console Access):**\\n"
+            f"• [⚡ V8 Live Monitor (市場掃描)](https://huyuyuan1989-oss.github.io/cexdex/reports/index.html)\\n"
+            f"• [🤖 V8 Trading Console (自動操盤室)](https://huyuyuan1989-oss.github.io/cexdex/reports/trading_console.html)\\n\\n"
+            f"🔗 **數據源:**\\n"
             f"• [📊 Raw Data (JSON)](https://huyuyuan1989-oss.github.io/cexdex/reports/data.json)"
         ),
         color=color,

@@ -89,9 +89,10 @@ class PaperTrader:
         
         total_unrealized_pnl_pct = 0
         total_pnl_usd = 0
+        closed_trades = []
         
-        # Simulated position size: $1000 per trade for USD PnL display
-        TRADE_SIZE = 1000
+        # V8: Get position size from Treasury (or default)
+        TRADE_SIZE = getattr(self, 'trade_size', 1000)
         
         for p in self.positions:
             if p['status'] == 'OPEN':
@@ -114,13 +115,22 @@ class PaperTrader:
                         p['status'] = 'CLOSED (TP)'
                         p['exit_price'] = current_price
                         p['exit_time'] = datetime.now().isoformat()
+                        closed_trades.append({'pnl_usd': p['pnl_usd'], 'is_win': True})
                     elif pnl_pct < -10: # SL
                         p['status'] = 'CLOSED (SL)'
                         p['exit_price'] = current_price
                         p['exit_time'] = datetime.now().isoformat()
+                        closed_trades.append({'pnl_usd': p['pnl_usd'], 'is_win': False})
         
         self._save_positions()
         logger.info(f"💰 Paper Trader: Updated {len(active_symbols)} positions. Total Unrealized PnL: {total_unrealized_pnl_pct:.2f}% (${total_pnl_usd:+.2f})")
+        
+        # V8: Return data for Treasury integration
+        return {
+            'closed_trades': closed_trades,
+            'total_unrealized_pnl_usd': total_pnl_usd,
+            'total_unrealized_pnl_pct': total_unrealized_pnl_pct
+        }
 
 
     async def execute_signals(self, opportunities: List[Dict]):
