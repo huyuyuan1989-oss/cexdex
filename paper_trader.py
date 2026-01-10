@@ -25,25 +25,41 @@ class PaperTrader:
         self.history_file = Path(__file__).parent / "reports" / "trade_history.csv"
         self.positions = self._load_positions()
         
-        # Mapping Chain to Tradeable Token
+        # Mapping Chain to Tradeable Token (V7 Expanded)
         self.CHAIN_TO_TOKEN = {
+            # === Tier 1: Major L1s ===
             'ETHEREUM': 'ETH',
             'SOLANA': 'SOL',
             'BSC': 'BNB',
-            'ARBITRUM': 'ARB',
-            'POLYGON': 'MATIC',
-            'AVALANCHE': 'AVAX',
-            'OPTIMISM': 'OP',
             'TRON': 'TRX',
-            'BASE': 'WETH',     # Base usually means ETH flows
-            'SUI': 'SUI',       # New
-            'APTOS': 'APT',     # New
-            'SEI': 'SEI',       # New
-            'NEAR': 'NEAR',     # New
-            'FANTOM': 'FTM',    # New
-            'COSMOS': 'ATOM',   # New
-            'CARDANO': 'ADA',   # New
-            'DOGE': 'DOGE'      # Market sentiment proxy
+            'AVALANCHE': 'AVAX',
+            # === Tier 2: L2 Ecosystems ===
+            'ARBITRUM': 'ARB',
+            'OPTIMISM': 'OP',
+            'BASE': 'ETH',       # Base trades correlated with ETH
+            'POLYGON': 'MATIC',
+            'ZKSYNC ERA': 'ZK',
+            'LINEA': 'ETH',      # Linea is ETH L2
+            'SCROLL': 'ETH',     # Scroll is ETH L2
+            'BLAST': 'BLAST',
+            'MANTA': 'MANTA',
+            'MANTLE': 'MNT',
+            # === Tier 3: Emerging L1s ===
+            'SUI': 'SUI',
+            'APTOS': 'APT',
+            'SEI': 'SEI',
+            'NEAR': 'NEAR',
+            'FANTOM': 'FTM',
+            'COSMOS': 'ATOM',
+            'CARDANO': 'ADA',
+            'CRONOS': 'CRO',
+            # === Tier 4: Others ===
+            'TON': 'TON',
+            'STARKNET': 'STRK',
+            # === Bonus: Market Sentiment Proxies ===
+            'DOGE': 'DOGE',
+            'PEPE': 'PEPE',
+            'SHIB': 'SHIB'
         }
 
     def _load_positions(self) -> List[Dict]:

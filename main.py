@@ -43,10 +43,16 @@ REPORTS_DIR = Path(__file__).parent / "reports"
 DATA_JSON_PATH = REPORTS_DIR / "data.json"
 HISTORY_CSV_PATH = REPORTS_DIR / "history.csv"
 
-# 分析的公鏈列表
+# 分析的公鏈列表 (V7 Expanded Coverage)
 CHAINS_TO_ANALYZE = [
-    'ethereum', 'solana', 'bsc', 'arbitrum', 'base',
-    'polygon', 'avalanche', 'optimism', 'tron'
+    # === Tier 1: Major L1s ===
+    'ethereum', 'solana', 'bsc', 'tron', 'avalanche',
+    # === Tier 2: L2 Ecosystems ===
+    'arbitrum', 'optimism', 'base', 'polygon', 'zksync era', 'linea', 'scroll', 'blast', 'manta', 'mantle',
+    # === Tier 3: Emerging L1s ===
+    'sui', 'aptos', 'sei', 'near', 'fantom', 'cosmos', 'cardano', 'cronos',
+    # === Tier 4: Others ===
+    'ton', 'starknet'
 ]
 
 # CSV 欄位定義
