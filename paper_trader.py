@@ -71,7 +71,11 @@ class PaperTrader:
         # Fetch current prices
         prices = await self.provider.get_token_prices(list(active_symbols))
         
-        total_unrealized_pnl = 0
+        total_unrealized_pnl_pct = 0
+        total_pnl_usd = 0
+        
+        # Simulated position size: $1000 per trade for USD PnL display
+        TRADE_SIZE = 1000
         
         for p in self.positions:
             if p['status'] == 'OPEN':
@@ -84,10 +88,12 @@ class PaperTrader:
                         pnl_pct *= -1
                     
                     p['pnl_pct'] = round(pnl_pct, 2)
-                    total_unrealized_pnl += pnl_pct
+                    p['pnl_usd'] = round(TRADE_SIZE * (pnl_pct / 100), 2)
+                    
+                    total_unrealized_pnl_pct += pnl_pct
+                    total_pnl_usd += p['pnl_usd']
                     
                     # Auto-Close logic (Take Profit / Stop Loss Simulation)
-                    # V6 Vision: 90% Win Rate target
                     if pnl_pct > 15: # TP
                         p['status'] = 'CLOSED (TP)'
                         p['exit_price'] = current_price
@@ -98,7 +104,8 @@ class PaperTrader:
                         p['exit_time'] = datetime.now().isoformat()
         
         self._save_positions()
-        logger.info(f"💰 Paper Trader: Updated {len(active_symbols)} positions. Total Unrealized PnL: {total_unrealized_pnl:.2f}%")
+        logger.info(f"💰 Paper Trader: Updated {len(active_symbols)} positions. Total Unrealized PnL: {total_unrealized_pnl_pct:.2f}% (${total_pnl_usd:+.2f})")
+
 
     async def execute_signals(self, opportunities: List[Dict]):
         """
@@ -146,7 +153,8 @@ class PaperTrader:
                     "reason": op['reason'],
                     "confidence": op['score'],
                     "status": "OPEN",
-                    "pnl_pct": 0.0
+                    "pnl_pct": 0.0,
+                    "pnl_usd": 0.0
                 }
                 self.positions.append(new_trade)
                 logger.info(f"🆕 Paper Trade Opened: {direction} {token} @ ${price} ({op['reason']})")

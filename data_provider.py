@@ -301,24 +301,26 @@ class DataProvider:
     
     async def get_token_prices(self, symbols: List[str]) -> Dict[str, float]:
         """
-        獲取代幣當前價格 (使用 Binance API)
-        Args:
-            symbols: 代幣符號列表 e.g. ['BTC', 'ETH', 'SOL']
-        Returns:
-            價格字典 {'BTC': 95000.0, ...}
+        獲取代幣當前價格 (Fallback: Binance -> Bybit)
         """
         prices = {}
-        # Binance symbol format: BTCUSDT
         for sym in symbols:
             try:
-                # Handle standard mapping or raw symbol
+                # 1. Try Binance
                 query_sym = sym.upper().replace('USDT', '') + 'USDT'
                 url = "https://api.binance.com/api/v3/ticker/price"
                 data = await self.fetch_with_retry(url, params={'symbol': query_sym})
                 if data and 'price' in data:
                     prices[sym] = float(data['price'])
+                    continue
+                
+                # 2. Try Bybit (Fallback)
+                url = f"https://api.bybit.com/v5/market/tickers?category=linear&symbol={query_sym}"
+                data = await self.fetch_with_retry(url)
+                if data and data.get('retCode') == 0:
+                    prices[sym] = float(data['result']['list'][0]['lastPrice'])
             except Exception:
-                pass # Ignore missing pairs
+                pass
         return prices
 
     async def get_cex_protocols(self, min_tvl: float = 100_000_000) -> List[Dict]:
