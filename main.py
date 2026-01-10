@@ -24,6 +24,9 @@ from data_provider import DataProvider
 from analyzer_chain import ChainAnalyzer
 from analyzer_cex import CEXAnalyzer
 from notification_service import check_and_alert, send_summary_notification
+from report_generator import ReportGenerator
+from paper_trader import PaperTrader
+from analyzer_social import SocialSentimentAnalyzer # V5
 
 # 設定日誌
 logging.basicConfig(
@@ -55,73 +58,89 @@ CSV_COLUMNS = [
 
 async def run_pipeline() -> Dict[str, Any]:
     """
-    執行完整數據管道
-    
-    Returns:
-        聚合後的數據快照
+    執行完整數據管道 (End-to-End Pipeline)
     """
-    logger.info("🚀 啟動資金流向數據管道...")
     start_time = datetime.now()
+    logger.info("🚀 啟動資金流向數據管道...")
     
-    async with DataProvider() as provider:
-        # 1. 執行公鏈分析
+    # 初始化組件
+    provider = DataProvider()
+    analyzer_chain = ChainAnalyzer(provider)
+    analyzer_cex = CEXAnalyzer(provider)
+    generator = ReportGenerator()
+    social_analyzer = SocialSentimentAnalyzer() # V5
+    paper_trader = PaperTrader(provider) # V6 Simulation
+    
+    async with provider:
+        # 1. 並行獲取數據
         logger.info("📊 分析公鏈資金流向...")
-        chain_analyzer = ChainAnalyzer(provider)
-        chain_data = await chain_analyzer.analyze_multiple_chains(CHAINS_TO_ANALYZE)
+        chain_task = analyzer_chain.analyze_multiple_chains(CHAINS_TO_ANALYZE)
         
-        # 2. 執行交易所分析
         logger.info("🏦 分析交易所資金流向...")
-        cex_analyzer = CEXAnalyzer(provider)
-        cex_data = await cex_analyzer.analyze_multiple_exchanges()
+        cex_task = analyzer_cex.analyze_multiple_exchanges()
         
-        # 3. 獲取穩定幣市值
+        # 並行執行主要分析任務
+        chain_data, cex_data = await asyncio.gather(chain_task, cex_task)
+        
+        # 2. 獲取輔助數據
         logger.info("💵 獲取穩定幣市值...")
-        stablecoin_marketcap = await _get_stablecoin_marketcap(provider)
-
-        # 4. 獲取衍生品數據 (Institutional Grade)
+        stablecoin_data = await provider.get_stablecoins()
+        if stablecoin_data and 'peggedAssets' in stablecoin_data:
+            stablecoin_marketcap = sum(a.get('circulating', {}).get('peggedUSD', 0) or 0 for a in stablecoin_data['peggedAssets'])
+        else:
+            stablecoin_marketcap = 0
+            
         logger.info("📈 獲取衍生品數據 (Funding/OI)...")
-        derivs_data = await provider.get_derivatives_data()
-
-        # 5. 獲取市場情緒指標 (Macro)
+        derivs_data = await provider.get_derivatives_data() 
+        
         logger.info("😨 獲取恐慌貪婪指數...")
         fng_data = await provider.fetch_fear_greed_index()
+
+        # 3. [V5 Feature] Social Sentiment Analysis
+        logger.info("🐦 V5 Intelligence: Analyzing Social Sentiment...")
+        tokens_to_analyze = set()
+        for chain in chain_data.get('chains', []):
+            if 'top_protocols' in chain:
+                for p in chain['top_protocols']:
+                    if p.get('symbol'):
+                        tokens_to_analyze.add(p['symbol'])
+        
+        social_map = {}
+        for token in tokens_to_analyze:
+            sentiment = await social_analyzer.analyze_token_sentiment(token)
+            social_map[token] = sentiment
+            if sentiment['score'] > 60:
+                logger.info(f"   🔥 Hot Sentiment detected for {token}: {sentiment['narrative']}")
+
+        # 4. 生成統一報告
+        logger.info("📝 生成統一分析報告...")
+        unified_report = generator.generate_unified_report(
+            chain_data=chain_data, 
+            cex_data=cex_data, 
+            stablecoin_marketcap=stablecoin_marketcap,
+            derivs_data=derivs_data,
+            fng_data=fng_data,
+            social_data=social_map # Pass V5 Intel
+        )
+        unified_report['meta']['execution_time_seconds'] = (datetime.now() - start_time).total_seconds()
+        
+        # 5. [V6 Feature] Paper Trading Simulation
+        logger.info("🤖 執行模擬交易引擎 (Paper Trading)...")
+        await paper_trader.update_positions() # Update PnL for dirty positions
+        
+        if 'alpha_opportunities' in unified_report:
+            await paper_trader.execute_signals(unified_report['alpha_opportunities'])
     
-    # 6. 生成統一報告
-    from report_generator import ReportGenerator
-    
-    logger.info("📝 生成統一報告 (V2 Schema)...")
-    
-    # 計算加權情緒 (Phase 3: AI Sentiment Weighting)
-    sentiment_details = _calculate_sentiment_score(
-        chain_data, 
-        cex_data, 
-        derivs_data, 
-        fng_data
-    )
-    
-    generator = ReportGenerator()
-    unified_report = generator.generate_unified_report(
-        chain_data=chain_data,
-        cex_data=cex_data,
-        sentiment_details=sentiment_details,
-        stablecoin_marketcap=stablecoin_marketcap,
-        derivs_data=derivs_data,
-        fng_data=fng_data  # Pass Macro Data
-    )
-    
-    # 添加執行時間
-    unified_report['meta']['execution_time_seconds'] = (datetime.now() - start_time).total_seconds()
-    
-    # 5. 儲存輸出
+    # 6. 儲存輸出
     await _save_outputs(unified_report, chain_data, cex_data, stablecoin_marketcap)
     
-    # 6. 發送 Discord 通知
+    # 7. 發送 Discord 通知
     logger.info("🔔 檢查並發送 Discord 警報...")
-    alerts_sent = check_and_alert(unified_report)  # 確保 check_and_alert 能處理新格式
+    alerts_sent = check_and_alert(unified_report)
     if alerts_sent > 0:
         logger.info(f"   → 已發送 {alerts_sent} 個警報")
     
-    # 7. 發送摘要通知
+    # 8. 發送摘要通知
     send_summary_notification(unified_report)
     
     logger.info(f"✅ 管道執行完成 ({unified_report['meta']['execution_time_seconds']:.2f}s)")

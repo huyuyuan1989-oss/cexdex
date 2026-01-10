@@ -299,6 +299,28 @@ class DataProvider:
     
     # ================= 便捷方法 =================
     
+    async def get_token_prices(self, symbols: List[str]) -> Dict[str, float]:
+        """
+        獲取代幣當前價格 (使用 Binance API)
+        Args:
+            symbols: 代幣符號列表 e.g. ['BTC', 'ETH', 'SOL']
+        Returns:
+            價格字典 {'BTC': 95000.0, ...}
+        """
+        prices = {}
+        # Binance symbol format: BTCUSDT
+        for sym in symbols:
+            try:
+                # Handle standard mapping or raw symbol
+                query_sym = sym.upper().replace('USDT', '') + 'USDT'
+                url = "https://api.binance.com/api/v3/ticker/price"
+                data = await self.fetch_with_retry(url, params={'symbol': query_sym})
+                if data and 'price' in data:
+                    prices[sym] = float(data['price'])
+            except Exception:
+                pass # Ignore missing pairs
+        return prices
+
     async def get_cex_protocols(self, min_tvl: float = 100_000_000) -> List[Dict]:
         """
         獲取中心化交易所 (CEX) 協議列表

@@ -12,7 +12,7 @@
 
 import json
 import logging
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from typing import Dict, Any, List, Optional
 
@@ -23,7 +23,107 @@ REPORTS_DIR = Path(__file__).parent / "reports"
 WEEKLY_HISTORY_FILE = REPORTS_DIR / "weekly_history.json"
 
 
+# ================= Helper Functions =================
+
+def _calculate_sentiment_score(
+    chain_data: Dict, 
+    cex_data: Dict, 
+    derivs_data: Dict = None, 
+    fng_data: Dict = None
+) -> Dict[str, Any]:
+    """
+    加權情緒評分系統 V3 (AI Weighted Model)
+    包含: Smart Money Flow, Derivatives Structure, Macro Sentiment
+    """
+    derivs_data = derivs_data or {}
+    fng_data = fng_data or {}
+    factors = []
+    total_score = 0
+    
+    # 1. Smart Money Flow (權重 40%) - 最重要指標
+    sm_flow = cex_data.get('summary', {}).get('smart_money_stable_flow', 0)
+    score_sm = 0
+    if sm_flow > 50_000_000: score_sm = 100    # Strong Buy
+    elif sm_flow > 10_000_000: score_sm = 75   # Buy
+    elif sm_flow > 0: score_sm = 25            # Weak Buy
+    elif sm_flow < -50_000_000: score_sm = -100 # Strong Sell
+    elif sm_flow < -10_000_000: score_sm = -75  # Sell
+    elif sm_flow < 0: score_sm = -25            # Weak Sell
+    
+    total_score += score_sm * 0.4
+    factors.append({
+        'name': '主力動向 (Smart Money)',
+        'score': score_sm,
+        'weight': '40%',
+        'value': f"${sm_flow/1e6:+.1f}M"
+    })
+    
+    # 2. Derivatives Structure (權重 30%)
+    funding_btc = derivs_data.get('funding_rates', {}).get('BTC', 0.01)
+    score_derivs = 0
+    if funding_btc > 0.03: score_derivs = -80      # 極度過熱
+    elif funding_btc > 0.01: score_derivs = -40    # 偏多過熱
+    elif funding_btc < -0.01: score_derivs = 60    # 軋空預期
+    elif funding_btc < -0.02: score_derivs = 90    # 強烈軋空預期
+    else: score_derivs = 10                        # 中性偏多 (健康費率)
+    
+    total_score += score_derivs * 0.3
+    factors.append({
+        'name': '合約結構 (Derivatives)',
+        'score': score_derivs,
+        'weight': '30%',
+        'value': f"Funding {funding_btc*100:.4f}%"
+    })
+    
+    # 3. Chain Activity (20%)
+    chain_summary = chain_data.get('summary', {})
+    chain_flow = chain_summary.get('stablecoin_flow_24h', 0)
+    score_chain = 0
+    if chain_flow > 20_000_000: score_chain = 100
+    elif chain_flow > 0: score_chain = 50
+    else: score_chain = -50
+    
+    total_score += score_chain * 0.2
+    factors.append({
+        'name': '公鏈生態 (On-chain)',
+        'score': score_chain,
+        'weight': '20%',
+        'value': f"${chain_flow/1e6:+.1f}M"
+    })
+    
+    # 4. Macro Sentiment (Contra) (10%)
+    fng_val = fng_data.get('value', 50)
+    score_macro = 0
+    # 逆勢邏輯: 極度恐慌(20)是買點(+80分)
+    if fng_val < 20: score_macro = 80       
+    elif fng_val < 40: score_macro = 40     
+    elif fng_val > 80: score_macro = -80    
+    elif fng_val > 60: score_macro = -40    
+    
+    total_score += score_macro * 0.1
+    factors.append({
+        'name': '市場情緒 (Sentiment)',
+        'score': score_macro,
+        'weight': '10%',
+        'value': f"F&G {fng_val}"
+    })
+    
+    # Determine Label
+    if total_score >= 60: label = "Bullish 🟢"
+    elif total_score >= 20: label = "Leaning Bullish 🌤️"
+    elif total_score >= -20: label = "Neutral ☁️"
+    elif total_score >= -60: label = "Leaning Bearish 🌧️"
+    else: label = "Bearish 🔴"
+    
+    return {
+        "score": round(total_score, 1),
+        "label": label,
+        "factors": factors
+    }
+
+
 class ReportGenerator:
+
     """
     統一報告生成器
     
@@ -62,18 +162,25 @@ class ReportGenerator:
     def generate_unified_report(
         self, 
         chain_data: Dict, 
-        cex_data: Dict,
-        sentiment_details: Dict,
+        cex_data: Dict, 
         stablecoin_marketcap: float,
-        derivs_data: Dict[str, Any] = None,
-        fng_data: Dict[str, Any] = None
+        derivs_data: Dict = None,
+        fng_data: Dict = None,
+        social_data: Dict = None # V5 Feature
     ) -> Dict[str, Any]:
         """
-        生成統一格式報告
+        生成統一格式報告 (包含 Social Sentiment)
         """
-        # 計算 CEX 與 DEX 分開的摘要
         cex_summary = self._calculate_cex_summary(cex_data)
         dex_summary = self._calculate_dex_summary(chain_data)
+        
+        # Determine Sentiment
+        sentiment_result = _calculate_sentiment_score(chain_data, cex_data, derivs_data, fng_data)
+        
+        # Generate Alpha Opportunities (with Social Intel)
+        alpha_opportunities = self._generate_alpha_opportunities(
+            chain_data, cex_data, derivs_data, social_data
+        )
         
         # 生成各時間週期敘述
         narratives = {
@@ -86,20 +193,14 @@ class ReportGenerator:
         weekly_comparison = self._generate_weekly_comparison(cex_summary, dex_summary)
         
         # 組裝統一報告
-        # V3 Alpha Hunter Logic Injection
-        alpha_picks = self._generate_alpha_opportunities(chain_data, cex_data, derivs_data)
-
         report = {
             "meta": {
-                "timestamp": datetime.utcnow().isoformat() + "Z",
-                "generated_at": datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                "data_quality": self._calculate_data_quality(chain_data, cex_data),
-                "version": "2.0"
+                "generated_at": datetime.now(timezone(timedelta(hours=8))).isoformat(),
+                "version": "v3.0.0"
             },
             
             "market_overview": {
-                "sentiment": sentiment_details,
-                "alpha_opportunities": alpha_picks,
+                "sentiment": sentiment_result,
                 "stablecoin_marketcap": stablecoin_marketcap,
                 "derivatives": derivs_data or {},
                 "fear_greed": fng_data or {},
@@ -159,6 +260,8 @@ class ReportGenerator:
                     "wow_comparison": weekly_comparison
                 }
             },
+
+            "alpha_opportunities": alpha_opportunities,
             
             "cex_analysis": {
                 "summary": {
@@ -240,7 +343,8 @@ class ReportGenerator:
         self, 
         chain_data: Dict, 
         cex_data: Dict,
-        derivs_data: Dict
+        derivs_data: Dict,
+        social_data: Dict = None # V5 Feature
     ) -> List[Dict[str, Any]]:
         """
         V3 Alpha Hunter: 自動篩選高勝率交易機會
@@ -296,8 +400,21 @@ class ReportGenerator:
                         "data": f"7D:{tvl_change_7d:.1f}% | 24H:${flow_stable_24h/1e6:.1f}M"
                     }
                     if top_protocols:
-                        opp['related_tokens'] = [f"{p['symbol']}" for p in top_protocols]  # Just symbols for UI
-                        opp['related_info'] = top_protocols # Full info for tooltip/details
+                        opp['related_tokens'] = []
+                        opp['related_info'] = []
+                        
+                        for p in top_protocols:
+                            symbol = p['symbol']
+                            # V5 Social Intel Injection
+                            social_score = 0
+                            if social_data and symbol in social_data:
+                                s_info = social_data[symbol]
+                                social_score = s_info.get('score', 50)
+                                if social_score > 60:
+                                    symbol += " 🔥" # Hot Sentiment
+                            
+                            opp['related_tokens'].append(symbol)
+                            opp['related_info'].append(p)
                     
                     opportunities.append(opp)
 
