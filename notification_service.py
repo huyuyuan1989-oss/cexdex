@@ -400,10 +400,11 @@ def send_summary_notification(data: Dict[str, Any]) -> bool:
         title="📡 V7 Hive Mind Intel Report",
         message=(
             f"**{datetime.now(timezone(timedelta(hours=8))).strftime('%Y-%m-%d %H:%M (UTC+8)')} 執行完成**\n\n"
-            f"🔗 **相關連結:**\n"
-            f"• [🧠 V7 Hive Terminal (Live Monitor)](https://huyuyuan1989-oss.github.io/cexdex/reports/index.html?tab=monitor)\n"
-            f"• [💰 全鏈資金流向總站]({DASHBOARD_URL})\n"
-            f"• [📊 原始數據源](https://huyuyuan1989-oss.github.io/cexdex/reports/data.json)"
+            f"🔗 **戰情中心 (Console Access):**\n"
+            f"• [⚡ V7 Live Monitor (市場掃描)](https://huyuyuan1989-oss.github.io/cexdex/reports/index.html)\n"
+            f"• [🤖 V7 Trading Console (自動操盤室)](https://huyuyuan1989-oss.github.io/cexdex/reports/trading_console.html)\n\n"
+            f"🔗 **數據源:**\n"
+            f"• [📊 Raw Data (JSON)](https://huyuyuan1989-oss.github.io/cexdex/reports/data.json)"
         ),
         color=color,
         fields=summary_fields
