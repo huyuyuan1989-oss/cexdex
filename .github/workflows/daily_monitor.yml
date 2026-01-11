@@ -6,10 +6,6 @@ on:
     - cron: '*/15 * * * *'
   # 允許手動觸發
   workflow_dispatch:
-  # 允許推送時觸發 (方便測試)
-  push:
-    branches:
-      - main
 
 jobs:
   run-monitor:
